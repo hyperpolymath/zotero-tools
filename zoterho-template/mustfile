@@ -1,0 +1,273 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
+#
+# mustfile - Authority-First Deployment for ZoteRho-template
+# Based on hyperpolymath/mustfile pattern
+#
+# This project strictly forbids Makefiles. All local tasks are orchestrated via
+# `just`, and all deployment transitions are managed via `must`.
+#
+# Every operation is a state transition consuming resources to produce outputs,
+# preventing orphaned states (Ephapax Linear Logic).
+
+set -euo pipefail
+
+# --- Configuration ---
+readonly PROJECT="zoterho-template"
+readonly VERSION="2.0.0"
+readonly TIER="plugin"
+
+# Colors for output
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m' # No Color
+
+# --- Utility Functions ---
+
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $*"
+}
+
+log_success() {
+    echo -e "${GREEN}[OK]${NC} $*"
+}
+
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $*"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $*" >&2
+}
+
+die() {
+    log_error "$*"
+    exit 1
+}
+
+# --- Policy Enforcement ---
+
+# MUST: No TypeScript allowed
+must_no_typescript() {
+    log_info "Checking for banned TypeScript files..."
+    local ts_files
+    ts_files=$(find . -type f \( -name "*.ts" -o -name "*.tsx" \) \
+        ! -path "./node_modules/*" \
+        ! -path "./.git/*" \
+        ! -name "*.d.ts" 2>/dev/null || true)
+
+    if [[ -n "$ts_files" ]]; then
+        log_error "TypeScript files detected (banned by policy):"
+        echo "$ts_files"
+        die "MUST: Convert all TypeScript to ReScript"
+    fi
+    log_success "No TypeScript files found"
+}
+
+# MUST: No raw JavaScript (except ReScript output)
+must_no_raw_javascript() {
+    log_info "Checking for banned raw JavaScript files..."
+    local js_files
+    js_files=$(find . -type f -name "*.js" \
+        ! -path "./node_modules/*" \
+        ! -path "./.git/*" \
+        ! -path "./lib/*" \
+        ! -path "./build/*" \
+        ! -name "*.res.js" \
+        ! -name "*.gen.js" 2>/dev/null || true)
+
+    if [[ -n "$js_files" ]]; then
+        log_warn "Raw JavaScript files detected (should use ReScript):"
+        echo "$js_files"
+        # Warning only - some JS may be necessary for Zotero plugin shims
+    fi
+    log_success "JavaScript policy check complete"
+}
+
+# MUST: No Makefile
+must_no_makefile() {
+    log_info "Checking for banned Makefiles..."
+    local makefiles
+    makefiles=$(find . -type f \( -iname "Makefile" -o -iname "GNUmakefile" -o -name "*.mk" \) \
+        ! -path "./node_modules/*" \
+        ! -path "./.git/*" 2>/dev/null || true)
+
+    if [[ -n "$makefiles" ]]; then
+        log_error "Makefiles detected (banned by policy):"
+        echo "$makefiles"
+        die "MUST: Use justfile instead of Makefile"
+    fi
+    log_success "No Makefiles found"
+}
+
+# MUST: No npm/bun package manager files (deno only)
+must_deno_only() {
+    log_info "Checking package manager policy (Deno only)..."
+
+    if [[ -f "package-lock.json" ]]; then
+        die "MUST: package-lock.json detected. Use Deno instead of npm."
+    fi
+
+    if [[ -f "bun.lockb" ]] || [[ -f "bun.lock" ]]; then
+        die "MUST: bun.lock detected. Use Deno instead of bun."
+    fi
+
+    if [[ -f "pnpm-lock.yaml" ]]; then
+        die "MUST: pnpm-lock.yaml detected. Use Deno instead of pnpm."
+    fi
+
+    if [[ -f "yarn.lock" ]]; then
+        die "MUST: yarn.lock detected. Use Deno instead of yarn."
+    fi
+
+    if [[ ! -f "deno.json" ]]; then
+        log_warn "deno.json not found - Deno configuration recommended"
+    else
+        log_success "deno.json found"
+    fi
+
+    log_success "Package manager policy enforced (Deno only)"
+}
+
+# MUST: Nickel config validation
+must_nickel_valid() {
+    log_info "Validating Nickel configurations..."
+
+    if command -v nickel &>/dev/null; then
+        for ncl_file in config/*.ncl; do
+            if [[ -f "$ncl_file" ]]; then
+                if nickel typecheck "$ncl_file" 2>/dev/null; then
+                    log_success "Valid: $ncl_file"
+                else
+                    log_warn "Nickel typecheck failed: $ncl_file"
+                fi
+            fi
+        done
+    else
+        log_warn "nickel not installed - skipping config validation"
+    fi
+}
+
+# MUST: Security checks
+must_secure() {
+    log_info "Running security checks..."
+
+    # No hardcoded secrets
+    local secrets_pattern='(password|secret|api_key|token)\s*[:=]\s*["\047][^"\047]+["\047]'
+    local secrets_found
+    secrets_found=$(grep -riE "$secrets_pattern" . \
+        --include="*.res" --include="*.js" --include="*.json" \
+        ! -path "./node_modules/*" \
+        ! -path "./.git/*" 2>/dev/null || true)
+
+    if [[ -n "$secrets_found" ]]; then
+        log_warn "Potential hardcoded secrets detected:"
+        echo "$secrets_found"
+    fi
+
+    # No HTTP URLs (HTTPS only)
+    local http_urls
+    http_urls=$(grep -rE 'http://[^[:space:]]+' . \
+        --include="*.res" --include="*.js" --include="*.json" --include="*.ncl" \
+        ! -path "./node_modules/*" \
+        ! -path "./.git/*" 2>/dev/null | grep -v 'localhost\|127.0.0.1\|http://json-schema.org' || true)
+
+    if [[ -n "$http_urls" ]]; then
+        log_warn "HTTP URLs detected (should use HTTPS):"
+        echo "$http_urls"
+    fi
+
+    log_success "Security checks complete"
+}
+
+# --- State Transitions ---
+
+transition_validate() {
+    log_info "=== MUST Validation Phase ==="
+    must_no_typescript
+    must_no_raw_javascript
+    must_no_makefile
+    must_deno_only
+    must_nickel_valid
+    must_secure
+    log_success "=== All MUST validations passed ==="
+}
+
+transition_build() {
+    log_info "=== MUST Build Phase ==="
+    transition_validate
+
+    if command -v just &>/dev/null; then
+        just build
+    else
+        die "just command not found - install just command runner"
+    fi
+
+    log_success "=== Build complete ==="
+}
+
+transition_package() {
+    log_info "=== MUST Package Phase ==="
+    transition_build
+
+    if command -v just &>/dev/null; then
+        just package 2>/dev/null || log_warn "Package recipe not defined"
+    fi
+
+    log_success "=== Package complete ==="
+}
+
+# --- Help ---
+
+show_help() {
+    cat <<EOF
+mustfile - Authority-First Deployment for ${PROJECT}
+
+Usage: ./mustfile <command>
+
+Commands:
+    validate    Run all MUST policy validations
+    build       Validate then build the project
+    package     Validate, build, then package as XPI
+    help        Show this help message
+
+Policy Enforcement:
+    - No TypeScript (use ReScript)
+    - No raw JavaScript (except .res.js output)
+    - No Makefiles (use justfile)
+    - No npm/bun/pnpm/yarn (use Deno)
+    - HTTPS only (no HTTP URLs)
+    - No hardcoded secrets
+
+Version: ${VERSION}
+EOF
+}
+
+# --- Main ---
+
+main() {
+    case "${1:-help}" in
+        validate)
+            transition_validate
+            ;;
+        build)
+            transition_build
+            ;;
+        package)
+            transition_package
+            ;;
+        help|--help|-h)
+            show_help
+            ;;
+        *)
+            log_error "Unknown command: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

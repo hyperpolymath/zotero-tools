@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# Hyperpolymath Pre-commit Hook
+# Enforces language policy before commits
+
+set -euo pipefail
+
+echo "Running pre-commit policy check..."
+
+# Get the repository root
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+# Run policy check
+if [ -f "$REPO_ROOT/scripts/check-policy.sh" ]; then
+    bash "$REPO_ROOT/scripts/check-policy.sh"
+elif command -v just &> /dev/null; then
+    just check-policy
+else
+    echo "Warning: Policy check script not found"
+fi
+
+# Check staged files for banned patterns
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+BANNED_EXTENSIONS=".ts .tsx .go .java .kt .swift .dart"
+BANNED_FILES="package.json package-lock.json bun.lockb yarn.lock pnpm-lock.yaml go.mod go.sum Makefile makefile GNUmakefile"
+
+for ext in $BANNED_EXTENSIONS; do
+    if echo "$STAGED_FILES" | grep -q "\\$ext\$"; then
+        echo "ERROR: Attempting to commit banned file type: $ext"
+        echo "Please review .claude/CLAUDE.md for the Hyperpolymath language policy."
+        exit 1
+    fi
+done
+
+for file in $BANNED_FILES; do
+    if echo "$STAGED_FILES" | grep -q "^$file\$\|/$file\$"; then
+        echo "ERROR: Attempting to commit banned file: $file"
+        echo "Please review .claude/CLAUDE.md for the Hyperpolymath language policy."
+        exit 1
+    fi
+done
+
+echo "✓ Pre-commit checks passed"
+exit 0

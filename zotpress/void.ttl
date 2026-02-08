@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: MPL-2.0
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://github.com/hyperpolymath/zotpress> a void:Dataset ;
+    dcterms:title "Zotpress" ;
+    dcterms:description "WordPress plugin for Zotero citation integration" ;
+    dcterms:creator <https://github.com/hyperpolymath> ;
+    dcterms:license <https://opensource.org/licenses/MPL-2.0> ;
+    dcterms:subject <http://dbpedia.org/resource/WordPress> ;
+    dcterms:subject <http://dbpedia.org/resource/Zotero> ;
+    dcterms:subject <http://dbpedia.org/resource/Citation> ;
+    void:feature <http://www.w3.org/ns/formats/Turtle> ;
+    void:dataDump <https://github.com/hyperpolymath/zotpress/releases> ;
+    foaf:homepage <https://github.com/hyperpolymath/zotpress> .

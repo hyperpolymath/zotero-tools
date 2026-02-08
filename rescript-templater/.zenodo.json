@@ -1,0 +1,142 @@
+{
+  "title": "Zotero ReScript Templater: A Scaffolding System for Zotero Plugins",
+  "description": "<p>The Zotero ReScript Templater is a comprehensive scaffolding system for creating Zotero plugins with type-safe, memory-safe, and offline-first architecture. It implements the Rhodium Standard Repository (RSR) framework and provides three template types (Practitioner, Researcher, Student) with full CI/CD infrastructure, testing, and documentation.</p>\n\n<h3>Key Features</h3>\n<ul>\n<li>Cross-platform support (Windows, Linux, macOS)</li>\n<li>Three language implementations (PowerShell, Racket, Bash)</li>\n<li>Type-safe code generation (ReScript, TypeScript)</li>\n<li>File integrity verification (XXHash64)</li>\n<li>Comprehensive testing (70+ tests)</li>\n<li>CI/CD automation (GitHub Actions)</li>\n<li>RSR framework compliance (Platinum level - 93%+)</li>\n<li>TPCF graduated trust model for governance</li>\n<li>GPG signature verification for releases</li>\n<li>Property-based testing infrastructure</li>\n</ul>\n\n<h3>Template Types</h3>\n<ul>\n<li><strong>Practitioner</strong>: ReScript/ReasonML professional plugin with bootstrap.js lifecycle</li>\n<li><strong>Researcher</strong>: Citation analysis with SQLite database integration</li>\n<li><strong>Student</strong>: TypeScript educational template with comprehensive tutorial</li>\n</ul>",
+
+  "license": {
+    "id": "AGPL-3.0-only"
+  },
+
+  "upload_type": "software",
+
+  "creators": [
+    {
+      "name": "(To be filled - see MAINTAINERS.md)",
+      "affiliation": "Independent",
+      "orcid": "0000-0000-0000-0000"
+    }
+  ],
+
+  "keywords": [
+    "scaffolding",
+    "code generation",
+    "Zotero",
+    "ReScript",
+    "TypeScript",
+    "plugin development",
+    "type safety",
+    "memory safety",
+    "offline-first",
+    "RSR framework",
+    "TPCF",
+    "research software",
+    "software engineering",
+    "development tools",
+    "PowerShell",
+    "Racket",
+    "Bash",
+    "CI/CD",
+    "testing",
+    "property-based testing",
+    "academic software"
+  ],
+
+  "access_right": "open",
+
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/Hyperpolymath/zotero-rescript-templater",
+      "resource_type": "software",
+      "scheme": "url"
+    },
+    {
+      "relation": "isDocumentedBy",
+      "identifier": "https://github.com/Hyperpolymath/zotero-rescript-templater/blob/main/README.md",
+      "resource_type": "publication-technicalnote",
+      "scheme": "url"
+    },
+    {
+      "relation": "cites",
+      "identifier": "https://www.zotero.org/",
+      "resource_type": "software",
+      "scheme": "url"
+    },
+    {
+      "relation": "cites",
+      "identifier": "https://racket-lang.org/",
+      "resource_type": "software",
+      "scheme": "url"
+    },
+    {
+      "relation": "cites",
+      "identifier": "https://rescript-lang.org/",
+      "resource_type": "software",
+      "scheme": "url"
+    }
+  ],
+
+  "contributors": [
+    {
+      "name": "Zotero Team",
+      "type": "RelatedPerson",
+      "affiliation": "Corporation for Digital Scholarship"
+    },
+    {
+      "name": "ReScript Team",
+      "type": "RelatedPerson"
+    },
+    {
+      "name": "Racket Team (PLT Design Inc.)",
+      "type": "RelatedPerson"
+    }
+  ],
+
+  "references": [
+    "Zotero. (2024). Zotero [Computer software]. https://www.zotero.org/",
+    "Racket Team. (2024). Racket Programming Language [Computer software]. https://racket-lang.org/",
+    "ReScript Team. (2024). ReScript [Computer software]. https://rescript-lang.org/",
+    "Microsoft Corporation. (2024). TypeScript [Computer software]. https://www.typescriptlang.org/",
+    "Microsoft Corporation. (2024). PowerShell Core [Computer software]. https://github.com/PowerShell/PowerShell"
+  ],
+
+  "communities": [
+    {
+      "identifier": "zenodo"
+    }
+  ],
+
+  "grants": [],
+
+  "subjects": [
+    {
+      "term": "Software Development",
+      "scheme": "lcsh"
+    },
+    {
+      "term": "Research Software Engineering",
+      "scheme": "keyword"
+    },
+    {
+      "term": "Type Systems",
+      "scheme": "lcsh"
+    },
+    {
+      "term": "Memory Safety",
+      "scheme": "keyword"
+    },
+    {
+      "term": "Code Generation",
+      "scheme": "lcsh"
+    },
+    {
+      "term": "Reference Management",
+      "scheme": "lcsh"
+    }
+  ],
+
+  "version": "0.2.0",
+
+  "language": "eng",
+
+  "notes": "This software implements the Rhodium Standard Repository (RSR) framework at Platinum compliance level (93%+) and uses the Tri-Perimeter Contribution Framework (TPCF) for community governance. All releases are signed with GPG for cryptographic verification. The software is available under AGPL-3.0-only license, which requires source disclosure for network use."
+}

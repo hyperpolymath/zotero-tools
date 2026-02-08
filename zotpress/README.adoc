@@ -1,0 +1,62 @@
+= zotpress
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+
+
+Jonathan D.A. Jewell <jonathan.jewell@gmail.com>
+:toc: macro
+:icons: font
+:source-highlighter: rouge
+:experimental:
+:url-github: https://github.com/hyperpolymath/zotpress
+:url-gitlab: https://gitlab.com/hyperpolymath/zotpress
+:url-bitbucket: https://bitbucket.org/hyperpolymath/zotpress
+:url-codeberg: https://codeberg.org/hyperpolymath/zotpress
+
+Zotero to WordPress integration
+
+image:https://img.shields.io/badge/RSR-Certified-gold[RSR Certified,link=https://github.com/hyperpolymath/rhodium-standard-repositories]
+
+toc::[]
+
+== Overview
+Domain: *software-development*
+
+== Installation
+
+[source,bash]
+----
+# Clone from GitHub (primary)
+git clone {url-github}
+
+# Or from mirrors
+git clone {url-gitlab}
+git clone {url-codeberg}
+----
+
+== Mirrors
+
+[cols="1,2"]
+|===
+| Platform | URL
+
+| GitHub (primary) | {url-github}
+| GitLab | {url-gitlab}
+| Bitbucket | {url-bitbucket}
+| Codeberg | {url-codeberg}
+|===
+
+== License
+
+Licensed under PMPL-1.0-or-later OR LicenseRef-Palimpsest-0.5.
+
+See link:LICENSE[LICENSE] for details.
+
+== Contributing
+
+See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc].
+
+== Metadata
+
+* Domain: software-development
+* Framework: RSR (Rhodium Standard Repository)
+* Dublin Core: link:.well-known/dc.xml[.well-known/dc.xml]

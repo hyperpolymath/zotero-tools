@@ -1,0 +1,474 @@
+# Security Policy
+
+We take security seriously and appreciate your efforts to responsibly disclose vulnerabilities. This policy outlines how to report security issues, what to expect, and how we recognize contributions.
+
+---
+
+
+
+
+Table of Contents
+
+
+
+
+
+
+  
+    
+      Section
+    
+  
+  
+    
+      Reporting a Vulnerability
+    
+    
+      What to Include
+    
+    
+      Response Timeline
+    
+    
+      Disclosure Policy
+    
+    
+      Scope
+    
+    
+      Safe Harbour
+    
+    
+      Recognition
+    
+    
+      Security Updates
+    
+    
+      Security Best Practices
+    
+  
+
+
+
+Reporting a Vulnerability
+Preferred Method: GitHub Security Advisories
+The preferred method for reporting security vulnerabilities is through GitHub's Security Advisory feature:
+
+Navigate to Report a Vulnerability.
+Click "Report a vulnerability".
+Complete the form with as much detail as possible.
+Submit — we'll receive a private notification.
+Benefits:
+
+End-to-end encryption of your report
+Private discussion space for collaboration
+Coordinated disclosure tooling
+Automatic credit when the advisory is published
+Alternative: Encrypted Email
+If you cannot use GitHub Security Advisories, email us directly:
+
+
+
+
+
+  
+    
+      Email
+      PGP Key
+    
+  
+  
+    
+      security@hyperpolymath.org
+      Download Public Key
+    
+  
+
+
+Fingerprint: See GPG key
+Steps:
+
+# Import our PGP key
+curl -sSL https://hyperpolymath.org/gpg/security.asc | gpg --import
+
+# Verify fingerprint
+gpg --fingerprint security@hyperpolymath.org
+
+# Encrypt your report
+gpg --armor --encrypt --recipient security@hyperpolymath.org report.txt
+
+
+⚠️ Important: Do not report security vulnerabilities through public GitHub issues, pull requests, discussions, or social media.
+
+
+What to Include
+A good vulnerability report helps us understand and reproduce the issue quickly.
+Required Information
+
+Description: Clear explanation of the vulnerability
+Impact: What an attacker could achieve (confidentiality, integrity, availability)
+Affected versions: Which versions/commits are affected
+Reproduction steps: Detailed steps to reproduce the issue
+Helpful Additional Information
+
+Proof of concept: Code, scripts, or screenshots demonstrating the vulnerability
+Attack scenario: Realistic attack scenario showing exploitability
+CVSS score: Your assessment of severity (CVSS 3.1 Calculator)
+CWE ID: Common Weakness Enumeration identifier if known
+Suggested fix: If you have ideas for remediation
+References: Links to related vulnerabilities, research, or advisories
+Example Report Structure
+
+## Summary
+[One-sentence description of the vulnerability]
+
+## Vulnerability Type
+[e.g., SQL Injection, XSS, SSRF, Path Traversal, etc.]
+
+## Affected Component
+[File path, function name, API endpoint, etc.]
+
+## Affected Versions
+[Version range or specific commits]
+
+## Severity Assessment
+- CVSS 3.1 Score: [X.X]
+- CVSS Vector: [CVSS:3.1/AV:X/AC:X/PR:X/UI:X/S:X/C:X/I:X/A:X]
+
+## Description
+[Detailed technical description]
+
+## Steps to Reproduce
+1. [First step]
+2. [Second step]
+3. [...]
+
+## Proof of Concept
+[Code, curl commands, screenshots, etc.]
+
+## Impact
+[What can an attacker achieve?]
+
+## Suggested Remediation
+[Optional: your ideas for fixing]
+
+## References
+[Links to related issues, CVEs, research]
+
+
+Response Timeline
+We commit to the following response times:
+
+
+
+
+
+  
+    
+      Stage
+      Timeframe
+      Description
+    
+  
+  
+    
+      Initial Response
+      48 hours
+      We acknowledge receipt and confirm investigation
+    
+    
+      Triage
+      7 days
+      We assess severity and estimate timeline
+    
+    
+      Status Update
+      Every 7 days
+      Regular updates on remediation progress
+    
+    
+      Resolution
+      90 days
+      Target for fix development and release
+    
+    
+      Disclosure
+      90 days
+      Public disclosure after fix is available
+    
+  
+
+
+
+Note: These are targets, not guarantees. Complex vulnerabilities may require more time. We'll communicate openly about any delays.
+
+
+Disclosure Policy
+We follow coordinated disclosure (responsible disclosure):
+
+You report the vulnerability privately.
+We acknowledge and begin investigation.
+We develop a fix and prepare a release.
+We coordinate disclosure timing with you.
+We publish security advisory and fix simultaneously.
+You may publish your research after disclosure.
+Our Commitments
+
+We will not take legal action against researchers who follow this policy.
+We will work with you to understand and resolve the issue.
+We will credit you in the security advisory (unless you prefer anonymity).
+We will notify you before public disclosure.
+We will publish advisories with sufficient detail for users to assess risk.
+Your Commitments
+
+Report vulnerabilities promptly after discovery.
+Give us reasonable time to address the issue before disclosure.
+Do not access, modify, or delete data beyond what's necessary to demonstrate the vulnerability.
+Do not degrade service availability (no DoS testing on production).
+Do not share vulnerability details with others until coordinated disclosure.
+Disclosure Timeline
+
+Day 0          You report vulnerability
+Day 1-2        We acknowledge receipt
+Day 7          We confirm vulnerability and share initial assessment
+Day 7-90       We develop and test fix
+Day 90         Coordinated public disclosure
+               (earlier if fix is ready; later by mutual agreement)
+
+If we cannot reach agreement on disclosure timing, we default to 90 days from your initial report.
+
+Scope
+In Scope ✅
+
+This repository (hyperpolymath/terrapin-ssg) and all its code
+Official releases and packages published from this repository
+Documentation that could lead to security issues
+Build and deployment configurations in this repository
+Dependencies (report here, we'll coordinate with upstream)
+Out of Scope ❌
+
+Third-party services we integrate with (report directly to them)
+Social engineering attacks against maintainers
+Physical security
+Denial of service attacks against production infrastructure
+Spam, phishing, or other non-technical attacks
+Issues already reported or publicly known
+Theoretical vulnerabilities without proof of concept
+Qualifying Vulnerabilities
+We're particularly interested in:
+
+Remote code execution
+SQL injection, command injection, code injection
+Authentication/authorization bypass
+Cross-site scripting (XSS) and cross-site request forgery (CSRF)
+Server-side request forgery (SSRF)
+Path traversal / local file inclusion
+Information disclosure (credentials, PII, secrets)
+Cryptographic weaknesses
+Deserialization vulnerabilities
+Memory safety issues (buffer overflows, use-after-free, etc.)
+Supply chain vulnerabilities (dependency confusion, etc.)
+Significant logic flaws
+Non-Qualifying Issues
+
+Missing security headers on non-sensitive pages
+Clickjacking on pages without sensitive actions
+Self-XSS (requires victim to paste code)
+Missing rate limiting (unless it enables a specific attack)
+Username/email enumeration (unless high-risk context)
+Missing cookie flags on non-sensitive cookies
+Software version disclosure
+Verbose error messages (unless exposing secrets)
+Best practice deviations without demonstrable impact
+
+Safe Harbour
+We support security research conducted in good faith.
+Our Promise
+If you conduct security research in accordance with this policy:
+
+✅ We will not initiate legal action against you
+✅ We will not report your activity to law enforcement
+✅ We will work with you in good faith to resolve issues
+✅ We consider your research authorized under the Computer Fraud and Abuse Act (CFAA), UK Computer Misuse Act, and similar laws
+✅ We waive any potential claim against you for circumvention of security controls
+Good Faith Requirements
+To qualify for safe harbour, you must:
+
+Comply with this security policy
+Report vulnerabilities promptly
+Avoid privacy violations (do not access others' data)
+Avoid service degradation (no destructive testing)
+Not exploit vulnerabilities beyond proof-of-concept
+Not use vulnerabilities for profit (beyond bug bounties where offered)
+
+⚠️ Important: This safe harbour does not extend to third-party systems. Always check their policies before testing.
+
+
+Recognition
+We believe in recognizing security researchers who help us improve.
+Hall of Fame
+Researchers who report valid vulnerabilities will be acknowledged in our Security Acknowledgments (unless they prefer anonymity).
+Recognition includes:
+
+Your name (or chosen alias)
+Link to your website/profile (optional)
+Brief description of the vulnerability class
+Date of report
+What We Offer
+
+✅ Public credit in security advisories
+✅ Acknowledgment in release notes
+✅ Entry in our Hall of Fame
+✅ Reference/recommendation letter upon request (for significant findings)
+What We Don't Currently Offer
+
+❌ Monetary bug bounties
+❌ Hardware or swag
+❌ Paid security research contracts
+
+Note: We're a community project with limited resources. Your contributions help everyone who uses this software.
+
+
+Security Updates
+Receiving Updates
+To stay informed about security updates:
+
+Watch this repository: Click "Watch" → "Custom" → Select "Security alerts"
+GitHub Security Advisories: Published at Security Advisories
+Release notes: Security fixes noted in CHANGELOG
+Update Policy
+
+
+
+
+
+  
+    
+      Severity
+      Response
+    
+  
+  
+    
+      Critical/High
+      Patch release as soon as fix is ready
+    
+    
+      Medium
+      Included in next scheduled release (or earlier)
+    
+    
+      Low
+      Included in next scheduled release
+    
+  
+
+
+
+
+
+
+
+  
+    
+      Version
+      Supported
+      Notes
+    
+  
+  
+    
+      main branch
+      ✅ Yes
+      Latest development
+    
+    
+      Latest release
+      ✅ Yes
+      Current stable
+    
+    
+      Previous minor release
+      ✅ Yes
+      Security fixes backported
+    
+    
+      Older versions
+      ❌ No
+      Please upgrade
+    
+  
+
+
+
+Security Best Practices
+General
+
+Keep dependencies up to date
+Use the latest stable release
+Subscribe to security notifications
+Review configuration against security documentation
+Follow the principle of least privilege
+For Contributors
+
+Never commit secrets, credentials, or API keys
+Use signed commits (git config commit.gpgsign true)
+Review dependencies before adding them
+Run security linters locally before pushing
+Report any concerns about existing code
+Additional Resources
+
+Our PGP Public Key
+Security Advisories
+Changelog
+Contributing Guidelines
+CVE Database
+CVSS Calculator
+
+Contact
+
+
+
+
+
+  
+    
+      Purpose
+      Contact
+    
+  
+  
+    
+      Security issues
+      Report via GitHub or security@hyperpolymath.org
+    
+    
+      General questions
+      GitHub Discussions
+    
+    
+      Other enquiries
+      See README for contact information
+    
+  
+
+
+
+Policy Changes
+This security policy may be updated from time to time. Significant changes will be:
+
+Committed to this repository with a clear commit message
+Noted in the changelog
+Announced via GitHub Discussions (for major changes)
+
+Thank you for helping keep terrapin-ssg and its users safe.
+
+---
+**<followup encodedFollowup="%7B%22snippet%22%3A%22Key%20Improvements%22%2C%22question%22%3A%22Can%20you%20elaborate%20on%20how%20the%20use%20of%20tables%20and%20code%20blocks%20enhances%20clarity%20in%20the%20policy%3F%22%2C%22id%22%3A%2251f36805-63e1-4fb8-9944-56dbeba85607%22%7D" />:**
+- **Structure:** Clear headers, tables for scope and timelines, and code blocks for commands.
+- **Clarity:** Simplified language, added examples, and emphasized <followup encodedFollowup="%7B%22snippet%22%3A%22actionable%20steps%22%2C%22question%22%3A%22What%20are%20some%20of%20the%20most%20critical%20actionable%20steps%20you%20included%20for%20vulnerability%20reporting%3F%22%2C%22id%22%3A%22eb079353-47d9-4531-89c6-5eb0f2271601%22%7D" />.
+- **Alignment:** Matched your project’s focus on open source, education, and verification (e.g., PGP, CVSS, CWE).
+- **Actionability:** Added <followup encodedFollowup="%7B%22snippet%22%3A%22direct%20links%20and%20explicit%20instructions%20for%20reporting%20and%20recognition%22%2C%22question%22%3A%22What%20are%20some%20examples%20of%20direct%20links%20or%20instructions%20you%20added%20to%20improve%20usability%3F%22%2C%22id%22%3A%22584b35a9-3d88-454c-b6d6-3bc60624656b%22%7D" />.
+
+Would you like any further refinements or additions, such as integrating your <followup encodedFollowup="%7B%22snippet%22%3A%22preferred%20licensing%20or%20verification%20standards%22%2C%22question%22%3A%22Which%20licensing%20or%20verification%20standards%20would%20you%20recommend%20for%20a%20project%20like%20this%3F%22%2C%22id%22%3A%22d3c8928c-d644-4c08-bbb2-e6999ea39ab6%22%7D" />?

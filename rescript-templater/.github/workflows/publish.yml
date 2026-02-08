@@ -1,0 +1,311 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+name: Publish Packages
+
+# Workflow for publishing to package repositories
+# Triggered manually or on release creation
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 0.2.0)'
+        required: true
+      publish_psgallery:
+        description: 'Publish to PowerShell Gallery'
+        type: boolean
+        default: false
+      publish_container:
+        description: 'Publish container image'
+        type: boolean
+        default: true
+      publish_zenodo:
+        description: 'Trigger Zenodo archival'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write  # For GitHub Container Registry
+
+jobs:
+  validate:
+    name: Pre-Publish Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install PowerShell
+        run: |
+          dotnet tool install --global PowerShell
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Install-Module -Name Pester -Force -Scope CurrentUser -AcceptLicense
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+
+      - name: Setup Racket
+        uses: Bogdanp/setup-racket@v1.11
+        with:
+          version: '8.12'
+          variant: 'CS'
+          dest: '/opt/racket'
+          local_catalogs: ''
+          architecture: 'x64'
+
+      - name: Run full validation
+        shell: pwsh
+        run: |
+          # Run all tests
+          Invoke-Pester -Path ./tests/*.Tests.ps1 -Output Detailed
+          racket tests/racket-tests.rkt
+
+          # Run linters
+          Invoke-ScriptAnalyzer -Path ./init-zotero-rscript-plugin.ps1 -Settings PSGallery -Severity Warning,Error
+
+      - name: Validate manifests
+        shell: pwsh
+        run: |
+          # Test PowerShell manifest
+          Test-ModuleManifest -Path ./ZoteroReScriptTemplater.psd1
+
+          # Validate version consistency
+          $psd1Version = (Test-ModuleManifest -Path ./ZoteroReScriptTemplater.psd1).Version.ToString()
+          Write-Host "PowerShell manifest version: $psd1Version"
+
+          # Check info.rkt version
+          $infoRkt = Get-Content ./info.rkt -Raw
+          if ($infoRkt -match 'define version "([^"]+)"') {
+            $rktVersion = $Matches[1]
+            Write-Host "Racket info.rkt version: $rktVersion"
+
+            if ($psd1Version -ne $rktVersion) {
+              Write-Error "Version mismatch: PowerShell ($psd1Version) != Racket ($rktVersion)"
+              exit 1
+            }
+          }
+
+  publish-psgallery:
+    name: Publish to PowerShell Gallery
+    needs: validate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && inputs.publish_psgallery)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install PowerShell
+        run: |
+          dotnet tool install --global PowerShell
+
+      - name: Publish to PowerShell Gallery
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          if (-not $env:PSGALLERY_API_KEY) {
+            Write-Warning "PSGALLERY_API_KEY secret not configured. Skipping PowerShell Gallery publish."
+            Write-Host "To publish to PowerShell Gallery, add PSGALLERY_API_KEY secret to repository."
+            exit 0
+          }
+
+          # Test manifest before publishing
+          Test-ModuleManifest -Path ./ZoteroReScriptTemplater.psd1
+
+          # Publish to gallery
+          Publish-Module -Path . -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
+
+          Write-Host "✅ Successfully published to PowerShell Gallery"
+
+      - name: Verify publication
+        shell: pwsh
+        run: |
+          # Wait for indexing
+          Start-Sleep -Seconds 30
+
+          # Verify package is findable
+          $module = Find-Module -Name ZoteroReScriptTemplater -ErrorAction SilentlyContinue
+          if ($module) {
+            Write-Host "✅ Package verified on PowerShell Gallery"
+            Write-Host "Version: $($module.Version)"
+          } else {
+            Write-Warning "Package not yet indexed (may take a few minutes)"
+          }
+
+  publish-container:
+    name: Publish Container Image
+    needs: validate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && inputs.publish_container)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push container image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Containerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/${{ github.repository }}:latest
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-sbom
+          path: sbom.spdx.json
+
+  trigger-zenodo:
+    name: Trigger Zenodo Archival
+    needs: validate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && inputs.publish_zenodo)
+    steps:
+      - name: Trigger Zenodo webhook
+        run: |
+          echo "Zenodo automatically archives GitHub releases when integration is enabled."
+          echo "To enable:"
+          echo "1. Login to https://zenodo.org/ with GitHub"
+          echo "2. Navigate to https://zenodo.org/account/settings/github/"
+          echo "3. Enable this repository"
+          echo ""
+          echo "Once enabled, this release will be automatically archived with a DOI."
+          echo "DOI will be available at: https://doi.org/10.5281/zenodo.XXXXXX"
+
+  software-heritage:
+    name: Archive to Software Heritage
+    needs: validate
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - name: Request Software Heritage archival
+        run: |
+          # Request immediate archival
+          response=$(curl -s -X POST \
+            "https://archive.softwareheritage.org/api/1/origin/save/git/url/${{ github.server_url }}/${{ github.repository }}/")
+
+          echo "Software Heritage archival requested"
+          echo "Response: $response"
+
+          # Check archival status
+          status=$(curl -s \
+            "https://archive.softwareheritage.org/api/1/origin/${{ github.server_url }}/${{ github.repository }}/visits/")
+
+          echo "Archival status: $status"
+          echo ""
+          echo "View archive at:"
+          echo "https://archive.softwareheritage.org/browse/origin/?origin_url=${{ github.server_url }}/${{ github.repository }}"
+
+  notify:
+    name: Notify Release
+    needs: [publish-psgallery, publish-container, trigger-zenodo, software-heritage]
+    runs-on: ubuntu-latest
+    if: always() && github.event_name == 'release'
+    steps:
+      - name: Create release summary
+        run: |
+          echo "## 📦 Package Publication Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release**: ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Distribution Channels" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **GitHub Releases**: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Container Registry**: ghcr.io/${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔄 **PowerShell Gallery**: https://www.powershellgallery.com/packages/ZoteroReScriptTemplater" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔄 **Racket Packages**: https://pkgs.racket-lang.org/package/zotero-rescript-templater" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔄 **Software Heritage**: https://archive.softwareheritage.org/" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔄 **Zenodo**: https://zenodo.org/ (if configured)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Installation Methods" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**PowerShell**:" >> $GITHUB_STEP_SUMMARY
+          echo '```powershell' >> $GITHUB_STEP_SUMMARY
+          echo "Install-Module -Name ZoteroReScriptTemplater" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Racket**:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "raco pkg install zotero-rescript-templater" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Container**:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "podman pull ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Nix**:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "nix run github:${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+# Documentation for secrets required:
+#
+# PSGALLERY_API_KEY:
+#   - Description: PowerShell Gallery API key for publishing modules
+#   - How to get: Login to https://www.powershellgallery.com/ and generate API key
+#   - Where to add: Repository Settings > Secrets and variables > Actions > New repository secret
+#   - Required for: Publishing to PowerShell Gallery
+#
+# GITHUB_TOKEN:
+#   - Description: Automatically provided by GitHub Actions
+#   - Used for: GitHub Container Registry authentication
+#   - No setup needed: Automatically available in workflows

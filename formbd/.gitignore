@@ -1,0 +1,20 @@
+# Lean 4 build artifacts
+.lake/
+build/
+lake-packages/
+
+# IDE
+.vscode/
+*.olean
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*~
+*.swp
+*.swo
+
+# Migration output
+test-output/

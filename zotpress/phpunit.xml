@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         executionOrder="depends,defects"
+         requireCoverageMetadata="false"
+         beStrictAboutCoverageMetadata="true"
+         beStrictAboutOutputDuringTests="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         colors="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true">
+  <testsuites>
+    <testsuite name="unit">
+      <directory suffix="Test.php">tests/Unit</directory>
+    </testsuite>
+    <testsuite name="integration">
+      <directory suffix="Test.php">tests/Integration</directory>
+    </testsuite>
+    <testsuite name="e2e">
+      <directory suffix="Test.php">tests/E2E</directory>
+    </testsuite>
+  </testsuites>
+
+  <coverage>
+    <report>
+      <clover outputFile="coverage/clover.xml"/>
+      <html outputDirectory="coverage/html"/>
+      <text outputFile="php://stdout" showOnlySummary="true"/>
+    </report>
+  </coverage>
+
+  <source>
+    <include>
+      <directory suffix=".php">lib</directory>
+      <directory suffix=".php">src</directory>
+    </include>
+    <exclude>
+      <directory>vendor</directory>
+      <directory>tests</directory>
+    </exclude>
+  </source>
+
+  <php>
+    <const name="ABSPATH" value="/tmp/wordpress/"/>
+    <const name="WPINC" value="wp-includes"/>
+    <const name="WP_DEBUG" value="true"/>
+    <const name="ZOTPRESS_VERSION" value="8.0.0"/>
+    <const name="ZOTPRESS_TESTING" value="true"/>
+  </php>
+</phpunit>

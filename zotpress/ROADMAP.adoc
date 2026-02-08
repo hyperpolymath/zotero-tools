@@ -1,0 +1,380 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Zotpress Roadmap
+:author: Hyperpolymath
+:revdate: 2025-12-26
+:toc: macro
+:toc-title: Contents
+:toclevels: 2
+:icons: font
+
+Development roadmap for Zotpress — Zotero to WordPress integration.
+
+toc::[]
+
+== Current Status
+
+[cols="2,1,3"]
+|===
+| Component | Completion | Status
+
+| **Core Plugin**
+| 90%
+| Stable — Full Zotero API integration working
+
+| **Admin Interface**
+| 85%
+| Stable — Account management, settings, browse functionality
+
+| **Shortcodes**
+| 95%
+| Stable — `[zotpress]`, `[zotpressInText]`, `[zotpressInTextBib]`
+
+| **Widgets**
+| 80%
+| Stable — Sidebar and metabox widgets functional
+
+| **ReScript Frontend**
+| 40%
+| In Progress — Migrating from jQuery to modern ReScript
+
+| **Test Suite**
+| 30%
+| In Progress — Unit tests exist, integration/E2E planned
+
+| **Overall**
+| **75%**
+| Active Development
+|===
+
+== Milestones
+
+=== v8.0 Stable
+
+Target: Feature-complete stable release
+
+==== Critical (Blockers)
+
+[cols="1,4,1"]
+|===
+| Priority | Task | Status
+
+| P0
+| Complete ReScript frontend migration
+| In Progress
+
+| P0
+| Integration tests for Zotero API
+| Not Started
+
+| P0
+| E2E tests with WordPress test environment
+| Not Started
+|===
+
+==== High Priority
+
+[cols="1,4,1"]
+|===
+| Priority | Task | Status
+
+| P1
+| Expand unit test coverage to 80%
+| In Progress
+
+| P1
+| Improve PHPStan coverage (currently Level 6)
+| Ongoing
+
+| P1
+| Performance optimization for large libraries
+| Not Started
+
+| P1
+| Accessibility audit and fixes
+| Partial
+|===
+
+==== Medium Priority
+
+[cols="1,4,1"]
+|===
+| Priority | Task | Status
+
+| P2
+| Documentation improvements
+| Ongoing
+
+| P2
+| Error handling refinement
+| Partial
+
+| P2
+| Caching optimization
+| Not Started
+|===
+
+=== v8.1 Features
+
+Target: Enhanced functionality and modern WordPress integration
+
+==== WordPress Block Editor (Gutenberg)
+
+[cols="4,1"]
+|===
+| Task | Status
+
+| Zotpress Bibliography block
+| Not Started
+
+| Zotpress Citation block
+| Not Started
+
+| Block patterns for common layouts
+| Not Started
+
+| Block-based settings UI
+| Not Started
+|===
+
+==== REST API
+
+[cols="4,1"]
+|===
+| Task | Status
+
+| `/wp-json/zotpress/v1/items` endpoint
+| Not Started
+
+| `/wp-json/zotpress/v1/collections` endpoint
+| Not Started
+
+| `/wp-json/zotpress/v1/search` endpoint
+| Not Started
+
+| Authentication & permissions
+| Not Started
+
+| Rate limiting
+| Not Started
+|===
+
+==== Enhanced Citation Styles
+
+[cols="4,1"]
+|===
+| Task | Status
+
+| Custom CSL style uploads
+| Not Started
+
+| Style preview in admin
+| Not Started
+
+| Per-shortcode style overrides
+| Partial
+|===
+
+=== v9.0 Vision
+
+Target: Next-generation features and integrations
+
+==== Standalone Components
+
+[cols="4,2"]
+|===
+| Goal | Notes
+
+| Citation component library (Web Components)
+| Usable outside WordPress
+
+| npm/Deno package distribution
+| Following RSR Deno-first policy
+
+| Framework-agnostic embeds
+| React, Vue, vanilla JS
+|===
+
+==== Static Site Generator Integration
+
+[cols="4,2"]
+|===
+| Goal | Notes
+
+| Astro plugin
+| ReScript-compatible
+
+| Hugo shortcodes
+| Go templates
+
+| Eleventy plugin
+| JavaScript
+
+| Jekyll includes
+| Ruby/Liquid
+|===
+
+==== WebAssembly Citation Formatter
+
+[cols="4,2"]
+|===
+| Goal | Notes
+
+| Rust-based CSL processor
+| Compile to WASM
+
+| Client-side formatting
+| No server round-trips
+
+| Offline support
+| Service worker integration
+|===
+
+=== Long-Term Vision
+
+==== Decentralized Citation Network
+
+* IPFS-based citation storage
+* Peer-to-peer bibliography sharing
+* Verifiable citation provenance
+* DOI/ORCID integration
+
+==== AI-Assisted Features
+
+* Smart citation suggestions
+* Automatic bibliography formatting
+* Related work discovery
+* Writing style consistency
+
+==== Cross-Platform Sync
+
+* Desktop app (Tauri)
+* Mobile apps (Tauri 2.0 / Dioxus)
+* Browser extension
+* CLI tool (Rust)
+
+== Technical Debt
+
+=== Immediate Actions
+
+[cols="4,2,1"]
+|===
+| Item | Impact | Priority
+
+| Remove jQuery dependency completely
+| Performance, bundle size
+| High
+
+| Convert remaining TypeScript to ReScript
+| RSR compliance
+| High
+
+| Add SPDX headers to all source files
+| Licensing
+| Medium
+
+| Consolidate CSS into design system
+| Maintainability
+| Medium
+|===
+
+=== Code Quality
+
+[cols="4,2,1"]
+|===
+| Item | Impact | Priority
+
+| Increase PHPStan to Level 7+
+| Type safety
+| Medium
+
+| Add strict typing to all PHP files
+| Reliability
+| Medium
+
+| Implement Psalm baseline reduction
+| Code quality
+| Low
+
+| Extract reusable PHP components
+| Maintainability
+| Low
+|===
+
+== Architecture Decisions Log
+
+=== Accepted
+
+[cols="1,3,2"]
+|===
+| ADR | Decision | Date
+
+| ADR-001
+| Use ReScript instead of TypeScript
+| 2025-01
+
+| ADR-002
+| Use Deno instead of Node.js/npm
+| 2025-01
+
+| ADR-003
+| PHP 8.1 minimum version
+| 2024-06
+
+| ADR-004
+| Dual AGPL-3.0/Palimpsest licensing
+| 2025-01
+|===
+
+=== Proposed
+
+[cols="1,3,2"]
+|===
+| ADR | Proposal | Status
+
+| ADR-005
+| WebAssembly for client-side CSL
+| Under Review
+
+| ADR-006
+| Web Components for embedding
+| Under Review
+
+| ADR-007
+| GraphQL alongside REST
+| Discussion
+|===
+
+== Contributing to Roadmap
+
+=== How to Propose Features
+
+1. Open an issue with `[Feature Request]` prefix
+2. Describe the use case and benefits
+3. Consider implementation complexity
+4. Reference any related ADRs
+
+=== Priority Definitions
+
+* **P0 (Critical)**: Blocks release, security issues, data loss
+* **P1 (High)**: Important for release, significant user impact
+* **P2 (Medium)**: Nice to have, improves experience
+* **P3 (Low)**: Future consideration, polish items
+
+=== Review Process
+
+* Roadmap reviewed quarterly
+* Community input via GitHub Discussions
+* Major changes require ADR
+* Breaking changes require RFC
+
+== Resources
+
+* link:STATE.scm[STATE.scm] — Current project state
+* link:META.scm[META.scm] — Architecture decisions
+* link:CONTRIBUTING.md[CONTRIBUTING.md] — Contribution guidelines
+* link:SECURITY.md[SECURITY.md] — Security policy
+
+== Changelog
+
+* **2025-12-26**: Initial roadmap creation
+* Based on STATE.scm and META.scm analysis

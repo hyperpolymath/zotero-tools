@@ -1,0 +1,628 @@
+= Development Guide
+:toc:
+:toclevels: 3
+
+This document provides detailed information for developers working on the Zotero Voyant Export extension.
+
+== Architecture Overview
+
+This project is based on the https://gitlab.com/extensions-library/zotero/zoterho-template[zoterho-template] architecture, which provides a production-ready framework for building modern Zotero 7 extensions with type safety, modern tooling, and professional automation.
+
+=== Key Architectural Decisions
+
+==== 1. ReScript for Type Safety
+
+All source code is written in ReScript (.res files), which provides:
+
+* Compile-time type checking
+* No runtime type errors
+* Excellent editor support (VSCode, Vim, etc.)
+* Compiles to clean, readable JavaScript (.mjs)
+* Full type inference with minimal annotations
+
+**Type Safety Metrics**: Only 3 small `%raw()` blocks in the entire codebase (unavoidable DOM APIs). No `{..}` open object types or `Obj.magic` unsafe casts.
+
+==== 2. Deno as Runtime
+
+Deno manages all build dependencies:
+
+* No package.json or node_modules directory
+* Secure by default (explicit permissions)
+* Built-in TypeScript support
+* `npm:` imports for accessing npm packages (ReScript compiler)
+* Native ES modules support
+
+==== 3. Direct Configuration Management
+
+All configuration files are committed directly to the repository:
+
+* `manifest.json` - WebExtension manifest with CSP and permissions
+* `deno.json` - Deno tasks and npm imports
+* `rescript.json` - ReScript compiler configuration
+
+**Rationale**: Eliminates build-time configuration generation complexity. What you see is what you get.
+
+==== 4. Optional Just for Task Automation
+
+Justfile provides convenient task automation:
+
+* Simple, readable syntax
+* Cross-platform support
+* Built-in help system
+* Optional - can use `deno task` directly
+
+== File Organization
+
+=== Source Files (Checked into Git)
+
+----
+src/
+├── background.res      # Extension entry point & initialization
+├── Firefox.res         # Complete Firefox/XPCOM type bindings
+├── Zotero.res          # Type-safe Zotero API bindings
+├── Exporter.res        # Collection export with error recovery
+├── Format.res          # XML generation (MODS, Dublin Core)
+├── UI.res              # Accessible menu items & file picker
+├── ErrorRecovery.res   # Retry logic & self-healing utilities
+└── Performance.res     # Performance monitoring & optimization
+
+ui/
+├── icon.png            # Extension icon (64x64 PNG)
+└── styles.css          # Accessible, modern CSS
+
+manifest.json           # WebExtension manifest (committed)
+deno.json               # Deno configuration (committed)
+rescript.json           # ReScript compiler config (committed)
+justfile                # Task automation (optional)
+README.adoc             # User-facing documentation
+DEVELOPMENT.adoc        # This file
+LICENSE                 # GPL-3.0 license
+----
+
+=== Generated Files (Gitignored)
+
+----
+src/*.mjs               # Compiled JavaScript from ReScript
+src/*.cmi               # ReScript interface files
+src/*.cmj               # ReScript compiled modules
+src/*.cmt               # ReScript type information
+
+lib/bs/                 # ReScript build directory
+web-ext-artifacts/      # Built XPI packages
+----
+
+== Build Process
+
+=== ReScript Compilation
+
+Using Deno:
+----
+deno task rescript:build
+----
+
+Using Just (if installed):
+----
+just build
+----
+
+This compiles all `src/*.res` files to `src/*.mjs` files.
+
+**Build Output**: ES modules with `.mjs` extension for maximum compatibility.
+
+=== Extension Packaging
+
+Using Deno:
+----
+deno task ext:build
+----
+
+Using Just:
+----
+just package
+----
+
+This creates an XPI file in `web-ext-artifacts/` ready for distribution.
+
+== Code Architecture
+
+=== Module Overview
+
+==== Firefox.res - Low-Level Bindings
+
+Provides complete type-safe bindings to Firefox/XPCOM APIs:
+
+[source,rescript]
+----
+// nsIFile interface
+type nsIFile = {
+  path: string,
+  clone: unit => nsIFile,
+  append: string => unit,
+  create: (int, int) => unit,
+  copyTo: (nsIFile, string) => unit,
+  createUnique: (int, int) => unit,
+}
+
+// FileUtils module
+module FileUtils = {
+  type t
+  @val
+  external get: unit => t = "ChromeUtils.importESModule(...).FileUtils"
+  @send
+  external getFile: (t, string, array<string>) => nsIFile = "getFile"
+}
+----
+
+**Purpose**: Eliminates `{..}` types and provides compile-time guarantees for all Firefox APIs.
+
+==== Zotero.res - Zotero API Bindings
+
+Provides type-safe bindings to Zotero's JavaScript API:
+
+[source,rescript]
+----
+type rec collection = {
+  name: string,
+  getChildItems: unit => array<item>,
+}
+
+and item = {
+  id: int,
+  libraryKey: string,
+  getDisplayTitle: unit => string,
+  getCreators: unit => array<creator>,
+  getBestAttachment: unit => promise<Js.Nullable.t<attachment>>,
+}
+
+@val @scope("window")
+external initializationPromise: promise<unit> = "Zotero.initializationPromise"
+----
+
+**Key Features**: Mutual recursion for complex type graphs, nullable returns properly typed.
+
+==== ErrorRecovery.res - Resilience Framework
+
+Implements production-grade error recovery:
+
+[source,rescript]
+----
+// Retry with exponential backoff
+let retry = async (operation: unit => promise<'a>): promise<result<'a, string>>
+
+// File validation
+let validateFile = (file: Firefox.nsIFile): bool
+
+// Safe directory creation
+let ensureDirectory = (dir: Firefox.nsIFile): result<unit, string>
+----
+
+**Features**:
+
+* Exponential backoff: 1s → 2s → 4s delays
+* 3 retry attempts by default
+* Detailed error logging
+* Result types for explicit error handling
+
+==== Performance.res - Optimization Utilities
+
+Performance monitoring and optimization:
+
+[source,rescript]
+----
+type performanceMetrics = {
+  startTime: float,
+  endTime: option<float>,
+  itemsProcessed: int,
+  itemsFailed: int,
+  bytesProcessed: option<int>,
+}
+
+let createMetrics = (): performanceMetrics
+let formatSummary = (metrics: performanceMetrics): string
+let batchProcess = (items: array<'a>, batchSize: int, processor: array<'a> => promise<unit>): promise<unit>
+----
+
+**Features**:
+
+* Duration and throughput tracking
+* Batch processing for large datasets
+* Memory management utilities
+* Throttling to prevent system overload
+
+==== Format.res - XML Generation
+
+Generates MODS and Dublin Core metadata:
+
+[source,rescript]
+----
+let generateMODS = (item: Zotero.item): string
+let generateDC = (item: Zotero.item): string
+----
+
+**Type Safety**: Uses proper `Dom.document` and `Dom.element` types instead of raw JavaScript.
+
+==== Exporter.res - Export Logic
+
+Handles the export process with full error recovery:
+
+[source,rescript]
+----
+let doExport = async (): unit => {
+  // Performance tracking
+  let startTime = Js.Date.now()
+
+  // Get collection with validation
+  // Create temp directory with error handling
+  // Process items with retry logic
+  // Generate metadata
+  // Zip with retry
+  // Report metrics
+}
+----
+
+**Features**:
+
+* Progress logging every 10 items
+* Success/failure tracking
+* Large collection warnings (>100 items)
+* Duration and throughput reporting
+
+==== UI.res - Accessible User Interface
+
+Manages menu items with WCAG 2.1 compliance:
+
+[source,rescript]
+----
+let insertExportMenuItem = (onclick: unit => unit): unit => {
+  // Load stylesheet
+  // Create accessible menu item
+  // Add ARIA attributes
+  // Support keyboard navigation
+}
+----
+
+**Accessibility Features**:
+
+* ARIA labels and roles
+* Keyboard activation (Enter, Space)
+* Alt+V shortcut key
+* Focus indicators
+* Screen reader support
+
+==== background.res - Entry Point
+
+Minimal initialization:
+
+[source,rescript]
+----
+let main = async () => {
+  await Zotero.initializationPromise
+  Zotero.debug("[Voyant Export] Plugin loaded")
+  UI.insertExportMenuItem(() => {
+    Exporter.doExport()->ignore
+  })
+}
+main()->ignore
+----
+
+== Modern Best Practices Implementation
+
+=== Accessibility (WCAG 2.1 Level AA)
+
+**Keyboard Navigation**:
+
+* Tab to menu item
+* Enter or Space to activate
+* Alt+V shortcut key
+
+**Screen Reader Support**:
+
+* ARIA role="menuitem"
+* aria-label with descriptive text
+* aria-describedby for additional context
+
+**Visual Accessibility**:
+
+* High contrast mode support (`@media (prefers-contrast: high)`)
+* Dark mode support (`@media (prefers-color-scheme: dark)`)
+* Reduced motion (`@media (prefers-reduced-motion: reduce)`)
+* Focus indicators with 2px outline
+
+**CSS Implementation** (`ui/styles.css`):
+
+[source,css]
+----
+#voyant-export:focus-visible {
+  outline: 2px solid var(--focus-outline-color, #0a84ff);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #voyant-export {
+    transition: none;
+  }
+}
+----
+
+=== Error Recovery & Self-Healing
+
+**Retry Logic**:
+
+* Exponential backoff with configurable delays
+* Default: 3 attempts (1s, 2s, 4s)
+* Detailed logging for each attempt
+* Result types for explicit error propagation
+
+**File Operations**:
+
+* Pre-flight validation (exists, readable)
+* Automatic directory creation
+* Safe copy with validation
+* Graceful failure handling
+
+**Implementation**:
+
+[source,rescript]
+----
+let copyFileTo = (sourceFile, targetDir, newName): result<unit, string> => {
+  try {
+    if !ErrorRecovery.validateFile(sourceFile) {
+      Error(`Source file is not valid: ${sourceFile.path}`)
+    } else {
+      sourceFile.copyTo(targetDir, newName)
+      Ok()
+    }
+  } catch {
+  | exn => Error(`Failed to copy file: ${exn}`)
+  }
+}
+----
+
+=== Performance Optimization
+
+**Large Collection Handling**:
+
+* Warning for >100 items
+* Progress logging every 10 items
+* Memory management suggestions
+* Batch processing support
+
+**Metrics Tracking**:
+
+[source,rescript]
+----
+let startTime = Js.Date.now()
+// ... process items ...
+let endTime = Js.Date.now()
+let duration = (endTime -. startTime) /. 1000.0
+
+Zotero.debug(
+  `Export complete: ${duration}s, ${successCount}/${totalCount} items`
+)
+----
+
+**Defensive Programming**:
+
+* Disk space estimation
+* Memory usage checks
+* Garbage collection hints for large datasets
+
+=== Security
+
+**Content Security Policy** (`manifest.json`):
+
+[source,json]
+----
+{
+  "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'"
+}
+----
+
+**Security Features**:
+
+* No external script loading
+* All resources self-contained
+* Input validation on file operations
+* No inline event handlers (except one unavoidable onclick)
+
+== Testing
+
+=== Manual Testing
+
+----
+# Build and package
+deno task rescript:build
+deno task ext:build
+
+# Load in Zotero
+# 1. Open Zotero 7
+# 2. Tools > Add-ons
+# 3. Gear icon > Install Add-on From File
+# 4. Select the XPI from web-ext-artifacts/
+----
+
+=== Testing Checklist
+
+* [ ] Extension loads without errors
+* [ ] Menu item appears in collection context menu
+* [ ] Menu item is keyboard accessible (Tab, Enter, Space)
+* [ ] Alt+V shortcut works
+* [ ] File picker appears on activation
+* [ ] Export completes successfully
+* [ ] ZIP file contains correct structure:
+** `bagit.txt` with version header
+** `data/[item-id]/CWRC.bin` (attachment)
+** `data/[item-id]/MODS.bin` (metadata)
+** `data/[item-id]/DC.xml` (Dublin Core)
+* [ ] Progress logged for large collections
+* [ ] Missing attachments handled gracefully
+* [ ] Dark mode works correctly
+* [ ] High contrast mode works correctly
+
+=== Debug Console
+
+Check Zotero's error console:
+
+----
+Tools → Developer → Error Console
+----
+
+Look for `[Voyant Export]` messages:
+
+* `[Voyant Export] Plugin loaded` - successful initialization
+* `[Voyant Export] Collection: NAME, COUNT items` - export started
+* `[Voyant Export] Progress: X/Y items` - progress updates
+* `[Voyant Export] Export complete: PATH (Xs, X/Y items)` - success
+
+== Troubleshooting
+
+=== ReScript Compilation Errors
+
+----
+deno task rescript:build
+----
+
+Common issues:
+
+* **Type mismatch**: Check function signatures
+* **Module not found**: Ensure all .res files are in src/
+* **Syntax error**: Check for missing parentheses, braces
+
+=== Extension Loading Issues
+
+1. Check browser console for errors
+2. Verify manifest.json syntax
+3. Ensure all .mjs files were generated
+4. Check file permissions
+
+=== Runtime Errors
+
+Check Zotero error console:
+
+* Missing API bindings: Add to Zotero.res or Firefox.res
+* File operation failures: Check ErrorRecovery logging
+* Export failures: Verify item has attachment
+
+== Adding New Features
+
+=== 1. Add Zotero API Bindings
+
+If you need new Zotero API functions:
+
+[source,rescript]
+----
+// In Zotero.res
+@val @scope(("window", "Zotero", "SomeModule"))
+external someNewFunction: string => int = "someNewFunction"
+----
+
+=== 2. Modify Export Logic
+
+To change what's exported:
+
+[source,rescript]
+----
+// In Exporter.res
+let processItem = async (item: Zotero.item, dataDir: Firefox.nsIFile): promise<bool> => {
+  // Add your custom processing here
+  // Use ErrorRecovery.retry for resilience
+}
+----
+
+=== 3. Update Configuration
+
+To change extension metadata:
+
+[source,json]
+----
+// In manifest.json
+{
+  "version": "2.1.0",
+  "description": "New description"
+}
+----
+
+Then rebuild and test.
+
+== Manifest V3 Future-Proofing
+
+Zotero currently uses WebExtension Manifest V2, but the web is moving toward V3. See link:MANIFEST_V3_MIGRATION.adoc[Manifest V3 Migration Guide] for our strategy and prepared V3 template.
+
+**Key V3 Differences**:
+
+* Background scripts → Service Workers
+* `browser.action` replaces `browser.browserAction`
+* Dynamic imports only
+* Enhanced CSP requirements
+
+The V3 template is maintained in the `manifest-v3` branch for future migration.
+
+== Release Process
+
+1. Update version in `manifest.json`
+2. Update CHANGELOG (if exists)
+3. Build extension: `deno task rescript:build`
+4. Package: `deno task ext:build`
+5. Test XPI in clean Zotero install
+6. Create GitHub release with XPI
+7. Tag release: `git tag v2.x.x && git push --tags`
+
+== Code Quality Standards
+
+=== Type Safety
+
+* No `{..}` open object types
+* No `Obj.magic` unsafe casts
+* Minimize `%raw()` usage (<5 blocks total)
+* Prefer Result types over exceptions
+
+=== Error Handling
+
+* All file operations wrapped in try/catch
+* Use ErrorRecovery.retry for critical operations
+* Return Result types from fallible functions
+* Log all errors with context
+
+=== Accessibility
+
+* All UI elements keyboard accessible
+* ARIA labels for screen readers
+* Support dark mode and high contrast
+* Respect prefers-reduced-motion
+
+=== Performance
+
+* Log progress for operations >10 items
+* Warn for large collections (>100 items)
+* Track duration and throughput
+* Validate disk space before operations
+
+== Resources
+
+* https://rescript-lang.org/docs/manual/latest/introduction[ReScript Documentation]
+* https://deno.land/manual[Deno Manual]
+* https://github.com/casey/just[Just Documentation]
+* https://www.zotero.org/support/dev/zotero_7_for_developers[Zotero 7 Plugin Development]
+* https://gitlab.com/extensions-library/zotero/zoterho-template[zoterho-template]
+* https://www.w3.org/WAI/WCAG21/quickref/[WCAG 2.1 Quick Reference]
+
+== Credits and Attribution
+
+This project's build system and architecture is based on:
+
+**https://gitlab.com/extensions-library/zotero/zoterho-template[zoterho-template]** +
+A production-ready template for building modern Zotero 7 extensions with type safety, modern tooling, and professional automation.
+
+Key concepts adopted:
+
+* Deno-based toolchain
+* Just for task automation
+* ReScript for type-safe code
+* In-source build for compiled files
+* Modern best practices
+
+Original Zotero Voyant Export extension:
+
+* Concept and initial implementation: Cora Johnson-Roberson
+* Licensed under GPL-3.0
+* Migrated to Zotero 7 and modernized: 2024

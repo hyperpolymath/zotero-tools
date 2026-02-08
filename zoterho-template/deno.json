@@ -1,0 +1,55 @@
+{
+  "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
+  "name": "zoterho-template",
+  "version": "2.0.0",
+  "tasks": {
+    "build": "deno task build:rescript",
+    "build:rescript": "deno run --allow-run npm:rescript build",
+    "build:clean": "deno run --allow-run npm:rescript build -clean-world",
+    "watch": "deno run --allow-run npm:rescript build -w",
+    "fmt": "deno run --allow-run npm:rescript format -all",
+    "clean": "deno run --allow-run npm:rescript clean",
+    "check": "deno check **/*.ts",
+    "lint": "deno lint",
+    "test": "deno test --allow-read --allow-write"
+  },
+  "imports": {
+    "@rescript/core": "npm:@rescript/core@^1.0.0",
+    "rescript": "npm:rescript@^11.0.0"
+  },
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "strict": true,
+    "allowJs": false
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": ["no-explicit-any"]
+    },
+    "exclude": [
+      "node_modules/",
+      "lib/",
+      "build/",
+      "*.gen.*"
+    ]
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "semiColons": false,
+    "singleQuote": true,
+    "exclude": [
+      "node_modules/",
+      "lib/",
+      "build/"
+    ]
+  },
+  "exclude": [
+    "node_modules/",
+    "lib/",
+    "build/",
+    "*.gen.*"
+  ]
+}

@@ -1,0 +1,38 @@
+includes:
+  - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+  level: 6
+  paths:
+    - lib/
+    - src/
+  excludePaths:
+    - vendor/
+    - tests/
+    - node_modules/
+  scanFiles:
+    - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+  bootstrapFiles:
+    - tests/bootstrap-phpstan.php
+  checkMissingIterableValueType: false
+  checkGenericClassInNonGenericObjectType: false
+  reportUnmatchedIgnoredErrors: false
+  parallel:
+    maximumNumberOfProcesses: 4
+  ignoreErrors:
+    # WordPress globals
+    - '#Function esc_html_.* not found#'
+    - '#Function wp_.* not found#'
+    - '#Function add_.* not found#'
+    - '#Function get_.* not found#'
+    - '#Function sanitize_.* not found#'
+    - '#Function current_user_can not found#'
+    - '#Function check_ajax_referer not found#'
+    - '#Access to an undefined property wpdb#'
+    - '#Variable \$wpdb might not be defined#'
+    # Legacy code patterns to fix gradually
+    - '#Parameter .* expects .*, mixed given#'
+    - '#Cannot access offset .* on mixed#'
+  stubFiles:
+    - stubs/wordpress.php
+  treatPhpDocTypesAsCertain: false

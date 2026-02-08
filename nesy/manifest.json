@@ -1,0 +1,37 @@
+{
+  "manifest_version": 2,
+  "name": "NSAI - Neurosymbolic Research Validator",
+  "version": "0.1.0",
+  "description": "Validates and prepares research data using neurosymbolic reasoning. Tractarian certainty for bibliographic validation.",
+  "author": "Hyperpolymath",
+  "homepage_url": "https://github.com/Hyperpolymath/zotero-nsai",
+
+  "applications": {
+    "zotero": {
+      "id": "nsai@hyperpolymath",
+      "update_url": "https://github.com/Hyperpolymath/zotero-nsai/releases/latest/download/update.json",
+      "strict_min_version": "6.0",
+      "strict_max_version": "7.0.*"
+    }
+  },
+
+  "icons": {
+    "48": "icons/nsai-48.png",
+    "96": "icons/nsai-96.png"
+  },
+
+  "background": {
+    "scripts": ["build/index.js"]
+  },
+
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+
+  "browser_action": {
+    "default_icon": "icons/nsai-48.png",
+    "default_title": "NSAI Validator",
+    "default_popup": "popup.html"
+  }
+}

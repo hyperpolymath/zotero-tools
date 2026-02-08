@@ -1,0 +1,113 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+name: Security Analysis (sanctify-php)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'composer.lock'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'composer.lock'
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly on Monday at 6am
+
+permissions: read-all
+
+jobs:
+  sanctify-analysis:
+    name: Sanctify PHP Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Haskell
+        uses: haskell-actions/setup@ec49483bfc012387b227434aba94f59a6ecd0900 # v2.7.5
+        with:
+          ghc-version: '9.6'
+          cabal-version: '3.10'
+
+      - name: Cache Cabal packages
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        with:
+          path: |
+            ~/.cabal/packages
+            ~/.cabal/store
+            dist-newstyle
+          key: ${{ runner.os }}-cabal-${{ hashFiles('**/*.cabal') }}
+          restore-keys: |
+            ${{ runner.os }}-cabal-
+
+      - name: Clone sanctify-php
+        run: |
+          git clone --depth 1 https://github.com/hyperpolymath/sanctify-php.git /tmp/sanctify-php
+
+      - name: Build sanctify-php
+        working-directory: /tmp/sanctify-php
+        run: |
+          cabal update
+          cabal build
+
+      - name: Run sanctify-php analysis
+        run: |
+          /tmp/sanctify-php/dist-newstyle/build/*/ghc-*/sanctify-php-*/x/sanctify-php/build/sanctify-php/sanctify-php \
+            --format sarif \
+            --output security-report.sarif \
+            --severity high \
+            lib/ src/ || true
+
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@662472033e021d55d94146f66f6058822b0b39fd # v3.27.0
+        if: always()
+        with:
+          sarif_file: security-report.sarif
+        continue-on-error: true
+
+      - name: Run sanctify-php (text output)
+        run: |
+          echo "## Security Analysis Report" >> $GITHUB_STEP_SUMMARY
+          /tmp/sanctify-php/dist-newstyle/build/*/ghc-*/sanctify-php-*/x/sanctify-php/build/sanctify-php/sanctify-php \
+            --format text \
+            --severity medium \
+            lib/ src/ 2>&1 | tee -a $GITHUB_STEP_SUMMARY || true
+
+  php-aegis-check:
+    name: PHP Aegis Integration Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@c541c155eee45413f5b09a52248675b1a2575231 # v2.31.1
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, sodium
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-progress --prefer-dist
+
+      - name: Check php-aegis usage
+        run: |
+          echo "## PHP Aegis Integration Check" >> $GITHUB_STEP_SUMMARY
+          if grep -r "Aegis\\\\" lib/ src/ 2>/dev/null; then
+            echo "✓ php-aegis is being used in the codebase" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠ php-aegis is installed but not yet integrated" >> $GITHUB_STEP_SUMMARY
+            echo "Consider using Aegis security functions for:" >> $GITHUB_STEP_SUMMARY
+            echo "- Input validation (Aegis\Validation)" >> $GITHUB_STEP_SUMMARY
+            echo "- Output sanitization (Aegis\Sanitization)" >> $GITHUB_STEP_SUMMARY
+            echo "- Cryptographic operations (Aegis\Crypto)" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Zotero Voyant Export",
+  "version": "2.1.0",
+  "description": "Export your Zotero collections to Voyant",
+  "author": "Cora Johnson-Roberson",
+  "homepage_url": "https://github.com/Hyperpolymath/zotero-voyant-export",
+  "applications": {
+    "gecko": {
+      "id": "zotero-voyant-export@corajr.com",
+      "strict_min_version": "115.0",
+      "strict_max_version": "8.0.*"
+    }
+  },
+  "icons": {
+    "64": "ui/icon.png"
+  },
+  "background": {
+    "scripts": ["src/background.mjs"]
+  },
+  "permissions": [
+    "storage"
+  ],
+  "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'",
+  "web_accessible_resources": [
+    "ui/styles.css",
+    "ui/icon.png"
+  ]
+}

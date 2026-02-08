@@ -1,0 +1,36 @@
+= zotero-rescript-templater - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{zotero-rescript-templater_2025,
+  author = {Polymath, Hyper},
+  title = {zotero-rescript-templater},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/zotero-rescript-templater},
+  license = {AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _zotero-rescript-templater_ [Computer software]. Available at: https://github.com/hyperpolymath/zotero-rescript-templater
+
+== OSCOLA
+
+Hyper Polymath, 'zotero-rescript-templater' (2025) <https://github.com/hyperpolymath/zotero-rescript-templater>
+
+== MLA
+
+Polymath, Hyper. "zotero-rescript-templater." 2025, github.com/hyperpolymath/zotero-rescript-templater.
+
+== APA 7
+
+Polymath, H. (2025). _zotero-rescript-templater_ [Computer software]. GitHub. https://github.com/hyperpolymath/zotero-rescript-templater
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]

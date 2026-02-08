@@ -1,0 +1,36 @@
+= ZoteRho-template - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{zoterho-template_2025,
+  author = {Polymath, Hyper},
+  title = {ZoteRho-template},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/ZoteRho-template},
+  license = {AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _ZoteRho-template_ [Computer software]. Available at: https://github.com/hyperpolymath/ZoteRho-template
+
+== OSCOLA
+
+Hyper Polymath, 'ZoteRho-template' (2025) <https://github.com/hyperpolymath/ZoteRho-template>
+
+== MLA
+
+Polymath, Hyper. "ZoteRho-template." 2025, github.com/hyperpolymath/ZoteRho-template.
+
+== APA 7
+
+Polymath, H. (2025). _ZoteRho-template_ [Computer software]. GitHub. https://github.com/hyperpolymath/ZoteRho-template
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]

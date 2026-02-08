@@ -1,0 +1,36 @@
+= zotero-voyant-export - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{zotero-voyant-export_2025,
+  author = {Polymath, Hyper},
+  title = {zotero-voyant-export},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/zotero-voyant-export},
+  license = {AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _zotero-voyant-export_ [Computer software]. Available at: https://github.com/hyperpolymath/zotero-voyant-export
+
+== OSCOLA
+
+Hyper Polymath, 'zotero-voyant-export' (2025) <https://github.com/hyperpolymath/zotero-voyant-export>
+
+== MLA
+
+Polymath, Hyper. "zotero-voyant-export." 2025, github.com/hyperpolymath/zotero-voyant-export.
+
+== APA 7
+
+Polymath, H. (2025). _zotero-voyant-export_ [Computer software]. GitHub. https://github.com/hyperpolymath/zotero-voyant-export
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]

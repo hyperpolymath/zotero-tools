@@ -1,0 +1,21 @@
+= zotero-tools
+// SPDX-License-Identifier: PMPL-1.0-or-later
+:author: Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+
+Zotero reference management extensions and integrations.
+
+== Components
+
+* `zoterho/` - Core Zotero integration
+* `zoterho-template/` - Zotero template system
+* `formbd/` - Zotero form-based data entry
+* `librarian/` - Automated library management
+* `nesy/` - Neurosymbolic Zotero integration
+* `rescript-templater/` - ReScript-based template engine
+* `safe-storage/` - Secure Zotero storage
+* `voyant-export/` - Voyant Tools export integration
+* `zotpress/` - Zotero WordPress integration
+
+== License
+
+PMPL-1.0-or-later

@@ -1,0 +1,879 @@
+= Zotero ReScript Templater
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
+
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+:experimental:
+
+image:https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey[Platform]
+image:https://img.shields.io/badge/racket-8.0%2B-blue[Racket,link=https://racket-lang.org/]
+image:https://img.shields.io/badge/powershell-7.0%2B-blue[PowerShell,link=https://github.com/PowerShell/PowerShell]
+
+A sophisticated scaffolding system for Zotero plugins, offering *Racket*, *PowerShell*, and *Bash* implementations with template interpolation, integrity verification, and type-safe development options.
+
+== Features
+
+* 🎯 *Three Ready-to-Use Templates*
+** *Practitioner* - Professional-grade ReScript/ReasonML plugins
+** *Researcher* - Research-focused with citation analysis and database integration
+** *Student* - Educational templates with extensive documentation and TypeScript
+
+* 🔒 *File Integrity Verification* - XXHash64-based checksums for tamper detection
+* 🎨 *Template Interpolation* - Simple `{{variable}}` syntax for customization
+* 🏗️ *Homoiconic Design* - Racket version uses code-as-data for ultimate flexibility
+* 📦 *Automated Dependency Management* - One-command setup for all prerequisites
+* 🔄 *CI/CD Ready* - GitHub Actions workflows included
+* 🐳 *Container Support* - Containerfile generation for isolated development
+* 🔐 *GPG Signing* - Cryptographic verification for releases
+* 📊 *Property-Based Testing* - QuickCheck-style invariant verification
+* 📚 *Formal Verification* - Racket contracts for runtime correctness
+* 📦 *SBOM Generation* - Software Bill of Materials in 3 formats
+* 🏛️ *Long-Term Archival* - Software Heritage and Zenodo integration
+
+== Quick Start
+
+=== PowerShell (Windows)
+
+[source,powershell]
+----
+# 1. Install dependencies (first time only)
+.\zotero-template-dependencies.ps1
+
+# 2. Create a new plugin
+.\init-zotero-rscript-plugin.ps1 `
+  -ProjectName "MyAwesomePlugin" `
+  -AuthorName "Your Name" `
+  -TemplateType practitioner `
+  -GitInit
+
+# 3. Verify file integrity
+.\init-zotero-rscript-plugin.ps1 `
+  -ProjectName "MyAwesomePlugin" `
+  -VerifyIntegrity
+----
+
+=== Racket (Cross-Platform)
+
+[source,bash]
+----
+# 1. Install Racket 8.12+
+# See: https://racket-lang.org/
+
+# 2. Create a new plugin
+racket init-raczotbuild.rkt \
+  -n MyAwesomePlugin \
+  -a "Your Name" \
+  -g
+
+# 3. Test the scaffolder
+racket tests/racket-tests.rkt
+----
+
+=== Bash (Linux/macOS)
+
+[source,bash]
+----
+# 1. Make executable
+chmod +x init-zotero-plugin.sh
+
+# 2. Create a new plugin
+./init-zotero-plugin.sh \
+  --name MyAwesomePlugin \
+  --author "Your Name" \
+  --template student \
+  --git
+
+# 3. Verify integrity
+./init-zotero-plugin.sh \
+  --verify MyAwesomePlugin
+----
+
+== Installation
+
+=== Prerequisites
+
+==== Required Tools
+
+[cols="2,3,2", options="header"]
+|===
+|Tool |Purpose |Minimum Version
+
+|PowerShell
+|Windows scaffolder runtime
+|7.4+
+
+|Racket
+|Homoiconic scaffolder runtime
+|8.12+
+
+|Bash
+|Linux/macOS scaffolder runtime
+|5.0+
+
+|Git
+|Version control
+|2.30+
+|===
+
+==== Optional Tools
+
+[cols="2,3", options="header"]
+|===
+|Tool |Purpose
+
+|Podman/Docker
+|Containerized development
+
+|Nix
+|Reproducible builds
+
+|just
+|Build automation
+
+|GPG
+|Release signing
+|===
+
+=== Dependency Installation
+
+==== Windows (PowerShell)
+
+[source,powershell]
+----
+# Install all required tools
+.\zotero-template-dependencies.ps1
+
+# With optional tools
+.\zotero-template-dependencies.ps1 -Optional
+----
+
+==== Linux/macOS (Package Manager)
+
+[source,bash]
+----
+# Ubuntu/Debian
+sudo apt-get install racket powershell git
+
+# macOS (Homebrew)
+brew install racket powershell git
+
+# Arch Linux
+sudo pacman -S racket powershell git
+----
+
+==== Nix (All Platforms)
+
+[source,bash]
+----
+# Enter development shell with all dependencies
+nix develop
+
+# Or build directly
+nix build
+
+# Run scaffolder
+nix run
+----
+
+== Usage
+
+=== PowerShell Scaffolder
+
+==== Basic Usage
+
+[source,powershell]
+----
+.\init-zotero-rscript-plugin.ps1 `
+  -ProjectName "CitationHelper" `
+  -AuthorName "Jane Doe" `
+  -TemplateType researcher
+----
+
+==== With Git Initialization
+
+[source,powershell]
+----
+.\init-zotero-rscript-plugin.ps1 `
+  -ProjectName "CitationHelper" `
+  -AuthorName "Jane Doe" `
+  -TemplateType researcher `
+  -GitInit
+----
+
+==== Integrity Verification
+
+[source,powershell]
+----
+# Verify after scaffolding
+.\init-zotero-rscript-plugin.ps1 `
+  -ProjectName "CitationHelper" `
+  -VerifyIntegrity
+
+# Expected output:
+# ✓ All files verified successfully
+# ✓ No tampering detected
+----
+
+=== Racket Scaffolder
+
+==== Command-Line Flags
+
+[source,bash]
+----
+racket init-raczotbuild.rkt [OPTIONS]
+
+Options:
+  -n, --name PROJECT_NAME      Project name (required)
+  -a, --author AUTHOR_NAME      Author name (required)
+  -g, --git                     Initialize Git repository
+  -h, --help                    Show this help message
+----
+
+==== Example
+
+[source,bash]
+----
+racket init-raczotbuild.rkt \
+  -n "ZoteroSync" \
+  -a "John Smith" \
+  -g
+----
+
+=== Bash Scaffolder
+
+==== Command-Line Options
+
+[source,bash]
+----
+./init-zotero-plugin.sh [OPTIONS]
+
+Options:
+  --name NAME           Project name (required)
+  --author AUTHOR       Author name (required)
+  --template TYPE       Template type: practitioner|researcher|student
+  --git                 Initialize Git repository
+  --verify DIR          Verify file integrity
+  --help                Show this help message
+----
+
+==== Example
+
+[source,bash]
+----
+./init-zotero-plugin.sh \
+  --name "BibTeXSync" \
+  --author "Alex Johnson" \
+  --template student \
+  --git
+----
+
+== Template Types
+
+=== Practitioner Template
+
+*Technology Stack:* ReScript/ReasonML + JavaScript
+
+*Use Case:* Professional plugin development with type safety
+
+*Key Features:*
+
+* Type-safe ReScript code compilation to JavaScript
+* Bootstrap.js lifecycle management
+* XUL overlays for UI integration
+* Complete chrome.manifest configuration
+* Production-ready build scripts
+* Comprehensive error handling
+
+*Directory Structure:*
+
+[source]
+----
+practitioner-plugin/
+├── bootstrap.js          # Plugin lifecycle
+├── chrome.manifest       # Chrome registration
+├── manifest.json           # Plugin metadata
+├── src/
+│   ├── plugin.re         # ReScript source
+│   └── types.re          # Type definitions
+├── package.json          # Dependencies
+├── bsconfig.json         # ReScript config
+└── README.md             # Documentation
+----
+
+*Build Commands:*
+
+[source,bash]
+----
+npm install               # Install dependencies
+npm run build             # Compile ReScript
+npm test                  # Run tests
+----
+
+=== Researcher Template
+
+*Technology Stack:* JavaScript + SQLite
+
+*Use Case:* Research-focused plugins with citation analysis
+
+*Key Features:*
+
+* SQLite database integration for citation storage
+* Citation metadata extraction and analysis
+* Bibliometric analysis utilities
+* Export to CSV/JSON/BibTeX
+* Research workflow automation
+* Data visualization helpers
+
+*Directory Structure:*
+
+[source]
+----
+researcher-plugin/
+├── bootstrap.js          # Plugin lifecycle
+├── chrome.manifest       # Chrome registration
+├── manifest.json           # Plugin metadata
+├── src/
+│   ├── database.js       # SQLite interface
+│   ├── citations.js      # Citation analysis
+│   └── export.js         # Data export
+├── schema/
+│   └── citations.sql     # Database schema
+└── README.md             # Documentation
+----
+
+*Key APIs:*
+
+[source,javascript]
+----
+// Citation analysis
+const analysis = analyzeCitation(item);
+
+// Export data
+exportToCSV(citations, 'output.csv');
+exportToBibTeX(citations, 'refs.bib');
+
+// Database queries
+const results = queryDatabase('SELECT * FROM citations');
+----
+
+=== Student Template
+
+*Technology Stack:* TypeScript + Comprehensive Tutorial
+
+*Use Case:* Educational plugin development with extensive guidance
+
+*Key Features:*
+
+* TypeScript for type safety and modern JavaScript features
+* 900+ line TUTORIAL.md with step-by-step instructions
+* Extensively commented code explaining every concept
+* Progressive complexity (simple → advanced)
+* Best practices documentation
+* Common pitfalls and solutions
+
+*Directory Structure:*
+
+[source]
+----
+student-plugin/
+├── bootstrap.js          # Plugin lifecycle
+├── chrome.manifest       # Chrome registration
+├── manifest.json           # Plugin metadata
+├── src/
+│   ├── plugin.ts         # TypeScript source
+│   ├── types.ts          # Type definitions
+│   └── utils.ts          # Helper functions
+├── TUTORIAL.md           # Comprehensive guide
+├── package.json          # Dependencies
+├── tsconfig.json         # TypeScript config
+└── README.md             # Quick start
+----
+
+*Learning Path (from TUTORIAL.md):*
+
+1. Understanding Zotero Plugin Architecture
+2. Bootstrap.js Lifecycle Management
+3. Chrome Manifest Configuration
+4. TypeScript Basics for Plugins
+5. Working with Zotero API
+6. UI Integration with XUL
+7. Event Handling and Observers
+8. Data Storage and Persistence
+9. Testing Your Plugin
+10. Debugging Techniques
+11. Distribution and Installation
+12. Best Practices and Patterns
+
+== File Integrity Verification
+
+All scaffolders generate an `audit-index.json` file containing XXHash64 checksums for every created file.
+
+=== Audit Index Format
+
+[source,json]
+----
+{
+  "generated": "2024-11-22T12:00:00Z",
+  "version": "0.2.0",
+  "files": [
+    {
+      "path": "README.md",
+      "hash": "1234567890abcdef"
+    },
+    {
+      "path": "src/plugin.re",
+      "hash": "fedcba0987654321"
+    }
+  ]
+}
+----
+
+=== Verification Process
+
+The verification process:
+
+1. *Read* `audit-index.json`
+2. *Compute* XXHash64 for each listed file
+3. *Compare* computed hash with stored hash
+4. *Report* any mismatches or missing files
+
+=== Why XXHash64?
+
+* *Fast:* 10+ GB/s throughput
+* *Collision-resistant:* 64-bit hash space
+* *Deterministic:* Same content → same hash
+* *Non-cryptographic:* Suitable for integrity (not security)
+
+For cryptographic verification, see link:GPG_SIGNING.md[GPG Signing Guide].
+
+== Dependencies
+
+=== Runtime Dependencies
+
+[cols="2,2,3,2", options="header"]
+|===
+|Dependency |Version |Purpose |License
+
+|PowerShell
+|7.4+
+|Windows scaffolder runtime
+|MIT
+
+|Racket
+|8.12+
+|Homoiconic scaffolder runtime
+|Apache-2.0 OR MIT
+
+|Bash
+|5.0+
+|Linux/macOS scaffolder runtime
+|GPL-3.0+
+
+|Git
+|2.30+
+|Version control
+|GPL-2.0
+|===
+
+=== Test Dependencies
+
+[cols="2,2,3,2", options="header"]
+|===
+|Dependency |Version |Purpose |License
+
+|Pester
+|5.5.0
+|PowerShell testing framework
+|Apache-2.0
+
+|rackunit
+|bundled
+|Racket unit testing
+|Apache-2.0 OR MIT
+
+|rackcheck
+|latest
+|Property-based testing
+|Apache-2.0 OR MIT
+|===
+
+=== Build Dependencies
+
+[cols="2,2,3,2", options="header"]
+|===
+|Dependency |Version |Purpose |License
+
+|just
+|1.0+
+|Build automation
+|CC0-1.0
+
+|nix
+|2.0+
+|Reproducible builds
+|LGPL-2.1
+
+|podman
+|4.0+
+|Container development
+|Apache-2.0
+|===
+
+See link:PUBLISHING.md[Publishing Guide] for complete dependency documentation.
+
+== Project Structure
+
+[source]
+----
+zotero-rescript-templater/
+├── init-zotero-rscript-plugin.ps1    # PowerShell scaffolder
+├── init-raczotbuild.rkt               # Racket scaffolder
+├── init-zotero-plugin.sh              # Bash scaffolder
+├── zotero-template-dependencies.ps1   # Dependency installer
+├── tests/
+│   ├── PowerShell.Tests.ps1           # PowerShell unit tests
+│   ├── PropertyBased.Tests.ps1        # Property-based tests
+│   ├── racket-tests.rkt               # Racket unit tests
+│   └── property-based-tests.rkt       # Racket property tests
+├── scripts/
+│   ├── sign-release.sh                # GPG release signing
+│   ├── verify-release.sh              # Signature verification
+│   └── generate-sbom.sh               # SBOM generation
+├── examples/
+│   └── racket-contracts-example.rkt   # Formal verification
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                     # CI/CD pipeline
+│       ├── release.yml                # Release automation
+│       ├── codeql.yml                 # Security scanning
+│       └── publish.yml                # Package publication
+├── .well-known/
+│   ├── security.txt                   # RFC 9116 security contact
+│   ├── ai.txt                         # AI training policies
+│   └── humans.txt                     # Attribution
+├── docs/                               # Documentation
+│   ├── README.adoc                    # This file
+│   ├── CONTRIBUTING.adoc              # Contribution guide
+│   ├── CODE_OF_CONDUCT.adoc           # Code of conduct
+│   ├── SECURITY.md                    # Security policy
+│   ├── CHANGELOG.md                   # Version history
+│   ├── MAINTAINERS.md                 # Maintainer info
+│   ├── TPCF.md                        # Governance model
+│   ├── RSR_COMPLIANCE.md              # Compliance status
+│   ├── PUBLISHING.md                  # Publication guide
+│   ├── GPG_SIGNING.md                 # GPG guide
+│   ├── ARCHIVAL.md                    # Long-term preservation
+│   └── FORMAL_VERIFICATION.md         # Verification guide
+├── justfile                            # Build automation
+├── flake.nix                           # Nix builds
+├── Containerfile                       # Container definition
+├── ZoteroReScriptTemplater.psd1       # PowerShell manifest
+├── info.rkt                            # Racket package info
+├── CITATION.cff                        # Academic citation
+├── .zenodo.json                        # Zenodo metadata
+├── LICENSE.txt                         # PMPL-1.0-only
+└── CLAUDE.md                           # AI assistance context
+----
+
+== Architecture
+
+=== Design Principles
+
+==== Offline-First
+
+* *No network dependencies* in core functionality
+* *Embedded templates* - all templates in scripts
+* *Air-gapped operation* - works without internet
+* *Local verification* - integrity checks offline
+
+==== Type Safety
+
+* *Generated code is type-safe* - ReScript, TypeScript
+* *Runtime contracts* - Racket contract system
+* *Property-based testing* - invariant verification
+* *Formal specifications* - documented properties
+
+==== Memory Safety
+
+* *Garbage-collected languages* - PowerShell, Racket, Bash
+* *No manual memory management* - automatic bounds checking
+* *String safety* - no buffer overflows
+* *Resource cleanup* - try/finally patterns
+
+==== Homoiconicity (Racket)
+
+* *Code as data* - project specs are S-expressions
+* *Meta-programming* - macros for code generation
+* *Reflexivity* - self-modifying specifications
+* *Flexibility* - runtime project structure changes
+
+=== Template System
+
+==== Variable Substitution
+
+Templates use `{{variable}}` syntax for interpolation:
+
+[source]
+----
+Input:  "# {{ProjectName}}\n\nBy {{AuthorName}}"
+Vars:   {ProjectName: "MyPlugin", AuthorName: "Jane"}
+Output: "# MyPlugin\n\nBy Jane"
+----
+
+*Algorithm:* Sequential string replacement
+
+* *Idempotent:* Multiple runs produce same result
+* *Commutative:* Order of variables doesn't matter
+* *Complete:* No `{{...}}` markers remain after substitution
+
+*Verification:* Property-based tests ensure invariants hold.
+
+==== Integrity System
+
+*Generation:*
+
+1. Scaffold project files
+2. Compute XXHash64 for each file
+3. Write `audit-index.json` with all hashes
+4. Include timestamp and version
+
+*Verification:*
+
+1. Read `audit-index.json`
+2. Recompute hashes for all files
+3. Compare stored vs. actual hashes
+4. Report any mismatches
+
+*Security Model:*
+
+* *Tamper detection:* Hash mismatch reveals changes
+* *Non-cryptographic:* XXHash64 for speed, not security
+* *Complementary:* GPG signatures for release verification
+
+== Testing
+
+=== Test Coverage
+
+* *90+ total tests* across all platforms
+* *Unit tests:* Individual function verification
+* *Integration tests:* Full scaffolding workflows
+* *Property-based tests:* Invariant verification
+* *Cross-platform tests:* Windows, Linux, macOS
+
+=== Running Tests
+
+==== PowerShell Tests
+
+[source,powershell]
+----
+# All tests
+Invoke-Pester
+
+# Specific test file
+Invoke-Pester -Path tests/PowerShell.Tests.ps1
+
+# Property-based tests
+Invoke-Pester -Path tests/PropertyBased.Tests.ps1
+----
+
+==== Racket Tests
+
+[source,bash]
+----
+# All tests
+racket tests/racket-tests.rkt
+
+# Property-based tests
+racket tests/property-based-tests.rkt
+
+# With raco
+raco test tests/
+----
+
+==== Build Automation
+
+[source,bash]
+----
+# Run all tests
+just test
+
+# Run only PowerShell tests
+just test-ps
+
+# Run only Racket tests
+just test-racket
+
+# Full validation (tests + linting + RSR check)
+just validate
+----
+
+=== Continuous Integration
+
+GitHub Actions runs tests on:
+
+* *Windows:* PowerShell 7.4, Racket 8.12
+* *Linux:* PowerShell 7.4, Racket 8.12, Bash 5.0
+* *macOS:* PowerShell 7.4, Racket 8.12, Bash 5.0
+
+All tests must pass before merge.
+
+== Distribution
+
+=== Installation Methods
+
+==== PowerShell Gallery (Planned)
+
+[source,powershell]
+----
+Install-Module -Name ZoteroReScriptTemplater
+Import-Module ZoteroReScriptTemplater
+New-ZoteroPlugin -Name "MyPlugin" -Author "Your Name"
+----
+
+==== Racket Package Catalog (Planned)
+
+[source,bash]
+----
+raco pkg install zotero-rescript-templater
+racket -l zotero-rescript-templater/init-raczotbuild.rkt -n MyPlugin
+----
+
+==== GitHub Releases
+
+Download from link:https://github.com/Hyperpolymath/zotero-rescript-templater/releases[Releases page]:
+
+* `zotero-rescript-templater-v0.2.0.tar.gz` + GPG signature
+* `zotero-rescript-templater-v0.2.0.zip` + GPG signature
+* `SHA256SUMS.asc` (clearsigned checksums)
+
+==== Container Registry
+
+[source,bash]
+----
+podman pull ghcr.io/hyperpolymath/zotero-rescript-templater:latest
+podman run -it --rm -v $(pwd):/workspace \
+  ghcr.io/hyperpolymath/zotero-rescript-templater:latest \
+  pwsh -c "New-ZoteroPlugin -Name MyPlugin"
+----
+
+==== Nix Flakes
+
+[source,bash]
+----
+nix run github:Hyperpolymath/zotero-rescript-templater
+----
+
+See link:PUBLISHING.md[Publishing Guide] for complete distribution documentation.
+
+== Contributing
+
+We welcome contributions! Please see link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] for:
+
+* Code standards (PowerShell, Racket, Bash)
+* Testing requirements
+* PR process and template
+* Template authoring guide
+* TPCF governance model
+
+=== Quick Contribution Guide
+
+1. *Fork* the repository
+2. *Create* a feature branch (`git checkout -b feature/amazing-feature`)
+3. *Make* your changes
+4. *Test* thoroughly (`just test`)
+5. *Commit* with clear messages
+6. *Push* to your fork
+7. *Open* a Pull Request
+
+See link:CODE_OF_CONDUCT.adoc[Code of Conduct] for community guidelines.
+
+== Security
+
+Security vulnerabilities should be reported responsibly:
+
+* *Email:* See link:.well-known/security.txt[.well-known/security.txt]
+* *GitHub:* link:https://github.com/Hyperpolymath/zotero-rescript-templater/security/advisories/new[Security Advisories]
+
+See link:SECURITY.md[SECURITY.md] for:
+
+* Reporting procedures
+* Response SLA (24-hour acknowledgement)
+* Supported versions
+* Security best practices
+
+== License
+
+This project is licensed under the *Palimpsest-MPL License v3.0* (PMPL-1.0-only).
+
+See link:LICENSE.txt[LICENSE.txt] for the full license text.
+
+=== Key License Terms
+
+* *Network use triggers disclosure:* If you run this as a network service, you must provide source code to users
+* *Modifications must be shared:* Changes must be released under PMPL-1.0
+* *Strong copyleft:* Derivatives must use compatible licenses
+* *Patent grant:* Contributors grant patent license
+
+=== Generated Code License
+
+Templates generate code under the license you specify in scaffolding. The scaffolder itself is PMPL-1.0, but generated projects can use any license.
+
+== Citation
+
+If you use this project in academic work, please cite:
+
+[source,bibtex]
+----
+@software{zotero_rescript_templater_2024,
+  author = {Zotero ReScript Templater Contributors},
+  title = {Zotero ReScript Templater: A Scaffolding System for Zotero Plugins},
+  year = {2024},
+  publisher = {GitHub},
+  url = {https://github.com/Hyperpolymath/zotero-rescript-templater}
+}
+----
+
+See link:CITATION.cff[CITATION.cff] for additional citation formats (APA, IEEE, MLA).
+
+== Acknowledgments
+
+* *Zotero Team* - For the excellent reference manager
+* *Racket Team* - For the beautiful Lisp dialect
+* *ReScript Team* - For sound type safety on JavaScript
+* *PowerShell Team* - For cross-platform automation
+* *RSR Framework* - For repository quality standards
+
+== Support
+
+* *Documentation:* See link:docs/[docs/] directory
+* *Issues:* link:https://github.com/Hyperpolymath/zotero-rescript-templater/issues[GitHub Issues]
+* *Discussions:* link:https://github.com/Hyperpolymath/zotero-rescript-templater/discussions[GitHub Discussions]
+* *Email:* See link:MAINTAINERS.md[MAINTAINERS.md]
+
+== Roadmap
+
+See link:ROADMAP.md[ROADMAP.md] for planned features and future directions.
+
+*Current Priorities:*
+
+* [x] Property-based testing
+* [x] Formal verification examples
+* [x] Package publication (PSGallery, Racket catalog)
+* [x] GPG signature verification
+* [x] SBOM generation
+* [x] Long-term archival (Software Heritage, Zenodo)
+* [ ] Enhanced template library
+* [ ] Web-based scaffolder
+* [ ] VS Code extension
+* [ ] Plugin marketplace integration
+
+---
+
+*Made with ❤️ by the Zotero ReScript Templater community*
+
+*License:* PMPL-1.0-only | *Documentation:* AsciiDoc | *Compliance:* RSR Platinum

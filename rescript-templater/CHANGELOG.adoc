@@ -1,0 +1,62 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+== [Unreleased]
+
+=== Added
+- Complete XXHash64 implementation for PowerShell scaffolder
+- Realistic Zotero plugin templates for all three types (practitioner, researcher, student)
+- Comprehensive README.md with badges, quick start, and detailed documentation
+- CONTRIBUTING.md with development guidelines and code standards
+- Full CI/CD pipeline with GitHub Actions
+  - Cross-platform testing (Windows, Linux, macOS)
+  - PowerShell and Racket testing
+  - PSScriptAnalyzer and Racket syntax checking
+  - Security scanning with CodeQL and Trivy
+  - Automated release workflow
+- Comprehensive test suites
+  - 50+ PowerShell tests using Pester
+  - 20+ Racket tests using rackunit
+- Bash/shell version for Linux and macOS users
+- Containerfile for containerized development environment
+- CHANGELOG.md for version tracking
+- Educational TUTORIAL.md in student template
+- File integrity verification system
+- Audit index generation with checksums
+- Template variable substitution system
+- Git initialization support
+- GitHub workflows directory structure
+
+=== Changed
+- PowerShell scaffolder now includes complete template implementations
+- Templates now include actual working Zotero plugin code
+- Improved error handling and validation
+- Enhanced documentation throughout
+
+=== Fixed
+- XXHash64 implementation (was placeholder, now complete)
+- Variable substitution in all template files
+- Cross-platform path handling
+
+== [0.1.0] - 2024-11-22
+
+=== Added
+- Initial project structure
+- Basic Racket scaffolder (init-raczotbuild.rkt)
+- Basic PowerShell scaffolder (init-zotero-rscript-plugin.ps1)
+- Windows dependency installer (zotero-template-dependencies.ps1)
+- AGPL-3.0 license
+- Basic template structures (placeholder implementations)
+
+=== Notes
+- First public release
+- Basic functionality for creating Zotero plugin scaffolds
+- PowerShell XXHash64 was placeholder in this version
+
+[Unreleased]: https://github.com/Hyperpolymath/zotero-rescript-templater/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Hyperpolymath/zotero-rescript-templater/releases/tag/v0.1.0

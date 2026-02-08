@@ -1,0 +1,36 @@
+= zotero-nsai - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{zotero-nsai_2025,
+  author = {Polymath, Hyper},
+  title = {zotero-nsai},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/zotero-nsai},
+  license = {AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _zotero-nsai_ [Computer software]. Available at: https://github.com/hyperpolymath/zotero-nsai
+
+== OSCOLA
+
+Hyper Polymath, 'zotero-nsai' (2025) <https://github.com/hyperpolymath/zotero-nsai>
+
+== MLA
+
+Polymath, Hyper. "zotero-nsai." 2025, github.com/hyperpolymath/zotero-nsai.
+
+== APA 7
+
+Polymath, H. (2025). _zotero-nsai_ [Computer software]. GitHub. https://github.com/hyperpolymath/zotero-nsai
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]

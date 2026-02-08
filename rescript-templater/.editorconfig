@@ -1,0 +1,50 @@
+# EditorConfig helps maintain consistent coding styles
+# https://editorconfig.org
+
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Code files
+[*.{ps1,psm1,psd1}]
+indent_style = space
+indent_size = 2
+
+[*.{rkt,scm,ss}]
+indent_style = space
+indent_size = 2
+
+[*.sh]
+indent_style = space
+indent_size = 2
+
+[*.{js,ts,re,res}]
+indent_style = space
+indent_size = 2
+
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+indent_style = space
+indent_size = 2
+
+# Makefiles
+[Makefile]
+indent_style = tab
+
+# Batch files
+[*.{cmd,bat}]
+end_of_line = crlf
+
+# Windows-specific PowerShell
+[*.ps1]
+end_of_line = crlf  # PowerShell on Windows prefers CRLF

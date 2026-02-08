@@ -1,0 +1,33 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  CACHE_DIR: ".cache"
+
+cache:
+  paths:
+    - ${CACHE_DIR}
+
+build:
+  stage: build
+  script:
+    - echo "Building project..."
+    - mkdir -p ${CACHE_DIR}
+  artifacts:
+    paths:
+      - ${CACHE_DIR}
+
+test:
+  stage: test
+  script:
+    - echo "Running tests..."
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying..."
+  only:
+    - main
+    - master

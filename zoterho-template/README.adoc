@@ -1,0 +1,215 @@
+= Make It Rhodium - ZoteRho (Rhodium-template) 
+
+== License & Philosophy
+
+This project must declare **MPL-2.0-or-later** for platform/tooling compatibility.
+
+Philosophy: **Palimpsest**. The Palimpsest-MPL (PMPL) text is provided in `license/PMPL-1.0.txt`, and the canonical source is the palimpsest-license repository.
+
+image:[Palimpsest-MPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"] 
+Jonathan D. A. Jewell
+v2.0, 2025-11-12
+:hp-repo-name: make-it-rhodium-standard
+:hp-gitlab-user: hyperpolymath
+:hp-zotero-version: 7+
+:toc: left
+:toclevels: 2
+
+A sample Zotero 7+ plugin demonstrating the Rhodium Standard for FOSS development: utilizing Rescript for type-safe logic, Nickel for declarative configuration, and Just for automation.
+
+This project is fully compliant with WCAG 2.3 AAA, prioritising accessibility and dependability in its structure.
+
+== 1-Click Reproducible Build
+
+This project provides a single command to bootstrap, build, and package the Zotero plugin:
+
+[source,bash]
+----
+just reproducible
+----
+
+This command:
+
+1. **Bootstrap**: Verifies required tools (Deno, just, zip) and caches dependencies
+2. **Validate**: Runs policy compliance checks (no TypeScript, Deno-only, security)
+3. **Build**: Compiles ReScript source to JavaScript
+4. **Package**: Creates `build/zoterho-template-2.0.xpi` with SHA256 hash
+
+=== Prerequisites
+
+* https://deno.land/[Deno] - JavaScript/TypeScript runtime
+* https://just.systems/[just] - Command runner
+* `zip` - Standard compression tool
+* https://nickel-lang.org/[Nickel] (optional) - For configuration generation
+
+=== Install to Zotero
+
+After building:
+
+[source,bash]
+----
+# Automatic install (detects Zotero profile)
+just install-zotero
+
+# Or manual install
+just install-zotero-manual
+----
+
+Manual install: In Zotero, go to Tools -> Add-ons -> Install Add-on From File... and select `build/zoterho-template-2.0.xpi`.
+
+=== Other Commands
+
+[source,bash]
+----
+# View all available recipes
+just
+
+# Build only (skip bootstrap)
+just package
+
+# Watch mode for development
+just watch
+
+# Run policy validation
+just validate
+
+# Full CI pipeline
+just ci
+----
+
+== ⚙️ Architecture and Technology Stack
+
+|===
+|Component |Technology |Reasoning
+
+|Core Logic |https://rescript-lang.org/[Rescript] |Highest preference: Type safety, clean JavaScript output, superior dependability over raw TypeScript/JavaScript.
+|Configuration |https://nickel-lang.org/[Nickel] |Preferred for declarative, type-checked configuration, replacing fragile JSON/TOML.
+|Automation |https://www.google.com/search?q=https://github.casey.sh/just/[Just] + https://www.oilshell.org/[Oil Shell] |High-level automation using just recipes, with the core build script written in the preferred Oil shell for robust execution.
+|Data Layer |GraphQL (Placeholder) |Future-proofing for complex data queries, ensuring semantic, non-RESTful data access.
+|Compliance |WCAG 2.3 AAA |Ensured for Zotero's preference pane (XHTML/HTML) and any new UI elements.
+|===
+
+== Project Structure
+
+[source,text]
+----
+.
+├── justfile                # Primary build automation (just command runner)
+├── mustfile                # Policy enforcement script
+├── deno.json               # Deno package manager configuration
+├── rescript.json           # ReScript compiler configuration
+├── README.adoc             # This document
+│
+├── bootstrap.res           # ReScript: Plugin entry point (-> bootstrap.js)
+├── ZoteRhoTemplate.res     # ReScript: Core logic (-> MakeItRed.js)
+├── RhodiumColorizer.res    # ReScript: Color utilities
+│
+├── config/                 # Nickel configuration sources
+│   ├── manifest.ncl        # Generates manifest.json
+│   ├── updates.ncl         # Generates updates.json
+│   └── policy.ncl          # Hyperpolymath policy definition
+│
+├── src-2.0/                # Zotero 7+ plugin contents (packaged into XPI)
+│   ├── manifest.json       # Generated from config/manifest.ncl
+│   ├── style.css           # Plugin styling
+│   └── locale/en-US/       # Fluent localization
+│
+└── build/                  # Build output (gitignored)
+    └── zoterho-template-2.0.xpi
+----
+
+== Versioned Source Directories
+
+This template includes multiple `src-*` directories representing different Zotero plugin API generations. Use the version that matches your target Zotero release.
+
+|===
+|Directory |Zotero Version |API Style |When to Use
+
+|`src-1.0/`
+|5.x - 6.x
+|Legacy XUL overlay
+|**Archived.** For maintaining old plugins on Zotero 5/6. Uses `install.rdf`, `chrome.manifest`, XUL overlays, `.properties` localization.
+
+|`src-1.1/`
+|6.x (transitional)
+|Hybrid legacy + manifest
+|**Archived.** Bridging format with both `install.rdf` and `manifest.json`. Useful for plugins supporting both Zotero 6 and early Zotero 7.
+
+|`src-1.2/`
+|6.x - 7.0
+|Transitional bootstrapped
+|**Archived.** Late Zotero 6 / early Zotero 7 hybrid. Has `manifest.json` but retains `install.rdf` for backward compatibility.
+
+|`src-2.0/`
+|7.0+
+|Pure bootstrapped
+|**Current.** For Zotero 7+ only. Uses `manifest.json`, Fluent localization (`.ftl`), no XUL overlays. This is the active development target.
+|===
+
+=== Choosing the Right Version
+
+* **New plugins**: Always use `src-2.0/` (Zotero 7+ bootstrapped)
+* **Migrating from Zotero 6**: Start with `src-1.2/` as reference, migrate to `src-2.0/`
+* **Supporting multiple versions**: Maintain separate XPI builds from different `src-*` directories
+
+=== Key Differences
+
+[cols="1,1,1"]
+|===
+|Feature |Legacy (1.0/1.1) |Bootstrapped (2.0)
+
+|Manifest
+|`install.rdf` (RDF/XML)
+|`manifest.json` (JSON)
+
+|UI Integration
+|XUL overlays (`chrome/content/*.xul`)
+|JavaScript DOM manipulation
+
+|Localization
+|`.properties` files
+|Fluent `.ftl` files
+
+|Chrome Registration
+|`chrome.manifest`
+|Not needed (manifest.json handles it)
+
+|Plugin Entry
+|XUL overlay loading
+|`bootstrap.js` lifecycle hooks
+|===
+
+== Policy Enforcement
+
+This project enforces the Hyperpolymath Rhodium Standard:
+
+* **No TypeScript** - Use ReScript instead
+* **No npm/yarn/pnpm/bun** - Use Deno only
+* **No Makefiles** - Use justfile
+* **HTTPS only** - No mixed content with insecure  URLs
+* **No hardcoded secrets**
+
+Policy is enforced by:
+
+1. `./mustfile validate` - Local validation
+2. `.github/workflows/ts-blocker.yml` - CI enforcement
+
+== ♿ WCAG 2.3 AAA Compliance (UI/Web)
+
+Any future additions to the Zotero plugin's UI, especially the preference pane (preferences.xhtml is currently referenced), must adhere to WCAG 2.3 AAA guidelines.
+
+Colour: The "Red" and "Green" colours in style.css must ensure sufficient contrast with the background (e.g., using contrast-ratio checks against the Zotero theme).
+
+ARIA/Semantics: All custom UI elements, such as the registered preference pane, must use correct ARIA roles and semantic HTML/XHTML tags.
+
+Focus Management: Ensure keyboard navigation and focus indicators are clear and visible.
+
+== 🌐 IndieWeb Compliance
+
+For this local plugin, IndieWeb principles are best applied to the public repository structure:
+
+h-card: The GitLab repository metadata and the LICENSE file contain the author's name (Jonathan D.A. Jewell), serving as a rudimentary h-card.
+
+Decentralisation: The core software is FOSS, promoting decentralisation of the toolchain.
+
+For a complete reference of all build commands, run `just` to see available recipes.

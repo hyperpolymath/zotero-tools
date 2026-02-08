@@ -1,0 +1,108 @@
+{
+  "name": "hyperpolymath/zotpress",
+  "description": "Zotero integration for WordPress - Display citations and bibliographies",
+  "type": "wordpress-plugin",
+  "license": "PMPL-1.0",
+  "homepage": "https://github.com/hyperpolymath/zotpress",
+  "authors": [
+    {
+      "name": "Hyper Polymath",
+      "email": "hyperpolymath@proton.me"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/hyperpolymath/zotpress/issues",
+    "source": "https://github.com/hyperpolymath/zotpress"
+  },
+  "require": {
+    "php": ">=8.1",
+    "hyperpolymath/php-aegis": "^0.1"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/hyperpolymath/php-aegis"
+    }
+  ],
+  "require-dev": {
+    "phpunit/phpunit": "^10.5",
+    "phpstan/phpstan": "^1.12",
+    "phpstan/extension-installer": "^1.4",
+    "szepeviktor/phpstan-wordpress": "^1.3",
+    "squizlabs/php_codesniffer": "^3.11",
+    "wp-coding-standards/wpcs": "^3.1",
+    "phpcompatibility/phpcompatibility-wp": "^2.1",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "yoast/phpunit-polyfills": "^3.0",
+    "php-parallel-lint/php-parallel-lint": "^1.4",
+    "php-parallel-lint/php-console-highlighter": "^1.0",
+    "roave/security-advisories": "dev-latest",
+    "vimeo/psalm": "^5.26",
+    "rector/rector": "^1.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Zotpress\\": "src/"
+    },
+    "classmap": [
+      "lib/"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Zotpress\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "lint": "parallel-lint lib/ src/",
+    "phpcs": "phpcs --standard=WordPress lib/ src/",
+    "phpcbf": "phpcbf --standard=WordPress lib/ src/",
+    "phpstan": "phpstan analyse --memory-limit=512M",
+    "psalm": "psalm --no-cache",
+    "test": "phpunit",
+    "test:coverage": "phpunit --coverage-html coverage/",
+    "rector": "rector process --dry-run",
+    "rector:fix": "rector process",
+    "ci": [
+      "@lint",
+      "@phpstan",
+      "@phpcs",
+      "@test"
+    ],
+    "fix": [
+      "@phpcbf",
+      "@rector:fix"
+    ]
+  },
+  "scripts-descriptions": {
+    "lint": "Check PHP syntax errors",
+    "phpcs": "Check WordPress coding standards",
+    "phpcbf": "Auto-fix coding standards violations",
+    "phpstan": "Run static analysis",
+    "psalm": "Run Psalm static analysis",
+    "test": "Run PHPUnit tests",
+    "test:coverage": "Run tests with HTML coverage report",
+    "rector": "Preview automated refactoring",
+    "rector:fix": "Apply automated refactoring",
+    "ci": "Run all CI checks",
+    "fix": "Auto-fix all fixable issues"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": true
+    },
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "platform": {
+      "php": "8.1.0"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "1.0.x-dev"
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

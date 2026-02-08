@@ -1,0 +1,526 @@
+= Zotero Safe Storage Roadmap
+:toc: macro
+:toc-title: Contents
+:toclevels: 3
+:icons: font
+
+[.lead]
+Development roadmap for bulletproof Zotero data storage.
+
+toc::[]
+
+== Vision
+
+Create the most reliable Zotero storage solution possible—one where data loss is not merely unlikely, but *architecturally impossible*.
+
+== Milestones
+
+=== Phase 0: Foundation [Current]
+
+*Goal:* Project structure and core documentation.
+
+[cols="1,3,1"]
+|===
+|Task |Description |Status
+
+|Repository setup
+|GitHub repo, README, ROADMAP, LICENSE
+|✓ Done
+
+|Architecture design
+|Document all components and their interactions
+|In Progress
+
+|Technology evaluation
+|Benchmark LiteFS, Litestream, SurrealDB options
+|Pending
+
+|Community input
+|Gather feedback from Zotero users on pain points
+|Pending
+|===
+
+=== Phase 1: Container Foundation
+
+*Goal:* Zotero running in a secure, reproducible container.
+
+[cols="1,3,1"]
+|===
+|Task |Description |Status
+
+|Wolfi base image
+|Minimal Chainguard Wolfi image with Zotero dependencies
+|Pending
+
+|nerdctl integration
+|Rootless container setup with proper volume mounts
+|Pending
+
+|X11/Wayland forwarding
+|GUI passthrough for Zotero interface
+|Pending
+
+|Guix manifest
+|Reproducible package definitions
+|Pending
+
+|Nix flake
+|Alternative reproducible builds
+|Pending
+
+|CI/CD pipeline
+|Automated builds and security scanning
+|Pending
+|===
+
+==== Container Specification
+
+[source,dockerfile]
+----
+# Planned Wolfi-based Containerfile
+FROM cgr.dev/chainguard/wolfi-base:latest
+
+# Zotero dependencies (to be finalized)
+RUN apk add --no-cache \
+    firefox-esr \
+    sqlite \
+    dbus \
+    libx11 \
+    ...
+
+# Zotero installation
+COPY --from=zotero-build /opt/zotero /opt/zotero
+
+# Entry point with integrity checks
+ENTRYPOINT ["/usr/local/bin/zotero-safe-start.sh"]
+----
+
+=== Phase 2: Local Backup Layer
+
+*Goal:* Comprehensive local backup with instant recovery.
+
+[cols="1,3,1"]
+|===
+|Task |Description |Status
+
+|Btrfs snapshot integration
+|Automatic CoW snapshots before operations
+|Pending
+
+|Snapshot rotation
+|Hourly/daily/weekly retention policies
+|Pending
+
+|Integrity verification
+|Pre and post-operation SQLite checks
+|Pending
+
+|Quick restore CLI
+|One-command restore from any snapshot
+|Pending
+
+|Snapshot browser
+|TUI for browsing and comparing snapshots
+|Pending
+|===
+
+==== Snapshot Strategy
+
+[source]
+----
+Retention Policy:
+├── Hourly:  168 snapshots (7 days)
+├── Daily:   30 snapshots (1 month)
+├── Weekly:  52 snapshots (1 year)
+└── Monthly: 24 snapshots (2 years)
+
+Storage estimate: ~500MB base + ~50MB/snapshot delta
+Total: ~5GB for full 2-year history
+----
+
+=== Phase 3: Cloud Backup Layer
+
+*Goal:* Real-time streaming backup to cloud storage.
+
+[cols="1,3,1"]
+|===
+|Task |Description |Status
+
+|Litestream integration
+|Continuous SQLite replication
+|Pending
+
+|Multi-destination backup
+|Primary + secondary cloud targets
+|Pending
+
+|Encryption at rest
+|Age/GPG encryption before upload
+|Pending
+
+|Bandwidth management
+|Configurable upload limits
+|Pending
+
+|Backup verification
+|Periodic restore tests
+|Pending
+
+|Cost optimization
+|Intelligent tiering (hot/cold storage)
+|Pending
+|===
+
+==== Supported Cloud Providers
+
+[cols="1,1,2"]
+|===
+|Provider |Cost |Notes
+
+|Backblaze B2
+|$0.005/GB/mo
+|Recommended for most users
+
+|AWS S3
+|$0.023/GB/mo
+|Enterprise option
+
+|Wasabi
+|$0.0059/GB/mo
+|No egress fees
+
+|MinIO (self-hosted)
+|Free
+|For privacy-conscious users
+
+|Cloudflare R2
+|$0.015/GB/mo
+|No egress fees
+|===
+
+=== Phase 4: Multi-Device Sync
+
+*Goal:* Safe synchronization across devices without corruption risk.
+
+[cols="1,3,1"]
+|===
+|Task |Description |Status
+
+|LiteFS primary/replica
+|Distributed SQLite with automatic failover
+|Pending
+
+|Conflict resolution
+|Deterministic merge for concurrent edits
+|Pending
+
+|Offline support
+|Queue changes when disconnected
+|Pending
+
+|Device discovery
+|mDNS/Tailscale for finding peers
+|Pending
+
+|Mobile support
+|Read-only sync to iOS/Android
+|Pending
+|===
+
+==== Sync Architecture Options
+
+*Option A: LiteFS (Primary Choice)*
+[source]
+----
+Pros:
++ Native SQLite support
++ Automatic failover
++ Battle-tested at Fly.io
+
+Cons:
+- Requires primary election
+- Write forwarding adds latency
+----
+
+*Option B: SurrealDB Mirror*
+[source]
+----
+Pros:
++ CRDT-based (no conflicts)
++ Multi-model (documents, graphs)
++ Built-in auth
+
+Cons:
+- Requires schema mapping
+- Additional complexity
+- Newer, less battle-tested
+----
+
+*Option C: Hybrid*
+[source]
+----
+- LiteFS for SQLite replication (reliable)
+- SurrealDB for sync metadata (conflict-free)
+- Best of both worlds
+----
+
+=== Phase 5: Advanced Features
+
+*Goal:* Quality-of-life improvements for power users.
+
+[cols="1,3,1"]
+|===
+|Task |Description |Status
+
+|Web dashboard
+|Browser-based backup status and management
+|Pending
+
+|Alerting
+|Email/webhook notifications on issues
+|Pending
+
+|Metrics export
+|Prometheus/Grafana integration
+|Pending
+
+|Attachment deduplication
+|Content-addressable PDF storage
+|Pending
+
+|Full-text search backup
+|Backup Zotero's search index
+|Pending
+
+|Batch operations
+|Bulk restore, export, migration
+|Pending
+|===
+
+=== Phase 6: Ecosystem Integration
+
+*Goal:* Seamless integration with academic workflows.
+
+[cols="1,3,1"]
+|===
+|Task |Description |Status
+
+|Better BibTeX sync
+|Backup citation keys and preferences
+|Pending
+
+|Obsidian integration
+|Sync Zotero notes to Obsidian vault
+|Pending
+
+|Logseq integration
+|Academic knowledge graph backup
+|Pending
+
+|Overleaf bridge
+|Push bibliography to Overleaf projects
+|Pending
+
+|Git integration
+|Version control for exported BibTeX
+|Pending
+|===
+
+== Technical Decisions
+
+=== Decision 1: Container Runtime
+
+*Chosen:* nerdctl + containerd
+
+*Rationale:*
+- Rootless by default (security)
+- No daemon required (unlike Docker)
+- OCI-compliant (portable)
+- Compose support (familiar UX)
+
+*Alternatives Considered:*
+- Podman: Also good, but nerdctl has better containerd integration
+- Docker: Requires daemon, root by default
+- Toolbox: Too Fedora-specific
+
+=== Decision 2: Base Image
+
+*Chosen:* Wolfi (Chainguard)
+
+*Rationale:*
+- Minimal attack surface
+- Daily CVE patches
+- Designed for containers
+- No legacy cruft
+
+*Alternatives Considered:*
+- Alpine: musl libc compatibility issues with Zotero
+- Distroless: Too minimal, missing runtime needs
+- Debian: Too large, slow updates
+
+=== Decision 3: SQLite Replication
+
+*Chosen:* Litestream (backup) + LiteFS (sync)
+
+*Rationale:*
+- Purpose-built for SQLite
+- Proven at scale (Fly.io production)
+- Minimal overhead
+- Point-in-time recovery
+
+*Alternatives Considered:*
+- rqlite: Raft consensus adds latency
+- Dqlite: Canonical-specific
+- Custom WAL shipping: Reinventing the wheel
+
+=== Decision 4: Configuration Language
+
+*Chosen:* TOML (config) + Guile Scheme (state)
+
+*Rationale:*
+- TOML: Human-readable, widely supported
+- Scheme: Expressive for complex state (per hyperpolymath standard)
+
+=== Decision 5: Backup Encryption
+
+*Chosen:* Age (primary) + GPG (optional)
+
+*Rationale:*
+- Age: Modern, simple, no configuration
+- GPG: For users with existing key infrastructure
+
+== Risk Register
+
+[cols="1,2,1,2"]
+|===
+|Risk |Impact |Likelihood |Mitigation
+
+|Zotero API changes
+|Container breaks on update
+|Medium
+|Pin versions, automated testing
+
+|LiteFS project abandoned
+|Sync stops working
+|Low
+|Litestream backup remains, manual sync fallback
+
+|Cloud provider outage
+|Backup unavailable
+|Medium
+|Multi-provider replication
+
+|Btrfs corruption
+|Local snapshots lost
+|Low
+|Cloud backup as primary, Btrfs as convenience
+
+|User misconfiguration
+|False sense of security
+|High
+|Sensible defaults, verification on startup
+
+|SQLite version mismatch
+|Database incompatibility
+|Medium
+|Bundle SQLite in container
+|===
+
+== Success Metrics
+
+=== Must Have (MVP)
+
+* [ ] Zero data loss in simulated failure scenarios
+* [ ] Sub-5-minute recovery from any backup
+* [ ] Works on Fedora Atomic/Silverblue
+* [ ] Documented installation under 10 minutes
+
+=== Should Have (v1.0)
+
+* [ ] Multi-device sync working reliably
+* [ ] Web dashboard for backup status
+* [ ] Mobile read-only access
+
+=== Nice to Have (Future)
+
+* [ ] Integration with 5+ academic tools
+* [ ] Community backup verification network
+* [ ] Formal verification of backup correctness
+
+== Contributing Priorities
+
+Looking for contributors in these areas:
+
+1. **Container expertise** — Optimizing Wolfi image, nerdctl quirks
+2. **Zotero internals** — Understanding schema changes, plugin compatibility
+3. **Distributed systems** — LiteFS edge cases, conflict resolution
+4. **Security review** — Encryption implementation, threat modeling
+5. **Documentation** — User guides, troubleshooting, translations
+6. **Testing** — Chaos engineering, failure simulation
+
+== Timeline (Tentative)
+
+[NOTE]
+====
+These are goals, not commitments. Quality over speed.
+====
+
+[cols="1,1,2"]
+|===
+|Phase |Target |Deliverable
+
+|Phase 0
+|Q1 2026
+|Architecture finalized, community feedback incorporated
+
+|Phase 1
+|Q2 2026
+|Working container, basic installation
+
+|Phase 2
+|Q2 2026
+|Local backup fully functional
+
+|Phase 3
+|Q3 2026
+|Cloud backup operational
+
+|Phase 4
+|Q4 2026
+|Multi-device sync beta
+
+|Phase 5
+|2027
+|Dashboard and advanced features
+
+|Phase 6
+|Ongoing
+|Ecosystem integrations
+|===
+
+== Questions to Resolve
+
+1. **LiteFS vs SurrealDB for sync** — Need real-world testing with Zotero's access patterns
+2. **Mobile strategy** — Native app wrapper vs web interface vs sync-only
+3. **Zotero 8 compatibility** — Unknown what changes are coming
+4. **Funding model** — Donations, grants, or commercial support tier?
+5. **Community governance** — Single maintainer vs collective?
+
+== Resources
+
+* https://litestream.io/[Litestream Documentation]
+* https://fly.io/docs/litefs/[LiteFS Documentation]
+* https://www.zotero.org/support/dev/[Zotero Developer Documentation]
+* https://sqlite.org/howtocorrupt.html[SQLite: How To Corrupt A Database]
+* https://surrealdb.com/docs[SurrealDB Documentation]
+* https://edu.chainguard.dev/chainguard/chainguard-images/[Chainguard Wolfi Images]
+
+---
+
+[quote]
+____
+"Plans are worthless, but planning is everything."
+— Dwight D. Eisenhower
+____
+
+This roadmap will evolve. Check the GitHub issues for current priorities.

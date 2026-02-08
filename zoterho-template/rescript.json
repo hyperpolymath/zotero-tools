@@ -1,0 +1,22 @@
+{
+  "name": "zoterho-template",
+  "sources": [
+    {
+      "dir": ".",
+      "subdirs": false
+    },
+    {
+      "dir": "src-2.0",
+      "subdirs": true
+    }
+  ],
+  "package-specs": [
+    {
+      "module": "es6",
+      "in-source": true
+    }
+  ],
+  "suffix": ".res.js",
+  "bs-dependencies": ["@rescript/core"],
+  "bsc-flags": ["-open", "RescriptCore"]
+}

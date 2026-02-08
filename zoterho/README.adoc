@@ -1,0 +1,202 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Zoterho
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+:toc: macro
+:toc-title: Contents
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+*Zotero ecosystem — Rhodium-compliant tools for bibliography management*
+
+[NOTE]
+====
+**Project Status**: Specification & Architecture Phase
+
+This repository defines the Zoterho ecosystem architecture and aggregates component repositories as submodules. Individual component implementations are developed in their respective repositories.
+====
+
+toc::[]
+
+== Overview
+
+Zoterho is a curated ecosystem of tools extending https://www.zotero.org/[Zotero], the open-source reference manager. All components adhere to *Rhodium* compliance standards and the Hyperpolymath language policy (ReScript, Rust, Deno — no TypeScript/Node.js).
+
+=== Design Principles
+
+* **Rhodium Compliance** — Follows the Rhodium specification for reproducibility and portability
+* **FOSS-First** — MIT/Palimpsest licensing; no proprietary dependencies
+* **Modern Stack** — ReScript for type-safe UI logic, Rust for performance-critical paths
+* **Multi-Forge** — Automatic synchronization to GitHub, GitLab, and Bitbucket
+
+== Components
+
+[cols="1,2,1", options="header"]
+|===
+| Component | Description | Status
+
+| link:zoterho-template[zoterho-template]
+| Rhodium-compliant Zotero configuration template. Provides standardized settings, translators, and styles.
+| 📋 Planned
+
+| link:zotpress[zotpress]
+| WordPress plugin for embedding Zotero bibliographies. Fork with Rhodium compliance and modern PHP.
+| 📋 Planned
+
+| link:zotero-voyant-export[zotero-voyant-export]
+| Export adapter for https://voyant-tools.org/[Voyant Tools] text analysis. Transforms Zotero collections into Voyant-compatible corpora.
+| 📋 Planned
+
+| link:zotero-rescript-templater[zotero-rescript-templater]
+| ReScript-based template generator for Zotero plugins. Scaffolds new Zotero 7+ plugins following best practices.
+| 📋 Planned
+
+| link:zotero-nsai[zotero-nsai]
+| NSAI (Non-Synthetic Authorship Indicator) content detection. Flags AI-generated content in bibliographic entries.
+| 📋 Planned
+
+|===
+
+== Quick Start
+
+Clone with submodules:
+
+[source,bash]
+----
+git clone --recursive https://github.com/hyperpolymath/zoterho.git
+cd zoterho
+----
+
+Initialize submodules if cloned without `--recursive`:
+
+[source,bash]
+----
+git submodule update --init --recursive
+----
+
+=== Development Setup
+
+This project uses https://github.com/casey/just[just] as its task runner (Makefile is banned per Hyperpolymath policy).
+
+[source,bash]
+----
+# Install just (if not already installed)
+cargo install just
+
+# Setup development environment
+just setup
+
+# View all available commands
+just --list
+
+# Run policy compliance check
+just check-policy
+----
+
+== Roadmap
+
+=== Phase 1: Foundation
+* [ ] Define Rhodium compliance specification for Zotero tools
+* [ ] Establish shared build infrastructure (Deno + Rust toolchain)
+* [ ] Create `zoterho-template` with baseline Zotero configuration
+* [ ] Set up cross-component testing framework
+
+=== Phase 2: Core Integrations
+* [ ] Implement `zotpress` WordPress plugin (PHP 8.2+, modern standards)
+* [ ] Build `zotero-voyant-export` for text analysis workflows
+* [ ] Develop `zotero-rescript-templater` plugin scaffolding
+
+=== Phase 3: Advanced Features
+* [ ] Ship `zotero-nsai` content authenticity detection
+* [ ] Add MCP (Model Context Protocol) integration for AI-assisted bibliography
+* [ ] Create unified CLI for ecosystem management
+
+=== Phase 4: Ecosystem Maturity
+* [ ] Publish to Zotero plugin registry
+* [ ] WordPress.org plugin submission for zotpress
+* [ ] Comprehensive documentation site
+* [ ] Community contribution guidelines
+
+== Repository Structure
+
+[source]
+----
+zoterho/
+├── .claude/              # AI assistant configuration
+│   └── CLAUDE.md         # Language policy & instructions
+├── .github/
+│   ├── workflows/
+│   │   ├── instant-sync.yml    # Forge propagation trigger
+│   │   ├── mirror.yml          # GitLab/Bitbucket mirroring
+│   │   ├── codeql-analysis.yml # Security scanning
+│   │   ├── semgrep.yml         # Static analysis
+│   │   └── policy-check.yml    # Language policy enforcement
+│   ├── dependabot.yml    # Dependency updates
+│   └── FUNDING.yml       # Sponsorship
+├── scripts/
+│   ├── check-policy.sh   # Policy enforcement script
+│   └── pre-commit        # Git pre-commit hook
+├── zoterho-template/     # [submodule] Zotero config template
+├── zotpress/             # [submodule] WordPress integration
+├── zotero-voyant-export/ # [submodule] Voyant Tools export
+├── zotero-rescript-templater/ # [submodule] Plugin scaffolding
+├── zotero-nsai/          # [submodule] AI content detection
+├── .gitmodules           # Submodule definitions
+├── deno.json             # Deno configuration
+├── justfile              # Task runner (replaces Makefile)
+├── Mustfile.ncl          # Nickel contract for policy enforcement
+├── MIT_LICENSE.txt       # License
+└── README.adoc           # This file
+----
+
+== Technology Stack
+
+Per the https://github.com/hyperpolymath[Hyperpolymath] language policy:
+
+[cols="1,2", options="header"]
+|===
+| Layer | Technology
+
+| Plugin Logic
+| ReScript (compiles to JavaScript for Zotero 7+)
+
+| Performance-Critical
+| Rust (WASM for browser, native for CLI)
+
+| Runtime
+| Deno (replaces Node.js)
+
+| WordPress Plugin
+| PHP 8.2+ (exception for WordPress ecosystem)
+
+| Configuration
+| Nickel / Guile Scheme
+
+| Package Management
+| Guix (primary), Nix (fallback), Deno (JS deps)
+
+|===
+
+== Contributing
+
+Contributions welcome once component repositories are initialized. See individual component READMEs for specific guidelines.
+
+=== Development Prerequisites
+
+* Deno 2.0+
+* Rust (latest stable)
+* Zotero 7+ (for plugin testing)
+
+== License
+
+Dual-licensed under:
+
+* **MIT** — link:MIT_LICENSE.txt[MIT_LICENSE.txt]
+* **Palimpsest-0.8** — Copyfarleft license for commons-based reciprocity
+
+== Links
+
+* https://www.zotero.org/[Zotero] — Open-source reference manager
+* https://github.com/hyperpolymath[Hyperpolymath] — Parent organization
+* https://voyant-tools.org/[Voyant Tools] — Text analysis platform

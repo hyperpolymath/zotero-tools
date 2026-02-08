@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Zotero Development Forum
+    url: https://forums.zotero.org/categories/dev
+    about: Ask questions and discuss Zotero plugin development
+  - name: GitHub Discussions
+    url: https://github.com/Hyperpolymath/zotero-rescript-templater/discussions
+    about: Community discussions and general questions
+  - name: Zotero Documentation
+    url: https://www.zotero.org/support/dev/client_coding
+    about: Official Zotero plugin development documentation

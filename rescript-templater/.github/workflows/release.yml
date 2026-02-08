@@ -1,0 +1,183 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.0.0)'
+        required: true
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Extract changelog for this version from CHANGELOG.md if it exists
+          if [ -f CHANGELOG.md ]; then
+            # Get content between version headers
+            NOTES=$(awk "/## \[${{ steps.version.outputs.version }}\]/,/## \[/" CHANGELOG.md | grep -v "^## \[" | sed '/^$/d')
+          else
+            # Generate from git commits
+            NOTES=$(git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --pretty=format:"- %s (%an)" --no-merges)
+          fi
+
+          # Save to file for multi-line handling
+          echo "$NOTES" > release_notes.txt
+
+          echo "Generated release notes:"
+          cat release_notes.txt
+
+      - name: Create package archives
+        run: |
+          mkdir -p dist
+
+          # Create PowerShell package
+          zip -r dist/zotero-rescript-templater-powershell-${{ steps.version.outputs.version }}.zip \
+            init-zotero-rscript-plugin.ps1 \
+            zotero-template-dependencies.ps1 \
+            README.md \
+            LICENSE \
+            CLAUDE.md \
+            CONTRIBUTING.md
+
+          # Create Racket package
+          zip -r dist/zotero-rescript-templater-racket-${{ steps.version.outputs.version }}.zip \
+            init-raczotbuild.rkt \
+            README.md \
+            LICENSE \
+            CLAUDE.md \
+            CONTRIBUTING.md
+
+          # Create full package
+          zip -r dist/zotero-rescript-templater-full-${{ steps.version.outputs.version }}.zip \
+            . \
+            -x "*.git*" \
+            -x "dist/*" \
+            -x "Test*/*"
+
+          # Generate checksums
+          cd dist
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
+          body_path: release_notes.txt
+          draft: false
+          prerelease: false
+          files: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test-release-artifacts:
+    name: Test Release Artifacts
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Download PowerShell artifact
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          curl -L -o package.zip \
+            "https://github.com/${{ github.repository }}/releases/download/$VERSION/zotero-rescript-templater-powershell-$VERSION.zip"
+          unzip package.zip
+
+      - name: Test PowerShell package
+        shell: pwsh
+        run: |
+          ./init-zotero-rscript-plugin.ps1 `
+            -ProjectName "ReleaseTest" `
+            -AuthorName "Release CI" `
+            -TemplateType student
+
+          if (-not (Test-Path "ReleaseTest/README.md")) {
+            throw "Release artifact test failed"
+          }
+          Write-Host "✓ Release artifact works correctly"
+
+  publish-to-registry:
+    name: Publish to Package Registries
+    needs: create-release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Racket
+        uses: Bogdanp/setup-racket@v1.10
+        with:
+          version: '8.12'
+
+      - name: Publish to Racket Package Catalog
+        run: |
+          # This would publish to https://pkgs.racket-lang.org/
+          # Requires setup and authentication
+          echo "Racket package publication would happen here"
+          # raco pkg install --link $(pwd)
+
+      - name: Publish to PowerShell Gallery
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          if (-not $env:PSGALLERY_API_KEY) {
+            Write-Warning "PSGALLERY_API_KEY not configured - skipping PowerShell Gallery publish"
+            Write-Host "To enable: add PSGALLERY_API_KEY secret to repository settings"
+            exit 0
+          }
+          Publish-Module -Path . -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
+          Write-Host "✅ Published to PowerShell Gallery"
+
+  notify:
+    name: Notify Release
+    needs: [create-release, test-release-artifacts]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Notify success
+        if: needs.test-release-artifacts.result == 'success'
+        run: |
+          echo "✅ Release ${{ needs.create-release.outputs.version }} completed successfully"
+
+      - name: Notify failure
+        if: needs.test-release-artifacts.result == 'failure'
+        run: |
+          echo "❌ Release ${{ needs.create-release.outputs.version }} failed"
+          exit 1

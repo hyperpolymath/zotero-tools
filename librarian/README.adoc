@@ -1,0 +1,176 @@
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-FileCopyrightText: 2025 hyperpolymath
+= Zotero Librarian
+:toc:
+:toc-placement: preamble
+
+Intelligent metadata extraction and file normalization for Zotero libraries.
+
+== Overview
+
+Zotero Librarian solves the problem of generic, cryptic filenames in your Zotero library. When you save images from social media, screenshots, or downloads, they often have names like `1765178235983.jpg` or `492346715_18501852034062834_n.jpg` that tell you nothing about their content.
+
+This tool:
+
+1. **Extracts metadata** from filenames (platform, username, date, post ID)
+2. **Reads EXIF data** (camera info, GPS, timestamps)
+3. **Generates meaningful names** based on parent item metadata
+4. **Preserves original info** in Zotero's `extra` field
+5. **Tracks all changes** with BLAKE3 hashes for recovery
+6. **Detects duplicates** across your library
+
+== Supported Patterns
+
+[cols="1,2,2"]
+|===
+|Platform |Pattern Example |Extracted Data
+
+|Instagram
+|`anonimostory.com_Instagram_bet1nka_3784448056885056811.jpeg`
+|Platform, username, post ID
+
+|Facebook
+|`504027097_18508398091062834_8642290145978150738_n.jpg`
+|Platform, post ID
+
+|Twitter/X
+|`GwGksKQWAAEHDwf.jpeg`
+|Platform, media ID
+
+|WhatsApp
+|`WhatsApp Image 2025-01-15 at 14.30.00.jpg`
+|Platform, timestamp
+
+|Telegram
+|`photo_2025-01-15_14-30-00.jpg`
+|Platform, timestamp
+
+|Copilot
+|`Copilot_20250115_143000.png`
+|Platform, timestamp
+
+|Gemini
+|`Gemini_Generated_Image_abc123.png`
+|Platform, generation ID
+
+|Screenshots
+|`Screenshot_20251211_130038.png`
+|Type, timestamp
+
+|Unix timestamps
+|`1765178235983.jpg`
+|Timestamp
+
+|Generic
+|`image.jpg`, `media.png`, `download.jpg`
+|Flagged for rename
+|===
+
+== Installation
+
+[source,bash]
+----
+cd ~/Documents/hyperpolymath-repos/zotero-librarian
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
+----
+
+== Usage
+
+=== Local Mode (files on disk)
+
+==== Preview Changes (Dry Run)
+
+[source,bash]
+----
+julia --project=. bin/normalize.jl
+----
+
+==== Apply Changes
+
+IMPORTANT: Close Zotero before applying changes!
+
+[source,bash]
+----
+julia --project=. bin/normalize.jl --apply
+----
+
+==== Custom Database Path
+
+[source,bash]
+----
+julia --project=. bin/normalize.jl --db /path/to/zotero.sqlite --apply
+----
+
+=== Cloud Mode (via Zotero API)
+
+For files stored in Zotero cloud that aren't synced locally.
+
+==== Get API Credentials
+
+1. Go to https://www.zotero.org/settings/keys/new
+2. Create a new key with "Allow library access" and "Allow write access"
+3. Note your User ID from https://www.zotero.org/settings/keys
+
+==== Preview Cloud Changes
+
+[source,bash]
+----
+export ZOTERO_API_KEY=your_api_key_here
+export ZOTERO_USER_ID=your_user_id
+julia --project=. bin/normalize-cloud.jl
+----
+
+==== Apply Cloud Changes
+
+[source,bash]
+----
+julia --project=. bin/normalize-cloud.jl --apply
+----
+
+NOTE: Cloud mode updates attachment *titles* (display names) and stores metadata in the `extra` field. Actual filenames in cloud storage are preserved until files sync locally.
+
+=== Save Report
+
+[source,bash]
+----
+julia --project=. bin/normalize.jl --report report.txt
+----
+
+== How It Works
+
+1. **Scans** all attachments in your Zotero library
+2. **Identifies** files with generic/cryptic names using pattern matching
+3. **Extracts** metadata from filenames (platform, date, username, etc.)
+4. **Reads** EXIF data if available (requires `exiftool`)
+5. **Generates** new names from parent item metadata (author, title, year)
+6. **Renames** physical files and updates database
+7. **Stores** extracted metadata in Zotero's `extra` field
+8. **Records** all changes with BLAKE3 hashes for recovery
+
+== Safety Features
+
+- **Dry run by default**: No changes unless you specify `--apply`
+- **Automatic backup**: Always backup `zotero.sqlite` before running
+- **Hash tracking**: All renames tracked in `rename-history.json`
+- **Duplicate detection**: Identifies identical files across library
+- **Zotero lock detection**: Warns if Zotero appears to be running
+
+== Roadmap
+
+=== v0.2.0: Cloud-Safe Storage
+
+Replace SQLite with append-only, cloud-sync-safe storage using FormDB's dependently-typed FQL architecture:
+
+- Append-only event log (no corruption from concurrent writes)
+- Content-addressed storage (deduplication built-in)
+- Merkle tree verification (integrity checking)
+- Works on Dropbox, Google Drive, OneDrive, etc.
+
+=== v0.3.0: Remote API
+
+Support for Zotero Web API for processing cloud-synced libraries directly.
+
+== License
+
+PMPL-1.0-or-later

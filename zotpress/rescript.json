@@ -1,0 +1,35 @@
+{
+  "name": "zotpress",
+  "version": "8.0.0",
+  "sources": [
+    {
+      "dir": "src/rescript",
+      "subdirs": true
+    }
+  ],
+  "package-specs": [
+    {
+      "module": "es6",
+      "in-source": false
+    }
+  ],
+  "suffix": ".res.js",
+  "bs-dependencies": [],
+  "warnings": {
+    "number": "+A-48-42"
+  },
+  "gentypeconfig": {
+    "language": "untyped",
+    "shims": {},
+    "module": "es6",
+    "generatedFileExtension": ".gen.js",
+    "debug": {
+      "all": false
+    }
+  },
+  "jsx": {
+    "version": 4,
+    "mode": "automatic"
+  },
+  "uncurried": true
+}

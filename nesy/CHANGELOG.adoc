@@ -1,0 +1,105 @@
+// SPDX-License-Identifier: MPL-2.0-or-later
+= Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+== [Unreleased]
+
+=== Added
+- RSR (Rhodium Standard Repository) compliance documentation
+- LICENSE file (GNU AGPL-3.0-or-later)
+- SECURITY.md with vulnerability reporting
+- CONTRIBUTING.md with comprehensive contribution guidelines
+- CODE_OF_CONDUCT.md (Contributor Covenant 2.1)
+- MAINTAINERS.md with maintainer information
+- TPCF.md (Tri-Perimeter Contribution Framework)
+- .well-known/ directory (security.txt, ai.txt, humans.txt)
+- justfile for task automation
+- CI/CD configuration (.github/workflows/)
+- RSR-COMPLIANCE.md documenting compliance level
+
+== [0.1.0-alpha] - 2024-11-22
+
+=== Added
+- Tractarian validation engine (TractarianValidator)
+- Multi-factor certainty scoring system
+- Fogbinder handoff manager (FogbinderHandoffManager)
+- Uncertainty region detection (4 types)
+- Contradiction hint generation
+- Epistemic summary with gap analysis
+- Complete type system (TypeScript + Zod)
+- Atomic citation data models
+- NCIS-themed popup UI (navy/cyan aesthetic)
+- Full accessibility support (WCAG AA)
+- Keyboard shortcuts (Cmd/Ctrl + V, E, Esc)
+- Screen reader announcements
+- Comprehensive test suite (45+ tests)
+- Citation factory for test data generation
+- Build system (TypeScript + Vite + Vitest)
+- ESLint configuration
+- README.md with complete documentation
+- PHILOSOPHY.md (Tractarian philosophical foundation)
+- FOGBINDER-HANDOFF.md (integration specification)
+- CLAUDE.md (AI assistant context)
+- AUTONOMOUS-DEVELOPMENT-SUMMARY.md
+
+=== Features Implemented
+
+**Validation**:
+- Structural completeness validation (required fields by item type)
+- Format consistency checking (dates, DOIs, URLs, ISBNs)
+- Logical coherence verification
+- Referential integrity validation
+- Certainty scoring (0.0-1.0 scale)
+
+**Fogbinder Integration**:
+- JSON export format (nsai-to-fogbinder v1.0.0)
+- Uncertainty region detection (structural, semantic, relational, temporal)
+- Contradiction hints (authorship, temporal, metadata)
+- Epistemic summary generation
+- Certainty boundary determination
+
+**User Interface**:
+- Validation results display
+- Certainty meter visualization
+- Export to Fogbinder functionality
+- Full ARIA support
+- High contrast mode
+- Reduced motion support
+
+**Testing**:
+- 30+ validator tests
+- 15+ handoff manager tests
+- Test utilities with citation factories
+
+=== Not Yet Implemented
+
+- Zotero API integration (planned for v0.2.0)
+- Settings panel (planned for v0.2.0)
+- Localization (i18n) (planned for v0.2.0)
+- Icon assets (planned for v0.2.0)
+- Plugin packaging (.xpi build) (planned for v0.2.0)
+
+=== Philosophy
+
+- Implemented Tractarian logic throughout
+- Citations as atomic facts
+- Validation as truth-functional analysis
+- Clear certainty boundary (NSAI validates, Fogbinder explores)
+- "Throwing away the ladder" metaphor for handoff
+
+== [0.0.0] - 2024-11-22
+
+=== Added
+- Initial repository setup
+- Project structure established
+- CLAUDE.md created
+
+---
+
+[Unreleased]: https://github.com/Hyperpolymath/zotero-nsai/compare/v0.1.0-alpha...HEAD
+[0.1.0-alpha]: https://github.com/Hyperpolymath/zotero-nsai/releases/tag/v0.1.0-alpha
+[0.0.0]: https://github.com/Hyperpolymath/zotero-nsai/releases/tag/v0.0.0

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Scan any website for accessibility issues. Get instant WCAG compliance scores and actionable recommendations.">
+  <title>AccessibilityHeaders.com - Scan Web Accessibility</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 20px;
+      opacity: 0.95;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .scanner-card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      margin-bottom: 40px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    #urlInput {
+      flex: 1;
+      padding: 16px 20px;
+      font-size: 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+
+    #urlInput:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .scan-btn {
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .scan-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .scan-btn:active {
+      transform: translateY(0);
+    }
+
+    .scan-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .example-sites {
+      text-align: center;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .example-sites a {
+      color: #667eea;
+      text-decoration: none;
+      margin: 0 8px;
+    }
+
+    .example-sites a:hover {
+      text-decoration: underline;
+    }
+
+    #results {
+      display: none;
+    }
+
+    .score-display {
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
+      border-radius: 12px;
+      margin-bottom: 32px;
+    }
+
+    .score-circle {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 72px;
+      font-weight: bold;
+      position: relative;
+      background: white;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .score-number {
+      display: block;
+    }
+
+    .score-label {
+      font-size: 18px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 8px;
+    }
+
+    .score-excellent { color: #10b981; }
+    .score-good { color: #3b82f6; }
+    .score-fair { color: #f59e0b; }
+    .score-poor { color: #ef4444; }
+    .score-critical { color: #991b1b; }
+
+    .wcag-compliance {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .wcag-badge {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+
+    .wcag-pass {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .wcag-fail {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .section-score {
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .issue-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .issue-item {
+      padding: 16px;
+      background: #f9fafb;
+      border-left: 4px solid;
+      border-radius: 8px;
+      transition: transform 0.2s;
+    }
+
+    .issue-item:hover {
+      transform: translateX(4px);
+    }
+
+    .issue-critical { border-color: #ef4444; }
+    .issue-serious { border-color: #f59e0b; }
+    .issue-moderate { border-color: #3b82f6; }
+    .issue-minor { border-color: #6b7280; }
+
+    .issue-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 8px;
+    }
+
+    .issue-title {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .issue-severity {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .issue-description {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .issue-wcag {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .share-section {
+      text-align: center;
+      padding: 24px;
+      background: #f9fafb;
+      border-radius: 12px;
+      margin-top: 32px;
+    }
+
+    .share-url {
+      background: white;
+      padding: 12px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 14px;
+      margin: 16px 0;
+      word-break: break-all;
+    }
+
+    .share-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .share-btn {
+      padding: 8px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .share-btn:hover {
+      background: #f9fafb;
+      border-color: #667eea;
+    }
+
+    .footer {
+      text-align: center;
+      color: white;
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 16px;
+    }
+
+    .footer-links a {
+      color: white;
+      text-decoration: none;
+      opacity: 0.9;
+    }
+
+    .footer-links a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .info-card {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-card h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      color: #667eea;
+    }
+
+    .info-card p {
+      color: #6b7280;
+      font-size: 15px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      border: 4px solid #f3f4f6;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .recommendation-box {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+
+    .recommendation-box h4 {
+      color: #1e40af;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .recommendation-box p {
+      color: #374151;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌐 AccessibilityHeaders</h1>
+      <p class="subtitle">
+        Scan any website for accessibility issues. Get instant WCAG compliance scores and actionable recommendations.
+      </p>
+    </header>
+
+    <div class="scanner-card">
+      <div class="input-group">
+        <input
+          type="url"
+          id="urlInput"
+          placeholder="https://example.com"
+          aria-label="Enter website URL to scan"
+        />
+        <button class="scan-btn" id="scanBtn" onclick="scanWebsite()">
+          Scan Website
+        </button>
+      </div>
+      <div class="example-sites">
+        <span>Try:</span>
+        <a href="#" onclick="scanExample('https://www.bbc.com'); return false;">BBC</a>
+        <a href="#" onclick="scanExample('https://www.gov.uk'); return false;">GOV.UK</a>
+        <a href="#" onclick="scanExample('https://www.apple.com'); return false;">Apple</a>
+        <a href="#" onclick="scanExample('https://www.wikipedia.org'); return false;">Wikipedia</a>
+      </div>
+    </div>
+
+    <div id="results"></div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>📊 Comprehensive Testing</h3>
+        <p>
+          We test for WCAG 2.1 Level A, AA, and AAA compliance across multiple categories including color contrast, keyboard navigation, screen reader compatibility, and semantic HTML.
+        </p>
+      </div>
+      <div class="info-card">
+        <h3>🚀 Instant Results</h3>
+        <p>
+          Get immediate feedback on your website's accessibility. Share results with your team and track improvements over time.
+        </p>
+      </div>
+      <div class="info-card">
+        <h3>🛠️ Actionable Fixes</h3>
+        <p>
+          Every issue includes specific WCAG references and recommendations for how to fix it. Make the web accessible to everyone.
+        </p>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>Making the web accessible to everyone</p>
+      <div class="footer-links">
+        <a href="#api">API</a>
+        <a href="#about">About</a>
+        <a href="#browser-extension">Browser Extension</a>
+        <a href="https://github.com/accessibility-everywhere" target="_blank">GitHub</a>
+        <a href="#methodology">Methodology</a>
+      </div>
+      <p style="margin-top: 16px; font-size: 14px; opacity: 0.8;">
+        Inspired by securityheaders.com • Built for digital accessibility advocacy
+      </p>
+    </footer>
+  </div>
+
+  <script src="scanner.js"></script>
+</body>
+</html>

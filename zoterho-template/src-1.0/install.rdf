@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+    <Description about="urn:mozilla:install-manifest">
+        <em:id>zoterho-template@metadatstastician.art</em:id>
+        <em:name>ZoteRho Template</em:name>
+        <em:version>1.0</em:version>
+        <em:multiprocessCompatible>true</em:multiprocessCompatible>
+        <em:updateURL>https://metadatstastician.art/zoterho-template/updates-1.0.json</em:updateURL>
+        <em:homepageURL>https://github.com/metadatstastician/zoterho-template</em:homepageURL>
+        <em:localized>
+            <Description>
+                <em:locale>en-US</em:locale>
+                <em:name>ZoteRho Template</em:name>
+                <em:description>A sample Zotero plugin demonstrating the Rhodium Standard</em:description>
+            </Description>
+        </em:localized>
+
+        <em:creator>Jonathan D.A. Jewell</em:creator>
+        <em:type>2</em:type> <!-- type=extension -->
+
+        <em:targetApplication>
+            <Description>
+                <em:id>zotero@chnm.gmu.edu</em:id>
+                <em:minVersion>6.0</em:minVersion>
+                <em:maxVersion>*</em:maxVersion>
+            </Description>
+        </em:targetApplication>
+    </Description>
+</RDF>

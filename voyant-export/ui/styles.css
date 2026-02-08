@@ -1,0 +1,104 @@
+/**
+ * Zotero Voyant Export - Styles
+ * Modern, accessible, high-contrast styles for menu items
+ */
+
+/* Menu item styling with accessibility focus */
+#voyant-export {
+  /* Visual design */
+  padding: 6px 12px;
+  margin: 2px 0;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  /* Ensure readable text */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+
+  /* High contrast for accessibility */
+  color: var(--menuitem-text-color, #000);
+  background-color: transparent;
+
+  /* Prevent text selection during clicks */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+/* Hover state - keyboard and mouse accessible */
+#voyant-export:hover,
+#voyant-export:focus {
+  background-color: var(--menuitem-hover-background, rgba(0, 0, 0, 0.1));
+  color: var(--menuitem-hover-text-color, #000);
+  outline: none;
+}
+
+/* Active/pressed state */
+#voyant-export:active {
+  background-color: var(--menuitem-active-background, rgba(0, 0, 0, 0.15));
+}
+
+/* Focus visible for keyboard navigation (accessibility) */
+#voyant-export:focus-visible {
+  outline: 2px solid var(--focus-outline-color, #0a84ff);
+  outline-offset: -2px;
+}
+
+/* Disabled state (for future use) */
+#voyant-export[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  #voyant-export:hover,
+  #voyant-export:focus {
+    outline: 2px solid currentColor;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  #voyant-export {
+    color: var(--menuitem-text-color-dark, #fff);
+  }
+
+  #voyant-export:hover,
+  #voyant-export:focus {
+    background-color: var(--menuitem-hover-background-dark, rgba(255, 255, 255, 0.1));
+    color: var(--menuitem-hover-text-color-dark, #fff);
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  #voyant-export {
+    transition: none;
+  }
+}
+
+/* Loading/processing state indicator */
+#voyant-export[data-processing="true"]::after {
+  content: " ⏳";
+  margin-left: 8px;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Error state indicator */
+#voyant-export[data-error="true"] {
+  color: var(--error-color, #d70022);
+  background-color: var(--error-background, rgba(215, 0, 34, 0.1));
+}
+
+#voyant-export[data-error="true"]::before {
+  content: "⚠️ ";
+}

@@ -1,0 +1,460 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test-powershell:
+    name: Test PowerShell Scaffolder
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        shell: pwsh
+        run: |
+          $PSVersionTable
+
+      - name: Test scaffolding (practitioner template)
+        shell: pwsh
+        run: |
+          ./init-zotero-rscript-plugin.ps1 `
+            -ProjectName "TestPractitioner" `
+            -AuthorName "CI Test" `
+            -TemplateType practitioner
+
+      - name: Verify generated files (practitioner)
+        shell: pwsh
+        run: |
+          $requiredFiles = @(
+            "TestPractitioner/README.md",
+            "TestPractitioner/bootstrap.js",
+            "TestPractitioner/install.rdf",
+            "TestPractitioner/chrome.manifest",
+            "TestPractitioner/package.json",
+            "TestPractitioner/bsconfig.json",
+            "TestPractitioner/audit-index.json"
+          )
+
+          foreach ($file in $requiredFiles) {
+            if (-not (Test-Path $file)) {
+              throw "Missing required file: $file"
+            }
+            Write-Host "✓ Found: $file"
+          }
+
+      - name: Test integrity verification (practitioner)
+        shell: pwsh
+        run: |
+          ./init-zotero-rscript-plugin.ps1 `
+            -ProjectName "TestPractitioner" `
+            -VerifyIntegrity
+
+      - name: Test scaffolding (researcher template)
+        shell: pwsh
+        run: |
+          ./init-zotero-rscript-plugin.ps1 `
+            -ProjectName "TestResearcher" `
+            -AuthorName "CI Test" `
+            -TemplateType researcher
+
+      - name: Verify generated files (researcher)
+        shell: pwsh
+        run: |
+          $requiredFiles = @(
+            "TestResearcher/README.md",
+            "TestResearcher/bootstrap.js",
+            "TestResearcher/chrome/content/main.js",
+            "TestResearcher/audit-index.json"
+          )
+
+          foreach ($file in $requiredFiles) {
+            if (-not (Test-Path $file)) {
+              throw "Missing required file: $file"
+            }
+            Write-Host "✓ Found: $file"
+          }
+
+      - name: Test scaffolding (student template)
+        shell: pwsh
+        run: |
+          ./init-zotero-rscript-plugin.ps1 `
+            -ProjectName "TestStudent" `
+            -AuthorName "CI Test" `
+            -TemplateType student
+
+      - name: Verify generated files (student)
+        shell: pwsh
+        run: |
+          $requiredFiles = @(
+            "TestStudent/README.md",
+            "TestStudent/TUTORIAL.md",
+            "TestStudent/bootstrap.js",
+            "TestStudent/src/index.ts",
+            "TestStudent/tsconfig.json",
+            "TestStudent/audit-index.json"
+          )
+
+          foreach ($file in $requiredFiles) {
+            if (-not (Test-Path $file)) {
+              throw "Missing required file: $file"
+            }
+            Write-Host "✓ Found: $file"
+          }
+
+      - name: Test GitInit functionality
+        shell: pwsh
+        run: |
+          ./init-zotero-rscript-plugin.ps1 `
+            -ProjectName "TestGitInit" `
+            -AuthorName "CI Test" `
+            -TemplateType student `
+            -GitInit
+
+          $gitFiles = @(
+            "TestGitInit/.gitignore"
+          )
+
+          foreach ($file in $gitFiles) {
+            if (-not (Test-Path $file)) {
+              throw "Missing git file: $file"
+            }
+            Write-Host "✓ Found: $file"
+          }
+
+      - name: Test variable substitution
+        shell: pwsh
+        run: |
+          $readme = Get-Content "TestPractitioner/README.md" -Raw
+          if ($readme -match '\{\{ProjectName\}\}' -or $readme -match '\{\{AuthorName\}\}') {
+            throw "Variable substitution failed - template variables still present"
+          }
+          if ($readme -notmatch 'TestPractitioner') {
+            throw "ProjectName not substituted correctly"
+          }
+          if ($readme -notmatch 'CI Test') {
+            throw "AuthorName not substituted correctly"
+          }
+          Write-Host "✓ Variable substitution successful"
+
+      - name: Test integrity tamper detection
+        shell: pwsh
+        run: |
+          # Modify a file
+          "Modified content" | Out-File -FilePath "TestPractitioner/README.md" -Append
+
+          # Verify should fail
+          $failed = $false
+          try {
+            ./init-zotero-rscript-plugin.ps1 `
+              -ProjectName "TestPractitioner" `
+              -VerifyIntegrity
+          } catch {
+            $failed = $true
+          }
+
+          if (-not $failed) {
+            throw "Integrity verification should have detected tampering"
+          }
+          Write-Host "✓ Tamper detection successful"
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-projects-${{ matrix.os }}
+          path: |
+            TestPractitioner/
+            TestResearcher/
+            TestStudent/
+            TestGitInit/
+          retention-days: 7
+
+  test-racket:
+    name: Test Racket Scaffolder
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        racket-version: ['8.11', '8.12']
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Racket
+        uses: Bogdanp/setup-racket@v1.10
+        with:
+          version: ${{ matrix.racket-version }}
+          distribution: 'full'
+
+      - name: Verify Racket installation
+        run: racket --version
+
+      - name: Test Racket scaffolding (basic)
+        run: |
+          racket init-raczotbuild.rkt -n TestRacketPlugin -a "CI Test"
+
+      - name: Verify Racket generated files
+        run: |
+          test -f TestRacketPlugin/README.md || exit 1
+          test -f TestRacketPlugin/LICENSE || exit 1
+          test -f TestRacketPlugin/.gitignore || exit 1
+          test -d TestRacketPlugin/raczotbuild || exit 1
+          test -d TestRacketPlugin/templates || exit 1
+          echo "✓ All required files present"
+
+      - name: Test Racket scaffolding with git init
+        run: |
+          racket init-raczotbuild.rkt -n TestRacketGit -a "CI Test" -g
+
+      - name: Verify git initialization
+        run: |
+          test -d TestRacketGit/.git || exit 1
+          cd TestRacketGit
+          git log --oneline | head -n 1
+          echo "✓ Git initialized successfully"
+
+      - name: Verify Racket code syntax
+        run: |
+          racket -e '(require "TestRacketPlugin/raczotbuild/main.rkt")'
+          echo "✓ Generated Racket code is syntactically valid"
+
+      - name: Upload Racket test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-racket-projects-${{ matrix.os }}-${{ matrix.racket-version }}
+          path: |
+            TestRacketPlugin/
+            TestRacketGit/
+          retention-days: 7
+
+  test-bash:
+    name: Test Bash Scaffolder
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Bash tests
+        run: |
+          chmod +x tests/bash-tests.sh
+          bash tests/bash-tests.sh
+
+      - name: Test Bash scaffolding manually
+        run: |
+          chmod +x init-zotero-plugin.sh
+          ./init-zotero-plugin.sh -n BashTestProject -a "CI Test" -t student
+
+      - name: Verify Bash generated files
+        run: |
+          test -f BashTestProject/README.md || exit 1
+          test -f BashTestProject/bootstrap.js || exit 1
+          test -f BashTestProject/audit-index.json || exit 1
+          echo "✓ Bash scaffolder generated files correctly"
+
+      - name: Upload Bash test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-bash-projects-${{ matrix.os }}
+          path: BashTestProject/
+          retention-days: 7
+
+  lint-powershell:
+    name: Lint PowerShell
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $results = Invoke-ScriptAnalyzer `
+            -Path ./init-zotero-rscript-plugin.ps1 `
+            -Severity Warning,Error `
+            -ReportSummary
+
+          if ($results.Count -gt 0) {
+            $results | Format-Table -AutoSize
+            throw "PSScriptAnalyzer found $($results.Count) issue(s)"
+          }
+          Write-Host "✓ No PSScriptAnalyzer issues found"
+
+  lint-racket:
+    name: Lint Racket
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Racket
+        uses: Bogdanp/setup-racket@v1.10
+        with:
+          version: '8.12'
+          distribution: 'full'
+
+      - name: Check Racket syntax
+        run: |
+          raco check init-raczotbuild.rkt
+          echo "✓ Racket syntax check passed"
+
+  test-documentation:
+    name: Test Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for broken links in README
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          config-file: '.github/workflows/markdown-link-check-config.json'
+        continue-on-error: true
+
+      - name: Verify all required documentation exists
+        run: |
+          test -f README.md || exit 1
+          test -f CLAUDE.md || exit 1
+          test -f CONTRIBUTING.md || exit 1
+          test -f LICENSE || exit 1
+          echo "✓ All required documentation files present"
+
+      - name: Check documentation formatting
+        run: |
+          # Check for consistent heading levels
+          grep -E '^#{1,6} ' README.md > /dev/null || exit 1
+          echo "✓ README has proper heading structure"
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy security scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  test-cross-platform-compatibility:
+    name: Cross-Platform Compatibility
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test file path handling
+        shell: pwsh
+        run: |
+          ./init-zotero-rscript-plugin.ps1 `
+            -ProjectName "PathTest" `
+            -AuthorName "Test" `
+            -TemplateType student
+
+          # Verify paths work on all platforms
+          $files = Get-ChildItem -Path PathTest -Recurse -File
+          Write-Host "Generated $($files.Count) files"
+
+          if ($files.Count -eq 0) {
+            throw "No files generated"
+          }
+          echo "✓ Cross-platform file generation successful"
+
+  integration-test:
+    name: Integration Test - Full Workflow
+    runs-on: ubuntu-latest
+    needs: [test-powershell, test-racket]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Full workflow test (PowerShell)
+        shell: pwsh
+        run: |
+          # Create project
+          ./init-zotero-rscript-plugin.ps1 `
+            -ProjectName "IntegrationTest" `
+            -AuthorName "CI Integration" `
+            -TemplateType practitioner `
+            -GitInit
+
+          # Install dependencies (student template has npm)
+          ./init-zotero-rscript-plugin.ps1 `
+            -ProjectName "StudentIntegration" `
+            -AuthorName "CI Integration" `
+            -TemplateType student
+
+          cd StudentIntegration
+          npm install
+          npm run build
+          echo "✓ Full workflow test passed"
+
+  status-check:
+    name: Status Check
+    runs-on: ubuntu-latest
+    needs: [test-powershell, test-racket, test-bash, lint-powershell, lint-racket, test-documentation, integration-test]
+    if: always()
+
+    steps:
+      - name: Check all jobs status
+        run: |
+          if [ "${{ needs.test-powershell.result }}" != "success" ] || \
+             [ "${{ needs.test-racket.result }}" != "success" ] || \
+             [ "${{ needs.test-bash.result }}" != "success" ] || \
+             [ "${{ needs.lint-powershell.result }}" != "success" ] || \
+             [ "${{ needs.lint-racket.result }}" != "success" ] || \
+             [ "${{ needs.integration-test.result }}" != "success" ]; then
+            echo "❌ One or more CI jobs failed"
+            exit 1
+          fi
+          echo "✅ All CI jobs passed"

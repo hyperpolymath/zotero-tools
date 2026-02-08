@@ -1,0 +1,45 @@
+name: 'Accessibility Test'
+description: 'Test your website for WCAG accessibility compliance in CI/CD'
+author: 'Accessibility Everywhere'
+branding:
+  icon: 'eye'
+  color: 'blue'
+
+inputs:
+  url:
+    description: 'URL to test (if not provided, will test deployed preview)'
+    required: false
+  min-score:
+    description: 'Minimum accessibility score (0-100) to pass'
+    required: false
+    default: '80'
+  wcag-level:
+    description: 'WCAG level to test against (A, AA, AAA)'
+    required: false
+    default: 'AA'
+  fail-on-regression:
+    description: 'Fail if score decreases from previous run'
+    required: false
+    default: 'true'
+  report-pr-comment:
+    description: 'Post results as PR comment'
+    required: false
+    default: 'true'
+  github-token:
+    description: 'GitHub token for posting comments'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  score:
+    description: 'Overall accessibility score (0-100)'
+  wcag-compliant:
+    description: 'Whether site meets WCAG level (true/false)'
+  report-url:
+    description: 'URL to full accessibility report'
+  passed:
+    description: 'Whether the test passed (true/false)'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

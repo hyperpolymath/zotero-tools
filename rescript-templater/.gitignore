@@ -1,0 +1,133 @@
+# RSR Standard .gitignore
+# https://github.com/hyperpolymath/RSR-template-repo
+#
+# RSR Language Tiers:
+#   Tier 1: Rust, Elixir, Zig, Ada, Haskell, ReScript
+#   Tier 2: Nickel, Racket, Guile Scheme, Nix
+#   Infrastructure: Guix channels, derivations
+#
+# Prohibited: TypeScript, JavaScript (use ReScript), Python (except salt/), Go, CUE
+
+# === Build Artifacts ===
+/target/
+/dist/
+/_build/
+/lib/
+*.o
+*.a
+*.so
+*.dylib
+
+# === Guix/Nix ===
+/result
+/result-*
+/.direnv/
+/.envrc.local
+*.drv
+
+# === ReScript ===
+*.bs.js
+.bsb.lock
+.merlin
+
+# === Rust ===
+/target/
+# Uncomment for binaries, keep for libraries:
+# Cargo.lock
+
+# === Elixir ===
+/_build/
+/deps/
+*.ez
+*.beam
+/priv/static/
+.fetch
+erl_crash.dump
+*.plt
+
+# === Zig ===
+zig-cache/
+zig-out/
+
+# === Ada ===
+*.ali
+*.o
+/obj/
+/bin/
+
+# === Haskell ===
+/.stack-work/
+/.cabal-sandbox/
+dist-newstyle/
+*.hi
+
+# === Nickel ===
+# (Nickel has no artifacts typically)
+
+# === Racket ===
+compiled/
+*.zo
+*.dep
+
+# === Salt (only permitted Python) ===
+salt/__pycache__/
+salt/*.pyc
+
+# === Containers (nerdctl + Wolfi/distroless) ===
+# No Docker artifacts - we use nerdctl
+*.tar
+image-cache/
+
+# === IDE & Editors ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.#*
+\#*#
+
+# === Environment ===
+.env
+.env.local
+.env.*.local
+*.env
+
+# === Logs ===
+*.log
+logs/
+
+# === OS Files ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Temporary ===
+/tmp/
+/.tmp/
+/.cache/
+*.tmp
+*.temp
+
+# === Coverage & Test ===
+/coverage/
+/.nyc_output/
+*.lcov
+
+# === Security ===
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+.secrets/
+credentials.json
+
+# === Generated Docs ===
+/docs/generated/
+!/docs/generated/.gitkeep
+
+# === Misc ===
+*.bak
+*.orig
+.justfile.bak

@@ -1,0 +1,18 @@
+{
+  "imports": {
+    "@rescript/core": "npm:@rescript/core@^1.6.1"
+  },
+  "tasks": {
+    "rescript:clean": "deno run --allow-read --allow-write --allow-env --allow-run npm:rescript clean",
+    "rescript:build": "deno run --allow-read --allow-write --allow-env --allow-run npm:rescript build",
+    "rescript:dev": "deno run --allow-read --allow-write --allow-env --allow-run npm:rescript build -w",
+    "ext:build": "deno run --allow-read --allow-write --allow-env --allow-run npm:web-ext build",
+    "ext:run": "deno run --allow-read --allow-write --allow-env --allow-run npm:web-ext run",
+    "ext:lint": "deno run --allow-read --allow-write --allow-env --allow-run npm:web-ext lint"
+  },
+  "nodeModulesDir": "auto",
+  "unstable": [
+    "bare-node-builtins",
+    "byonm"
+  ]
+}

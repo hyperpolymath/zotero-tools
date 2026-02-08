@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+name: ReScript/Deno CI
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.1
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v1.x
+      
+      - name: Deno lint
+        run: deno lint
+      
+      - name: Deno fmt check
+        run: deno fmt --check
+      
+      - name: Deno test
+        run: deno test --allow-all --coverage=coverage
+      
+      - name: ReScript build
+        run: |
+          if [ -f "rescript.json" ] || [ -f "bsconfig.json" ]; then
+            npm install
+            npx rescript
+          fi
+      
+      - name: Type check
+        run: deno check **/*.ts || true
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.1
+      - uses: denoland/setup-deno@v2
+      - name: Check permissions
+        run: |
+          # Audit for dangerous permissions
+          grep -rE "allow-run|allow-write|allow-env" . || echo "No dangerous permissions"

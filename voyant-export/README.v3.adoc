@@ -1,0 +1,75 @@
+= Manifest V3 Branch
+
+This branch contains the future Manifest V3 version of the extension.
+
+== Status
+
+🚧 **Work in Progress** - Not yet usable in Zotero
+
+Zotero 7 currently uses Manifest V2. This branch prepares for future Zotero versions that will support Manifest V3.
+
+== What's Different
+
+=== Files Added
+
+* `manifest.v3.json` - Manifest V3 configuration
+* `src/background.v3.res` - Service worker entry point
+* `src/content_script.v3.res` - UI manipulation in content context
+* `MANIFEST_V3_MIGRATION.adoc` - Complete migration guide
+
+=== Key Changes
+
+* Background script → Service worker
+* Direct DOM access → Message passing
+* Context menu integration via content script
+* Updated CSP format
+* Structured web_accessible_resources
+
+== When Will This Be Used?
+
+When Zotero announces support for Manifest V3, we will:
+
+1. Test this branch against new Zotero version
+2. Merge to main after verification
+3. Release as version 3.0.0
+4. Deprecate V2 version per Zotero's timeline
+
+== Building V3 Version
+
+----
+# Switch to this branch
+git checkout manifest-v3
+
+# Build ReScript
+deno task rescript:build
+
+# Use V3 manifest
+cp manifest.v3.json manifest.json
+
+# Package
+deno task ext:build
+----
+
+== Testing
+
+Currently can only be tested in:
+
+* Chrome/Edge (V3 is default)
+* Firefox with `extensions.manifestV3.enabled = true`
+
+**Not yet testable in Zotero** - waiting for Zotero V3 support.
+
+== Documentation
+
+See link:MANIFEST_V3_MIGRATION.adoc[Manifest V3 Migration Guide] for complete details.
+
+== Timeline
+
+* **Now**: Template maintained, ready for migration
+* **Zotero V3 Announcement**: Begin active testing
+* **Testing Phase**: Parallel V2/V3 releases
+* **V2 Sunset**: Drop V2 when Zotero does
+
+== Contact
+
+Questions about V3 migration? Open an issue on GitHub.

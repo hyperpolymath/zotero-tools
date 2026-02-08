@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NSAI Validator</title>
+  <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+  <div class="nsai-container" role="main">
+    <!-- Header -->
+    <header class="nsai-header" role="banner">
+      <div class="nsai-logo">
+        <span class="nsai-icon" aria-hidden="true">🔍</span>
+        <h1>NSAI</h1>
+      </div>
+      <p class="nsai-tagline">Neurosymbolic Validation</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="nsai-main">
+      <!-- Validation Status -->
+      <section class="validation-status" aria-labelledby="status-heading">
+        <h2 id="status-heading" class="sr-only">Validation Status</h2>
+        <div class="status-card">
+          <div class="status-item">
+            <span class="status-label">Validated</span>
+            <span class="status-value" id="validated-count" aria-live="polite">-</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Uncertain</span>
+            <span class="status-value status-uncertain" id="uncertain-count" aria-live="polite">-</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Certainty</span>
+            <span class="status-value" id="certainty-score" aria-live="polite">-</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Certainty Meter -->
+      <section class="certainty-meter" aria-labelledby="certainty-heading">
+        <h2 id="certainty-heading" class="sr-only">Overall Certainty</h2>
+        <div class="meter-container">
+          <div class="meter-bar" role="progressbar"
+               aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+               aria-label="Certainty percentage">
+            <div class="meter-fill" id="certainty-meter-fill"></div>
+          </div>
+          <div class="meter-labels">
+            <span class="meter-label">Uncertain</span>
+            <span class="meter-label">Certain</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results List -->
+      <section class="results-section" aria-labelledby="results-heading">
+        <h2 id="results-heading">Validation Results</h2>
+        <div class="results-list" id="results-list" role="list">
+          <!-- Results populated by JavaScript -->
+          <p class="results-empty">No validation data available.</p>
+        </div>
+      </section>
+
+      <!-- Fogbinder Handoff -->
+      <section class="fogbinder-section" id="fogbinder-section" hidden aria-labelledby="fogbinder-heading">
+        <h2 id="fogbinder-heading">Uncertainty Detected</h2>
+        <div class="fogbinder-card">
+          <p class="fogbinder-message">
+            <strong id="uncertainty-count">0</strong> uncertainty regions detected.
+            Consider exploring in Fogbinder.
+          </p>
+          <button class="btn btn-fogbinder" id="export-fogbinder"
+                  aria-label="Export to Fogbinder for uncertainty exploration">
+            Export to Fogbinder
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="nsai-footer" role="contentinfo">
+      <button class="btn btn-primary" id="validate-btn"
+              aria-label="Validate selected citations">
+        Validate Citations
+      </button>
+      <button class="btn btn-secondary" id="settings-btn"
+              aria-label="Open settings">
+        Settings
+      </button>
+    </footer>
+  </div>
+
+  <!-- Accessibility: Screen reader announcements -->
+  <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="sr-announcements"></div>
+
+  <script src="build/popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+[submodule "zoterho-template"]
+	path = zoterho-template
+	url = git@github.com:hyperpolymath/zoterho-template.git
+[submodule "zotpress"]
+	path = zotpress
+	url = git@github.com:hyperpolymath/zotpress.git
+[submodule "zotero-voyant-export"]
+	path = zotero-voyant-export
+	url = git@github.com:hyperpolymath/zotero-voyant-export.git
+[submodule "zotero-rescript-templater"]
+	path = zotero-rescript-templater
+	url = git@github.com:hyperpolymath/zotero-rescript-templater.git
+[submodule "zotero-nsai"]
+	path = zotero-nsai
+	url = git@github.com:hyperpolymath/zotero-nsai.git

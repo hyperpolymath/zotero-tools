@@ -1,0 +1,205 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Zoterho Roadmap
+:toc:
+:toc-title: Phases
+:toclevels: 2
+:icons: font
+
+Development roadmap for the Zoterho ecosystem.
+
+[IMPORTANT]
+====
+**Current Status**: Project specification phase. Component repositories are defined but await implementation.
+====
+
+toc::[]
+
+== Phase 1: Foundation
+
+Establish the infrastructure and standards for all Zoterho components.
+
+=== Rhodium Compliance Specification
+* [ ] Document Rhodium requirements for Zotero ecosystem tools
+* [ ] Define reproducibility criteria (deterministic builds, pinned deps)
+* [ ] Establish portability standards (cross-platform, no vendor lock-in)
+* [ ] Create compliance verification checklist
+
+=== Build Infrastructure
+* [ ] Set up Deno-based build system for ReScript components
+* [ ] Configure Rust toolchain with WASM targets
+* [ ] Create shared CI/CD templates for all components
+* [ ] Implement cross-component dependency management
+
+=== zoterho-template (Baseline)
+* [ ] Curate default Zotero 7+ settings for research workflows
+* [ ] Select and bundle essential translators
+* [ ] Include academic citation styles (APA, MLA, Chicago, etc.)
+* [ ] Document template customization points
+
+=== Testing Framework
+* [ ] Design cross-component integration test suite
+* [ ] Set up Zotero headless testing environment
+* [ ] Create fixtures for common bibliography scenarios
+* [ ] Implement snapshot testing for export formats
+
+'''
+
+== Phase 2: Core Integrations
+
+Deliver the primary tools that extend Zotero's capabilities.
+
+=== zotpress (WordPress Plugin)
+* [ ] Fork upstream zotpress; audit for security issues
+* [ ] Modernize PHP to 8.2+ standards
+* [ ] Replace deprecated WordPress APIs
+* [ ] Add Gutenberg block for bibliography embedding
+* [ ] Implement shortcode for inline citations
+* [ ] Create settings page with Zotero API configuration
+* [ ] Add caching layer for performance
+* [ ] Write PHPUnit test suite
+
+=== zotero-voyant-export
+* [ ] Research Voyant Tools corpus format requirements
+* [ ] Build Zotero export translator in ReScript
+* [ ] Support plain text, XML, and JSON corpus formats
+* [ ] Handle collection hierarchies → Voyant categories
+* [ ] Add metadata preservation (author, date, source)
+* [ ] Create CLI wrapper for batch exports
+* [ ] Document integration with Voyant server
+
+=== zotero-rescript-templater
+* [ ] Design plugin template architecture for Zotero 7+
+* [ ] Generate boilerplate: manifest, bootstrap, preferences
+* [ ] Include ReScript compilation setup
+* [ ] Add development server with hot reload
+* [ ] Create CLI scaffolding commands
+* [ ] Write documentation and tutorial
+
+'''
+
+== Phase 3: Advanced Features
+
+Build sophisticated tooling for specialized workflows.
+
+=== zotero-nsai (Content Authenticity)
+* [ ] Research AI content detection approaches
+* [ ] Design NSAI metadata schema for bibliographic entries
+* [ ] Implement detection heuristics (perplexity, burstiness)
+* [ ] Integrate with external detection APIs (optional)
+* [ ] Add visual indicators in Zotero UI
+* [ ] Create report generation for collections
+* [ ] Handle false positive management
+
+=== MCP Integration
+* [ ] Design MCP server for Zotero data access
+* [ ] Expose bibliography queries as tools
+* [ ] Enable AI-assisted citation discovery
+* [ ] Support natural language bibliography search
+* [ ] Implement citation recommendation engine
+
+=== Unified CLI
+* [ ] Create `zoterho` CLI entry point
+* [ ] Subcommands for each component
+* [ ] Global configuration management
+* [ ] Plugin installation/update orchestration
+* [ ] Backup and migration utilities
+
+'''
+
+== Phase 4: Ecosystem Maturity
+
+Polish, publish, and build community.
+
+=== Distribution
+* [ ] Submit `zotero-rescript-templater` plugins to Zotero registry
+* [ ] Publish `zotpress` to WordPress.org plugin directory
+* [ ] Create Homebrew formula for CLI tools
+* [ ] Package for Guix and Nix
+
+=== Documentation
+* [ ] Build documentation site (AsciiDoc → HTML)
+* [ ] Write getting started guides for each component
+* [ ] Create video tutorials for common workflows
+* [ ] API reference documentation
+
+=== Community
+* [ ] Establish contribution guidelines (CONTRIBUTING.adoc)
+* [ ] Set up issue templates for bug reports and features
+* [ ] Create discussion forum or Discord
+* [ ] Define governance and decision-making process
+
+=== Quality Assurance
+* [ ] Security audit of all components
+* [ ] Performance benchmarking
+* [ ] Accessibility review for UI elements
+* [ ] Internationalization (i18n) support
+
+'''
+
+== Component Dependencies
+
+[source]
+----
+                    ┌─────────────────────┐
+                    │  zoterho-template   │
+                    │    (foundation)     │
+                    └──────────┬──────────┘
+                               │
+           ┌───────────────────┼───────────────────┐
+           │                   │                   │
+           ▼                   ▼                   ▼
+   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐
+   │   zotpress    │   │ voyant-export │   │ rescript-     │
+   │  (WordPress)  │   │   (analysis)  │   │  templater    │
+   └───────────────┘   └───────────────┘   └───────┬───────┘
+                                                   │
+                                                   ▼
+                                           ┌───────────────┐
+                                           │  zotero-nsai  │
+                                           │ (built with   │
+                                           │  templater)   │
+                                           └───────────────┘
+----
+
+== Success Metrics
+
+|===
+| Metric | Target
+
+| zoterho-template downloads
+| 500+ installations
+
+| zotpress active installs
+| 1,000+ WordPress sites
+
+| zotero-nsai detection accuracy
+| >90% on benchmark dataset
+
+| CLI tool adoption
+| 100+ monthly active users
+
+| Documentation coverage
+| 100% public API documented
+
+|===
+
+== Non-Goals
+
+The following are explicitly **out of scope** for Zoterho:
+
+* Replacing Zotero core functionality
+* Building a standalone reference manager
+* Supporting Zotero versions prior to 7.0
+* Mobile applications (use Zotero's official apps)
+* Cloud hosting services (self-host or use Zotero sync)
+
+== Versioning Strategy
+
+* **Umbrella repo** (this repo): Calendar versioning (YYYY.MM)
+* **Components**: Semantic versioning (MAJOR.MINOR.PATCH)
+* **Breaking changes**: Announced one minor version in advance
+* **LTS**: None planned; track latest Zotero releases
+
+== Timeline Disclaimer
+
+This roadmap describes *what* will be built, not *when*. Development proceeds as contributor capacity allows. Priorities may shift based on community feedback.

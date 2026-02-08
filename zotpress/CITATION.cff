@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: MPL-2.0
+cff-version: 1.2.0
+title: Zotpress
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Jewell
+    given-names: Jonathan D.A.
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+repository-code: "https://github.com/hyperpolymath/zotpress"
+url: "https://github.com/hyperpolymath/zotpress"
+abstract: >-
+  WordPress plugin for displaying Zotero citations and bibliographies
+  with modern accessibility features (WCAG 2.3 AAA compliant).
+  Built with ReScript and Deno following the Rhodium Standard.
+keywords:
+  - wordpress
+  - zotero
+  - citations
+  - bibliography
+  - academic
+  - accessibility
+license: MPL-2.0
+version: "8.0.0"
+date-released: "2025-01-03"

@@ -1,0 +1,36 @@
+= zotpress - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{zotpress_2025,
+  author = {Polymath, Hyper},
+  title = {zotpress},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/zotpress},
+license = "PMPL-1.0"
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _zotpress_ [Computer software]. Available at: https://github.com/hyperpolymath/zotpress
+
+== OSCOLA
+
+Hyper Polymath, 'zotpress' (2025) <https://github.com/hyperpolymath/zotpress>
+
+== MLA
+
+Polymath, Hyper. "zotpress." 2025, github.com/hyperpolymath/zotpress.
+
+== APA 7
+
+Polymath, H. (2025). _zotpress_ [Computer software]. GitHub. https://github.com/hyperpolymath/zotpress
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]

@@ -1,0 +1,434 @@
+= Manifest V3 Migration Guide
+:toc:
+:toclevels: 3
+
+== Overview
+
+This document outlines the strategy for migrating from Manifest V2 (current) to Manifest V3 when Zotero supports it.
+
+**Current Status**: Zotero 7 uses Manifest V2 +
+**Future**: Zotero will eventually migrate to Manifest V3 +
+**Our Strategy**: Maintain V3-ready code in `manifest-v3` branch
+
+== Key Differences: V2 vs V3
+
+=== Background Scripts → Service Workers
+
+**V2** (Current):
+[source,json]
+----
+{
+  "background": {
+    "scripts": ["src/background.mjs"]
+  }
+}
+----
+
+**V3** (Future):
+[source,json]
+----
+{
+  "background": {
+    "service_worker": "src/background.mjs",
+    "type": "module"
+  }
+}
+----
+
+**Impact on Our Code**:
+
+* Service workers have no DOM access
+* Must use `chrome.scripting` API for DOM manipulation
+* No persistent background page (episodic execution)
+* All imports must be ES modules
+
+**Our Readiness**: ✅ Already using ES modules (.mjs)
+
+=== Browser Action → Action API
+
+**V2** (Current):
+----
+Right-click menu integration via XUL overlay
+----
+
+**V3** (Future):
+[source,json]
+----
+{
+  "action": {
+    "default_title": "Export Collection to Voyant"
+  }
+}
+----
+
+**Impact**: Need to migrate from context menu to toolbar action or side panel.
+
+=== Host Permissions
+
+**V2** (Current):
+[source,json]
+----
+{
+  "permissions": ["storage"]
+}
+----
+
+**V3** (Future):
+[source,json]
+----
+{
+  "permissions": ["storage"],
+  "host_permissions": []
+}
+----
+
+**Impact**: Minimal - we don't access external hosts.
+
+=== Content Security Policy
+
+**V2** (Current):
+[source,json]
+----
+{
+  "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'"
+}
+----
+
+**V3** (Future):
+[source,json]
+----
+{
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; style-src 'self'"
+  }
+}
+----
+
+**Impact**: Need to remove `'unsafe-inline'` from styles. Already prepared - styles are in external CSS file.
+
+=== Web Accessible Resources
+
+**V2** (Current):
+[source,json]
+----
+{
+  "web_accessible_resources": [
+    "ui/styles.css",
+    "ui/icon.png"
+  ]
+}
+----
+
+**V3** (Future):
+[source,json]
+----
+{
+  "web_accessible_resources": [
+    {
+      "resources": ["ui/styles.css", "ui/icon.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
+----
+
+**Impact**: Structure change only, same functionality.
+
+== Migration Checklist
+
+=== Phase 1: Preparation (Now)
+
+* [x] Use ES modules (.mjs) exclusively
+* [x] Externalize all CSS (no inline styles)
+* [x] Remove inline event handlers (use addEventListener)
+* [x] Use Promises instead of callbacks
+* [x] Maintain V3 manifest template in `manifest-v3` branch
+
+=== Phase 2: Service Worker Adaptation (When Zotero Supports V3)
+
+* [ ] Convert background.mjs to work as service worker
+* [ ] Remove DOM access from background script
+* [ ] Use message passing for UI operations
+* [ ] Implement periodic wake-up mechanism
+* [ ] Test episodic execution
+
+=== Phase 3: API Migration
+
+* [ ] Replace context menu with action/side panel
+* [ ] Update permission requests
+* [ ] Migrate to declarativeNetRequest (if needed)
+* [ ] Update CSP to remove 'unsafe-inline'
+
+=== Phase 4: Testing
+
+* [ ] Test in Firefox with V3 enabled
+* [ ] Test service worker lifecycle
+* [ ] Verify all functionality works
+* [ ] Performance testing
+* [ ] Accessibility testing
+
+== Code Changes Required
+
+=== Background Script (Service Worker Compatible)
+
+**Current** (`background.res`):
+[source,rescript]
+----
+let main = async () => {
+  await Zotero.initializationPromise
+  Zotero.debug("[Voyant Export] Plugin loaded")
+  UI.insertExportMenuItem(() => {
+    Exporter.doExport()->ignore
+  })
+}
+main()->ignore
+----
+
+**V3 Future** (`background.v3.res`):
+[source,rescript]
+----
+// Service worker - no DOM access
+// Use message passing to content script
+
+let handleMessage = (message, sender, sendResponse) => {
+  switch message["type"] {
+  | "export-collection" => {
+      Exporter.doExport()
+      sendResponse({"status": "started"})
+    }
+  | _ => sendResponse({"status": "unknown"})
+  }
+}
+
+// Register message listener
+@val @scope("chrome.runtime.onMessage")
+external addListener: (('a, 'b, 'c) => unit) => unit = "addListener"
+
+addListener(handleMessage)
+
+Zotero.debug("[Voyant Export] Service worker loaded")
+----
+
+=== UI Interaction (Content Script)
+
+Need a new content script for UI manipulation:
+
+[source,rescript]
+----
+// content_script.res - runs in Zotero UI context
+
+let insertExportMenuItem = (): unit => {
+  // Same logic as current UI.res
+  // But communicates with service worker via messages
+}
+
+let handleMenuClick = () => {
+  chrome.runtime.sendMessage({"type": "export-collection"}, response => {
+    Zotero.debug(`Export status: ${response["status"]}`)
+  })
+}
+
+insertExportMenuItem()
+----
+
+=== Manifest Changes
+
+Create `manifest.v3.json` (already done in this branch):
+
+* `manifest_version: 3`
+* `service_worker` instead of `scripts`
+* Structured `web_accessible_resources`
+* Updated CSP format
+* `action` API configuration
+
+== Architecture for V3
+
+=== Current (V2) Architecture
+
+----
+background.mjs (persistent)
+    ↓
+  UI.mjs (direct DOM access)
+    ↓
+  Exporter.mjs
+----
+
+=== Future (V3) Architecture
+
+----
+service_worker.mjs (episodic)
+    ↑ messages ↓
+content_script.mjs (UI context)
+    ↓
+  Exporter.mjs (shared)
+----
+
+**Key Changes**:
+
+* Background script is service worker (no DOM, episodic)
+* Content script handles UI (runs in page context)
+* Message passing for communication
+* Exporter logic unchanged (already pure)
+
+== Advantages of V3
+
+=== Performance
+
+* Service workers are more efficient
+* Episodic execution saves memory
+* Faster startup time
+
+=== Security
+
+* Stricter CSP (no inline code)
+* Better isolation
+* Improved sandboxing
+
+=== Compatibility
+
+* Modern web platform alignment
+* Future-proof architecture
+* Better browser support
+
+== Migration Strategy
+
+=== Option 1: Dual Manifest (Recommended)
+
+Maintain both V2 and V3 versions:
+
+----
+manifest.json          # V2 for Zotero 7 (current)
+manifest.v3.json       # V3 for Zotero 8+ (future)
+
+src/
+  background.res       # V2 background script
+  background.v3.res    # V3 service worker
+  content_script.res   # V3 content script (new)
+  Exporter.res         # Shared logic (unchanged)
+  Format.res           # Shared logic (unchanged)
+  UI.res               # V2 UI logic
+----
+
+**Build Process**:
+
+----
+# V2 build (default)
+deno task rescript:build
+mv manifest.json dist/
+
+# V3 build (future)
+deno task rescript:build:v3
+mv manifest.v3.json dist/manifest.json
+----
+
+=== Option 2: Feature Detection
+
+Single codebase with runtime detection:
+
+[source,rescript]
+----
+let isV3 = %raw(`typeof chrome.runtime.getManifest === 'function' && chrome.runtime.getManifest().manifest_version === 3`)
+
+if isV3 {
+  // Use V3 APIs
+} else {
+  // Use V2 APIs
+}
+----
+
+**Not Recommended**: Adds complexity, harder to maintain.
+
+=== Option 3: Branch-Based
+
+Maintain V3 in separate branch:
+
+* `main` branch: V2 (current)
+* `manifest-v3` branch: V3 (future)
+
+**Recommended for now** until Zotero announces V3 timeline.
+
+== Testing V3 Changes
+
+=== Firefox with V3 Support
+
+----
+# Enable V3 in Firefox
+about:config
+extensions.manifestV3.enabled = true
+
+# Load extension
+about:debugging > This Firefox > Load Temporary Add-on
+----
+
+=== Chrome/Chromium
+
+V3 is default in Chrome. Can test there for compatibility.
+
+=== Automated Testing
+
+[source,javascript]
+----
+// test/v3-compatibility.test.js
+import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+
+Deno.test("Service worker loads", async () => {
+  // Test service worker initialization
+});
+
+Deno.test("Message passing works", async () => {
+  // Test background ↔ content script communication
+});
+----
+
+== Timeline
+
+=== Current Status (2024)
+
+* Zotero 7: Manifest V2 only
+* V3 template maintained in `manifest-v3` branch
+* Codebase already V3-friendly (ES modules, external CSS)
+
+=== Future Milestones
+
+* **Zotero 8 announcement**: Evaluate V3 requirement
+* **V3 migration**: Switch to service worker architecture
+* **Testing period**: Run both V2 and V3 in parallel
+* **V2 sunset**: Drop V2 support when Zotero does
+
+== Resources
+
+* https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/manifest_version[MDN: Manifest Version]
+* https://developer.chrome.com/docs/extensions/mv3/intro/[Chrome: Manifest V3 Overview]
+* https://extensionworkshop.com/documentation/develop/manifest-v3-migration-guide/[Firefox: V3 Migration Guide]
+* https://www.zotero.org/support/dev/zotero_7_for_developers[Zotero 7 Developer Docs]
+
+== Questions for Zotero Team
+
+When Zotero announces V3 support:
+
+1. Will XUL overlays still work in V3?
+2. Timeline for V2 deprecation?
+3. Recommended migration path for context menus?
+4. Service worker limitations in Zotero context?
+5. Testing resources/environments available?
+
+== Conclusion
+
+This extension is well-positioned for V3 migration:
+
+* ✅ ES modules already in use
+* ✅ External CSS (no inline styles)
+* ✅ Promise-based APIs
+* ✅ V3 manifest template ready
+* ✅ Separation of concerns (Exporter is pure logic)
+
+**Estimated Migration Effort**: 2-3 days when Zotero V3 support arrives.
+
+The main work will be:
+
+1. Splitting background script into service worker + content script
+2. Implementing message passing
+3. Testing service worker lifecycle
+4. Updating build process
+
+All preparatory work is complete in this branch.

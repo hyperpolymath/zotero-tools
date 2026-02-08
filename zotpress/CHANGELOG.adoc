@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-FileCopyrightText: 2025 Hyperpolymath
+= Changelog
+:toc:
+:toclevels: 2
+
+All notable changes to this project will be documented in this file.
+
+== [Unreleased]
+
+=== Added
+* RSR compliance files
+* ReScript frontend implementation
+* Deno build system
+* WCAG 2.3 AAA accessibility support
+
+=== Removed
+* TypeScript source files (replaced by ReScript)
+* Node.js/npm dependencies (replaced by Deno)
+
+=== Changed
+* Converted documentation to AsciiDoc format

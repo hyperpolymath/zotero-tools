@@ -1,0 +1,66 @@
+# Build outputs
+build/
+lib/
+dist/
+
+# ReScript build artifacts
+*.res.js
+*.resi.js
+.bsb.lock
+.merlin
+
+# Node/Deno cache (Deno uses global cache, but just in case)
+node_modules/
+.npm/
+.deno/
+
+# Package manager lockfiles (banned - use Deno)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+bun.lock
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Generated configs (from Nickel)
+src-*/manifest.json
+src-*/updates-*.json
+
+# Generated JS files copied during packaging
+src-*/bootstrap.js
+src-*/ZoteRhoTemplate.js
+src-*/preferences.js
+src-*/RhodiumLinter.js
+
+# XPI packages (build artifacts)
+*.xpi
+
+# Makefile (banned - use justfile)
+Makefile
+GNUmakefile
+*.mk

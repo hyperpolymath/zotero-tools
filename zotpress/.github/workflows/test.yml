@@ -1,0 +1,229 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Zotpress - Test & Quality Workflow
+# Runs PHP and TypeScript/JavaScript tests with full CI checks
+
+name: Test & Quality
+
+on:
+  push:
+    branches: [main, develop, 'claude/*']
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DENO_VERSION: '2.x'
+  PHP_VERSION: '8.2'
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # PHP Tests
+  # ─────────────────────────────────────────────────────────────────────────────
+  php-tests:
+    name: PHP Tests (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xml, curl, json, dom
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            php-${{ matrix.php }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHP syntax check
+        run: composer lint
+
+      - name: Run PHPUnit tests
+        run: composer test
+
+      - name: Upload coverage to Codecov
+        if: matrix.php == '8.2'
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
+        with:
+          files: ./coverage/clover.xml
+          flags: php
+          fail_ci_if_error: false
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # PHP Static Analysis
+  # ─────────────────────────────────────────────────────────────────────────────
+  php-static-analysis:
+    name: PHP Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, curl, json, dom
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v4
+        with:
+          path: ~/.composer/cache
+          key: php-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: php-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPStan
+        run: composer phpstan
+        continue-on-error: true
+
+      - name: Run PHPCS (WordPress standards)
+        run: composer phpcs
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Deno Tests (TypeScript/JavaScript)
+  # ─────────────────────────────────────────────────────────────────────────────
+  deno-tests:
+    name: Deno Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+
+      - name: Cache Deno dependencies
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v4
+        with:
+          path: |
+            ~/.cache/deno
+            ~/.deno
+          key: deno-${{ hashFiles('deno.json', 'deno.lock') }}
+          restore-keys: deno-
+
+      - name: Verify formatting
+        run: deno fmt --check
+
+      - name: Run linter
+        run: deno lint
+
+      - name: Type check
+        run: deno check src/**/*.ts scripts/**/*.ts
+        continue-on-error: true
+
+      - name: Run tests
+        run: deno test --allow-read --allow-write
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Build Check
+  # ─────────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build Assets
+    runs-on: ubuntu-latest
+    needs: [deno-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+
+      - name: Build CSS
+        run: deno task build:css
+        continue-on-error: true
+
+      - name: Build JavaScript
+        run: deno task build:js
+        continue-on-error: true
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+        if: always()
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # WordPress Compatibility
+  # ─────────────────────────────────────────────────────────────────────────────
+  wordpress-compat:
+    name: WordPress Compatibility
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, curl, json, dom
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Check PHP compatibility
+        run: |
+          vendor/bin/phpcs --standard=PHPCompatibilityWP --runtime-set testVersion 8.1- lib/ src/ || true
+
+      - name: Check WordPress minimum version
+        run: |
+          echo "Checking for WordPress 6.0+ compatibility markers..."
+          # Add specific checks here if needed
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # All Checks Passed
+  # ─────────────────────────────────────────────────────────────────────────────
+  all-checks:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [php-tests, php-static-analysis, deno-tests, build, wordpress-compat]
+    if: always()
+
+    steps:
+      - name: Check all jobs
+        run: |
+          if [[ "${{ needs.php-tests.result }}" == "failure" ]]; then
+            echo "PHP tests failed"
+            exit 1
+          fi
+          echo "All critical checks passed"

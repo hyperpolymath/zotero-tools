@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<ruleset name="Zotpress">
+  <description>WordPress coding standards for Zotpress plugin</description>
+
+  <!-- What to scan -->
+  <file>./lib</file>
+  <file>./src</file>
+
+  <!-- Exclude paths -->
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+  <exclude-pattern>*/tests/*</exclude-pattern>
+  <exclude-pattern>*/.cache/*</exclude-pattern>
+  <exclude-pattern>*/dist/*</exclude-pattern>
+  <exclude-pattern>*.min.js</exclude-pattern>
+  <exclude-pattern>*.min.css</exclude-pattern>
+
+  <!-- Arguments -->
+  <arg name="basepath" value="."/>
+  <arg name="colors"/>
+  <arg name="extensions" value="php"/>
+  <arg name="parallel" value="8"/>
+  <arg value="ps"/>
+
+  <!-- Use WordPress coding standards -->
+  <rule ref="WordPress">
+    <!-- Allow short array syntax -->
+    <exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
+    <!-- Allow modern PHP features -->
+    <exclude name="WordPress.PHP.DisallowShortTernary"/>
+  </rule>
+
+  <!-- Use WordPress-Extra for extra checks -->
+  <rule ref="WordPress-Extra">
+    <exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+    <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+  </rule>
+
+  <!-- Use WordPress-Docs for documentation -->
+  <rule ref="WordPress-Docs"/>
+
+  <!-- PHP Compatibility -->
+  <rule ref="PHPCompatibilityWP"/>
+  <config name="testVersion" value="8.1-"/>
+  <config name="minimum_supported_wp_version" value="6.0"/>
+
+  <!-- Additional security rules -->
+  <rule ref="WordPress.Security.EscapeOutput"/>
+  <rule ref="WordPress.Security.NonceVerification"/>
+  <rule ref="WordPress.Security.ValidatedSanitizedInput"/>
+  <rule ref="WordPress.DB.PreparedSQL"/>
+
+  <!-- Allow certain global variables -->
+  <rule ref="WordPress.WP.GlobalVariablesOverride">
+    <properties>
+      <property name="custom_test_classes" type="array">
+        <element value="WP_UnitTestCase"/>
+      </property>
+    </properties>
+  </rule>
+
+  <!-- Line length -->
+  <rule ref="Generic.Files.LineLength">
+    <properties>
+      <property name="lineLimit" value="120"/>
+      <property name="absoluteLineLimit" value="200"/>
+    </properties>
+  </rule>
+</ruleset>

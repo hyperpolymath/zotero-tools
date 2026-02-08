@@ -1,0 +1,42 @@
+var format = require('../lib/format');
+const {
+  resolve
+} = require('sdk/core/promise');
+
+const attachment = {
+  "saveFile": function() {
+    return null;
+  }
+};
+
+const item = {
+  "getDisplayTitle": () => "Further Chronicles of Avonlea",
+  "libraryKey": "XYZ",
+  "getCreators": () => [{
+    "lastName": "Montgomery",
+    "firstName": "Lucy Maud"
+  }],
+  "getBestAttachment": resolve(attachment)
+};
+
+exports["test generateMODS produces MODS from a Zotero item (title and author only)"] = function(assert) {
+  var mods = format.generateMODS(item);
+  assert.ok(mods === ('<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<mods xmlns="http://www.loc.gov/mods/v3" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="https://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/mods.xsd">' +
+    '<titleInfo>' +
+    '<title>Further Chronicles of Avonlea</title>' +
+    '</titleInfo>' +
+    '<name type="personal">' +
+    '<namePart>Lucy Maud Montgomery</namePart>' +
+    '</name>' +
+    '</mods>'), "MODS output ok");
+};
+
+exports["test generateDC produces DC from a Zotero item (Zotero key only)"] = function(assert) {
+  var dc = format.generateDC(item);
+  assert.ok(dc === ('<oai_dc:dc xmlns:oai_dc="https://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="https://purl.org/dc/elements/1.1/" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.openarchives.org/OAI/2.0/oai_dc/ https://www.openarchives.org/OAI/2.0/oai_dc.xsd">' +
+    '<dc:identifier>XYZ</dc:identifier>' +
+    '</oai_dc:dc>'), "DC output ok");
+};
+
+require("sdk/test").run(exports);

@@ -1,0 +1,354 @@
+= NSAI - Neurosymbolic Research Validator for Zotero
+image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,link="https://opensource.org/licenses/MPL-2.0"]
+
+== License & Philosophy
+
+This project must declare **MPL-2.0-or-later** for platform/tooling compatibility.
+
+Philosophy: **Palimpsest**. The Palimpsest-MPL (PMPL) text is provided in `license/PMPL-1.0.txt`, and the canonical source is the palimpsest-license repository.
+// SPDX-License-Identifier: MPL-2.0-or-later
+// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
+
+*"What can be said at all can be said clearly."* — Wittgenstein, Tractatus Logico-Philosophicus
+
+NSAI is a Zotero plugin that validates and prepares research data using neurosymbolic reasoning. It serves as the *certainty layer* for academic research, complementing [Fogbinder](https://github.com/Hyperpolymath/fogbinder) which navigates epistemic ambiguity.
+
+== Philosophy
+
+NSAI is grounded in the logical atomism of Wittgenstein's *Tractatus*:
+
+- *The world is the totality of facts* → A research library is a totality of bibliographic facts
+- *What can be said clearly* → NSAI validates formal structure and consistency
+- *What we cannot speak about* → Fogbinder explores (uncertainty, contradiction, ambiguity)
+
+See [PHILOSOPHY.md](./PHILOSOPHY.md) for the complete philosophical foundation.
+
+== Features
+
+=== ✅ Tractarian Validation
+
+- *Structural Completeness*: Verify required fields (authors, titles, dates, publishers)
+- *Format Consistency*: Validate dates, DOIs, ISBNs, URLs
+- *Logical Coherence*: Check internal consistency of metadata
+- *Referential Integrity*: Verify persistent identifiers
+
+=== 📊 Certainty Scoring
+
+Each citation receives a certainty score (0.0-1.0) based on:
+- *Structural* factors (field completeness)
+- *Consistency* factors (format validity)
+- *Referential* factors (presence of DOI/ISBN/URL)
+
+=== 🌫️ Fogbinder Handoff
+
+Citations below the certainty threshold (< 0.7) are flagged for Fogbinder exploration:
+- Uncertainty regions identified
+- Contradiction hints detected
+- Epistemic gaps documented
+- Export to Fogbinder JSON format
+
+See [FOGBINDER-HANDOFF.md](./FOGBINDER-HANDOFF.md) for complete integration details.
+
+=== 🎨 NCIS-Themed UI
+
+- *Professional investigative aesthetic*: Navy blue (#001f3f) and cyan (#00d4ff)
+- *Fully accessible*: ARIA labels, keyboard navigation, screen reader support
+- *Dark theme*: High contrast mode support
+- *Responsive*: Adapts to different screen sizes
+
+=== 🔒 Privacy & Security
+
+- *No tracking or telemetry*
+- *Local-first processing*
+- *No API key storage*
+- *Input sanitization*
+- *PMPLv3 license*
+
+== Installation
+
+=== Prerequisites
+
+- *Zotero 6.0+* (or Zotero 7.0)
+- *Node.js 18+* (for development)
+
+=== From Release (Coming Soon)
+
+1. Download the latest `.xpi` file from [Releases](https://github.com/Hyperpolymath/zotero-nsai/releases)
+2. In Zotero: Tools → Add-ons → Install Add-on From File
+3. Select the downloaded `.xpi` file
+4. Restart Zotero
+
+=== From Source
+
+```bash
+= Clone the repository
+
+git clone https://github.com/Hyperpolymath/zotero-nsai.git
+cd zotero-nsai
+
+= Install dependencies
+
+npm install
+
+= Build the plugin
+
+npm run build
+
+= The plugin will be in ./build/
+
+```
+
+== Usage
+
+=== Basic Validation
+
+1. Select citations in your Zotero library
+2. Right-click → NSAI → Validate Selection
+3. View validation results in the NSAI popup
+4. Review certainty scores and issues
+
+=== Keyboard Shortcuts
+
+- *Cmd/Ctrl + V*: Validate selected citations
+- *Cmd/Ctrl + E*: Export to Fogbinder
+- *Esc*: Close NSAI popup
+
+=== Certainty Interpretation
+
+| Score | Meaning | Action |
+|-------|---------|--------|
+| *0.8-1.0* | High certainty | ✅ Citation is well-formed |
+| *0.7-0.8* | Acceptable | ⚠️ Minor improvements possible |
+| *0.4-0.7* | Ambiguous | 🌫️ Consider Fogbinder exploration |
+| *0.0-0.4* | Low certainty | 🔴 Requires attention or Fogbinder |
+
+=== Export to Fogbinder
+
+1. After validation, click "Export to Fogbinder"
+2. Save the `.nsai.json` file
+3. Import into Fogbinder for uncertainty exploration
+
+== Development
+
+=== Project Structure
+
+```
+zotero-nsai/
+├── src/
+│   ├── types/
+│   │   ├── atomic.ts              # Core data models
+│   │   └── fogbinder-interface.ts # Fogbinder integration types
+│   ├── validation/
+│   │   ├── validator.ts           # Tractarian validator
+│   │   └── validator.test.ts      # Validation tests
+│   ├── fogbinder/
+│   │   ├── handoff.ts             # Fogbinder handoff manager
+│   │   └── handoff.test.ts        # Handoff tests
+│   ├── ui/
+│   │   └── popup.ts               # Popup UI logic
+│   └── index.ts                   # Plugin entry point
+├── styles/
+│   └── popup.css                  # NCIS-themed styles
+├── manifest.json                  # Zotero plugin manifest
+├── popup.html                     # Popup UI
+├── PHILOSOPHY.md                  # Philosophical foundation
+├── FOGBINDER-HANDOFF.md          # Integration documentation
+└── CLAUDE.md                      # AI assistant context
+```
+
+=== Building
+
+```bash
+= Development build (watch mode)
+
+npm run dev
+
+= Production build
+
+npm run build
+
+= Run tests
+
+npm test
+
+= Type checking
+
+npm run typecheck
+
+= Linting
+
+npm run lint
+```
+
+=== Testing
+
+```bash
+= Run all tests
+
+npm test
+
+= Run tests in watch mode
+
+npm run test:watch
+
+= Run tests with coverage
+
+npm run test:coverage
+```
+
+=== Architecture
+
+*Technology Stack*:
+- *TypeScript*: Type-safe implementation
+- *Vite*: Fast build system
+- *Vitest*: Testing framework
+- *Zod*: Runtime type validation
+
+*Future Enhancements* (not yet implemented):
+- *Lean 4 WASM*: Formal verification for critical logic
+- *ONNX Runtime*: ML-based validation
+- *Elixir GraphQL*: Backend API layer
+- *ReScript*: Enhanced type safety
+
+== Relationship to Fogbinder
+
+NSAI and Fogbinder are *complementary tools*:
+
+| Aspect | NSAI | Fogbinder |
+|--------|------|-----------|
+| *Purpose* | Validation & preparation | Exploration & uncertainty |
+| *Philosophy* | Early Wittgenstein (Tractatus) | Late Wittgenstein (Language games) |
+| *Domain* | What can be validated | What cannot be validated |
+| *Epistemic* | Certainty | Uncertainty |
+| *Theme* | NCIS investigation (navy/cyan) | Dark mystery (purple/black) |
+| *Features* | Structure validation, consistency | Contradiction detection, mood scoring |
+
+*Workflow*:
+1. *NSAI*: Validate bibliography structure
+2. *NSAI*: Identify uncertainties and contradictions
+3. *NSAI → Fogbinder*: Export uncertain regions
+4. *Fogbinder*: Explore contradictions, cluster mysteries
+5. *Fogbinder*: Visualize FogTrail (certainty → uncertainty)
+
+== API Reference
+
+=== TractarianValidator
+
+```typescript
+import { TractarianValidator } from './validation/validator';
+
+const validator = new TractarianValidator();
+
+// Validate single citation
+const result = validator.validate(citation);
+
+// Batch validation
+const results = validator.validateBatch(citations);
+```
+
+=== FogbinderHandoffManager
+
+```typescript
+import { FogbinderHandoffManager } from './fogbinder/handoff';
+
+const manager = new FogbinderHandoffManager();
+
+// Create Fogbinder payload
+const payload = manager.createPayload(validationResults);
+
+// Export to JSON
+const exportPackage = manager.exportToFogbinder(validationResults);
+```
+
+See [API documentation](./docs/api.md) for complete reference (coming soon).
+
+== Accessibility
+
+NSAI follows WCAG 2.1 Level AA guidelines:
+
+- ✅ Semantic HTML structure
+- ✅ ARIA labels and roles
+- ✅ Full keyboard navigation
+- ✅ Screen reader announcements
+- ✅ High contrast mode support
+- ✅ Reduced motion support
+- ✅ Focus indicators
+
+== Contributing
+
+Contributions welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) (coming soon).
+
+=== Guidelines
+
+1. Follow the Tractarian philosophy: validate what can be validated formally
+2. Maintain strict type safety (TypeScript strict mode)
+3. Write tests for new features
+4. Update documentation
+5. Follow accessibility standards
+6. Respect privacy: no tracking, local-first
+
+== License
+
+*Palimpsest-MPL License v3.0 (PMPL-1.0)*
+
+This ensures:
+- ✅ Free software (freedom to use, study, modify, distribute)
+- ✅ Copyleft (modifications must also be open source)
+- ✅ Network use disclosure (even if run as a service)
+
+See [LICENSE](./LICENSE) for details.
+
+== Acknowledgments
+
+=== Philosophical Inspiration
+
+- *Ludwig Wittgenstein*: *Tractatus Logico-Philosophicus* (1921)
+- *Ludwig Wittgenstein*: *Philosophical Investigations* (1953)
+
+=== Technical Inspiration
+
+- *Zotero*: Open-source reference management
+- *Lean 4*: Formal verification and theorem proving
+- *ONNX*: Interoperable machine learning
+
+== Related Projects
+
+- *[Fogbinder](https://github.com/Hyperpolymath/fogbinder)*: Companion tool for navigating epistemic ambiguity
+
+== Contact
+
+- *Repository*: [github.com/Hyperpolymath/zotero-nsai](https://github.com/Hyperpolymath/zotero-nsai)
+- *Issues*: [github.com/Hyperpolymath/zotero-nsai/issues](https://github.com/Hyperpolymath/zotero-nsai/issues)
+- *Author*: Hyperpolymath
+
+== Roadmap
+
+=== v0.1.0 (Current)
+
+- [x] Core validation engine
+- [x] Certainty scoring system
+- [x] Fogbinder handoff interface
+- [x] NCIS-themed UI
+- [x] Accessibility features
+- [ ] Zotero integration (in progress)
+
+=== v0.2.0 (Planned)
+
+- [ ] Batch validation performance optimization
+- [ ] Custom validation rules
+- [ ] Export to multiple formats (CSV, BibTeX)
+- [ ] Settings panel
+- [ ] Localization (i18n)
+
+=== v1.0.0 (Future)
+
+- [ ] Lean 4 WASM integration (formal verification)
+- [ ] ONNX Runtime (ML-based validation)
+- [ ] GraphQL API
+- [ ] Fogbinder bidirectional communication
+- [ ] Real-time validation
+- [ ] Cloud sync (optional, privacy-respecting)
+
+---
+
+*"Whereof one can validate clearly, thereof NSAI will speak. Whereof validation fails, thereof Fogbinder must explore."*

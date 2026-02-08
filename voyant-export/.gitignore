@@ -1,0 +1,42 @@
+# Generated JavaScript from ReScript
+src/**/*.mjs
+src/**/*.mjsi
+src/**/*.cmi
+src/**/*.cmj
+src/**/*.cmt
+src/**/*.cmti
+
+# ReScript build artifacts
+lib/bs/
+.bsb.lock
+.merlin
+
+# Extension build output
+web-ext-artifacts/
+dist/
+*.xpi
+update.rdf
+
+# Deno
+.deno/
+deno.lock
+
+# Node (if used for tooling)
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary
+*.tmp
+.cache/
