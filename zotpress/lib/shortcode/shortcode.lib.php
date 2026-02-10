@@ -1,7 +1,7 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly 
 
 
-require(__DIR__ . '/shortcode.class.lib.php');
+// require(__DIR__ . '/shortcode.class.lib.php');
 
 function Zotpress_zotpressLib( $atts )
 {
@@ -50,150 +50,7 @@ function Zotpress_zotpressLib( $atts )
     // ), $atts, "zotpress"));
 
 
-    // +---------------------------+
-    // | FORMAT & CLEAN PARAMETERS |
-    // +---------------------------+
 
-    global $wpdb;
-
-    // 7.3.11: Use the Zotpress_prep_ajax_request_vars() function
-    $zpr = Zotpress_prep_ajax_request_vars($wpdb, $atts, true);
-
-    // // Filter by account
-    // if ($user_id) {
-    //     $api_user_id = str_replace('"','',html_entity_decode($user_id));
-    // } elseif ($userid) {
-    //     $api_user_id = str_replace('"','',html_entity_decode($userid));
-    // } else $api_user_id = false;
-
-    // if ($nickname) $nickname = str_replace('"','',html_entity_decode($nickname));
-    // if ($nick) $nickname = str_replace('"','',html_entity_decode($nick));
-
-
-	// // Type of display
-	// $type = $type ? str_replace('"','',html_entity_decode($type)) : "dropdown";
-
-    // // Filter by collection
-    // if ($collection_id) {
-    //     $collection_id = zotpress_clean_param( $collection_id );
-    // } elseif ($collection) {
-    //     $collection_id = zotpress_clean_param( $collection );
-    // } elseif ($collections) {
-    //     $collection_id = zotpress_clean_param( $collections );
-    // } elseif (isset($_GET['collection_id'])
-    //         && preg_match("/^[a-zA-Z0-9]+$/", $_GET['collection_id'])) {
-    //     $collection_id = zotpress_clean_param( $_GET['collection_id'] );
-    // } elseif (isset($_GET['subcollection_id'])
-    //         && preg_match("/^[a-zA-Z0-9]+$/", $_GET['subcollection_id'])) {
-    //     $collection_id = zotpress_clean_param( $_GET['subcollection_id'] );
-    // }
-
-	// // Filters
-	// if ( $searchby ) $searchby = str_replace('"','',html_entity_decode($searchby));
-
-	// // Style
-	// if ( $style ) $style = str_replace('"','',html_entity_decode($style));
-
-	// // Min length
-	// if ( $minlength ) $minlength = str_replace('"','',html_entity_decode($minlength));
-
-	// // Max results
-	// if ( $maxresults ) $maxresults = str_replace('"','',html_entity_decode($maxresults));
-
-	// // Max per page
-	// if ( $maxperpage ) $maxperpage = str_replace('"','',html_entity_decode($maxperpage));
-
-	// // Max tags
-	// if ( $maxtags ) $maxtags = str_replace('"','',html_entity_decode($maxtags));
-
-	// // Sortby
-	// if ( $sortby ) $sortby = str_replace('"','',html_entity_decode($sortby));
-
-	// // Order
-	// if ( $order ) $order = str_replace('"','',html_entity_decode($order));
-
-	// // Citeable
-	// if ( $cite ) $cite = str_replace('"','',html_entity_decode($cite));
-	// if ( $citeable ) $cite = str_replace('"','',html_entity_decode($citeable));
-
-	// // Downloadable
-	// if ( $download ) $download = str_replace('"','',html_entity_decode($download));
-	// if ( $downloadable ) $download = str_replace('"','',html_entity_decode($downloadable));
-
-    // // Show tags
-    // if ( $showtags ) $showtags = str_replace('"','',html_entity_decode($showtags));
-    // if ( strpos( $searchby, "tags" ) !== false ) $showtags = true;
-
-	// // Show image
-	// if ( $showimages ) $showimage = str_replace('"','',html_entity_decode($showimages));
-	// if ( $showimage ) $showimage = str_replace('"','',html_entity_decode($showimage));
-
-    // if ( $urlwrap ) $urlwrap = str_replace('"','',html_entity_decode($urlwrap));
-
-    // if ( $toplevel ) $toplevel = str_replace('"','',html_entity_decode($toplevel));
-
-    // $target = $target && $target != "no";
-
-    // if ( $browsebar ) $browsebar = str_replace('"','',html_entity_decode($browsebar));
-
-
-	// Get API User ID
-
-	// global $wpdb;
-
-    // if ( $nickname !== false )
-    // {
-    //     // $zp_account = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."zotpress WHERE nickname='".$nickname."'", OBJECT);
-    //     $zp_account = $wpdb->get_row(
-    //         $wpdb->prepare(
-    //             "
-    //             SELECT * FROM ".$wpdb->prefix."zotpress 
-    //             WHERE nickname='%s'
-    //             ",
-    //             array( $nickname )
-    //         ), OBJECT
-    //     );
-    //     if ( is_null($zp_account) ): echo "<p>Sorry, but the selected Zotpress nickname can't be found.</p>"; return false; endif;
-    //     $api_user_id = $zp_account->api_user_id;
-    // } 
-    // elseif ( $api_user_id !== false )
-    // {
-    //     // $zp_account = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."zotpress WHERE api_user_id='".$api_user_id."'", OBJECT);
-    //     $zp_account = $wpdb->get_row(
-    //         $wpdb->prepare(
-    //             "
-    //             SELECT * FROM ".$wpdb->prefix."zotpress 
-    //             WHERE api_user_id='%s'
-    //             ",
-    //             array( $api_user_id )
-    //         ), OBJECT
-    //     );
-    //     if ( is_null($zp_account) ): echo $api_user_id."<p>Sorry, but the selected Zotpress account can't be found.</p>"; return false; endif;
-    //     $api_user_id = $zp_account->api_user_id;
-    // } 
-    // elseif ( $api_user_id === false 
-    //         && $nickname === false )
-    // {
-    //     if ( get_option("Zotpress_DefaultAccount") !== false )
-    //     {
-    //         $api_user_id = get_option("Zotpress_DefaultAccount");
-    //         // $zp_account = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."zotpress WHERE api_user_id ='".$api_user_id."'", OBJECT);
-    //         $zp_account = $wpdb->get_row(
-    //             $wpdb->prepare(
-    //                 "
-    //                 SELECT * FROM ".$wpdb->prefix."zotpress 
-    //                 WHERE api_user_id='%s'
-    //                 ",
-    //                 array( $api_user_id )
-    //             ), OBJECT
-    //         );
-    //     }
-    //     else // When all else fails ... assume one account
-    //     {
-    //         $zp_account = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."zotpress LIMIT 1", OBJECT);
-    //         $api_user_id = $zp_account->api_user_id;
-    //     }
-    // }
     $zp_account = false;
 
     if ( $zpr['nickname'] !== false ) {

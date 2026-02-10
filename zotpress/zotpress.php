@@ -34,7 +34,7 @@ function zotpress_init(): void {
     load_plugin_textdomain( 'zotpress', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
     // Register shortcodes
-    require_once ZOTPRESS_PLUGIN_DIR . 'lib/shortcode/shortcode.php';
+    require_once ZOTPRESS_PLUGIN_DIR . 'lib/shortcode/shortcode.lib.php';
     add_shortcode( 'zotpress', 'Zotpress_func' );
 
     // Load in-text citation shortcodes if they exist
