@@ -19,6 +19,7 @@
 #   - Creates uninstall script for easy removal
 #
 # Usage:
+# WARNING: Pipe-to-shell is unsafe — download and verify first
 #   curl -sSL https://raw.githubusercontent.com/hyperpolymath/zotero-formdb/main/install.sh | bash
 #   # or
 #   ./install.sh           # Dry run - shows what would happen
