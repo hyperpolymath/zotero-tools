@@ -19,3 +19,8 @@ Zotero reference management extensions and integrations.
 == License
 
 PMPL-1.0-or-later
+
+
+== Architecture
+
+See link:TOPOLOGY.md[TOPOLOGY.md] for a visual architecture map and completion dashboard.
