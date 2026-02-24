@@ -189,8 +189,8 @@ prim__registerCallback : Bits64 -> AnyPtr -> PrimIO Bits32
 export
 registerCallback : Handle -> Callback -> IO (Either Result ())
 registerCallback h cb = do
--- PROOF_TODO: Replace believe_me with actual proof
-  result <- primIO (prim__registerCallback (handlePtr h) (believe_me cb))
+-- PROOF_TODO: Replace cast with actual proof
+  result <- primIO (prim__registerCallback (handlePtr h) (cast cb))
   pure $ case resultFromInt result of
     Just Ok => Right ()
     Just err => Left err
