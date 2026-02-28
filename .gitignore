@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# RSR-compliant .gitignore
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+.directory
+
+# Zotero plugin build
+*.xpi
+*.xpi.zip
+
+# Rust
+/target/
+**/target/
+**/*.rs.bk
+
+# Idris2
+build/
+*.ibc
+
+# Zig
+**/zig-out/
+**/.zig-cache/
+
+# ReScript
+/lib/bs/
+**/lib/bs/
+/.bsb.lock
+**/.bsb.lock
+
+# Dependencies
+/node_modules/
+**/node_modules/
+/vendor/
+/deps/
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
+secrets/
+
+# Test/Coverage
+/coverage/
+htmlcov/
+
+# Logs
+*.log
+/logs/
+
+# Temp
+/tmp/
+*.tmp
+*.bak
+
+# Crash recovery artifacts
+ai-cli-crash-capture/
