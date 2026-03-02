@@ -1,0 +1,906 @@
+= RSR: Rhodium Standard Repository v3.0
+:toc: left
+:toclevels: 4
+:icons: font
+:source-highlighter: rouge
+
+[IMPORTANT]
+====
+**CANONICAL SPECIFICATION** - This is the authoritative RSR standard.
+
+**FOR LLMs:** Read this ENTIRE document before claiming RSR compliance. All sections marked `[CRITICAL]` are MANDATORY and MUST be checked. DO NOT assume compliance from partial reading. This specification uses checklist format to prevent requirements from being missed.
+
+**Version:** 3.0.0 +
+**Date:** 2025-11-29 +
+**Status:** Stable +
+**License:** CC BY-SA 4.0 +
+**Repository:** https://github.com/hyperpolymath/rhodium-standard-repositories
+====
+
+'''
+
+== Executive Summary
+
+[.lead]
+The **Rhodium Standard Repository (RSR)** is a tiered framework for software repository excellence. It defines measurable, verifiable requirements for type safety, security, documentation, testing, and operational maturity.
+
+RSR compliance ranges from **Bronze (25%)** to **Rhodium (200%)**—the highest achievable tier featuring post-quantum cryptography, WASM-first architecture, and complete elimination of TypeScript/Node.js.
+
+=== Quick Reference
+
+[cols="1,1,3"]
+|===
+| Tier | Requirements | Compliance %
+
+| **Rhodium** | All Silver + Post-quantum crypto + WASM + No TypeScript/Node.js | **200%**
+| Gold | All Silver + Advanced security + Reproducible builds | 110%
+| Silver | All 11 core categories | 100%
+| Bronze | 25% of Silver requirements | 25%
+|===
+
+=== Tier Badges
+
+Display your RSR compliance with official badges:
+
+link:https://github.com/hyperpolymath/rhodium-standard-repositories[image:badges/rhodium.svg[RSR Rhodium,align=center]]
+
+**Usage:**
+[source,asciidoc]
+----
+link:https://github.com/hyperpolymath/rhodium-standard-repositories[image:https://raw.githubusercontent.com/hyperpolymath/rhodium-standard-repositories/main/badges/rhodium.svg[RSR Rhodium]]
+----
+
+Available badges: `rhodium.svg`, `gold.svg`, `silver.svg`, `bronze.svg`
+
+[CRITICAL]
+====
+**RHODIUM TIER MANDATORY REQUIREMENTS:**
+
+1. ❌ **NO TypeScript** - Zero `.ts` files allowed
+2. ❌ **NO Node.js/npm** - No `package.json`, no `node_modules`
+3. ✅ **100% type-safe language** - ReScript, Rust, OCaml, Haskell, F#, Elm, etc.
+4. ✅ **Post-quantum cryptography** implemented
+5. ✅ **WASM modules** for performance-critical code
+6. ✅ **justfile** with 100+ recipes (NO npm scripts)
+7. ✅ **AsciiDoc** for all documentation (4 exceptions allowed)
+8. ✅ **Git SSH-only** - No HTTPS for Git operations
+9. ✅ **Dual licensing** OR strong copyleft
+10. ✅ **Automated maintenance** system
+====
+
+'''
+
+== Core Categories (Silver Tier)
+
+[NOTE]
+====
+Silver tier (100%) requires compliance with **ALL** 11 core categories below.
+Each category contains MANDATORY requirements marked with [CRITICAL].
+====
+
+=== 1. Type Safety [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | Primary language is 100% type-safe | MANDATORY
+| ✅ | All function signatures typed | MANDATORY
+| ✅ | NO `any`, `unknown`, or escape hatches | MANDATORY
+| ✅ | Algebraic data types (ADTs) used | MANDATORY
+| ✅ | Pattern matching over conditionals | RECOMMENDED
+|===
+
+**Approved languages:**
+
+* ReScript, Rust, OCaml, Haskell, F#, Elm, PureScript, Idris, Agda, Coq
+
+**Forbidden languages for primary implementation:**
+
+* ❌ TypeScript - Has escape hatches (`any`, `as`, `!`)
+* ❌ JavaScript - No type system
+* ❌ Python - Dynamic typing
+* ❌ Ruby, PHP, Perl - Dynamic typing
+
+**Rhodium additions:**
+
+* ❌ **NO TypeScript** - Use ReScript, Rust, or other truly type-safe language
+* ❌ **NO JavaScript** - Only compiled output allowed
+* ✅ **Sound type system** - No runtime type errors possible
+
+=== 2. Memory Safety [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | No manual memory management OR Rust/safe language | MANDATORY
+| ✅ | No buffer overflows possible | MANDATORY
+| ✅ | No use-after-free possible | MANDATORY
+| ✅ | No null pointer dereferences OR no nulls | MANDATORY
+|===
+
+**Safe languages:** ReScript, OCaml, Haskell, F#, Elm (garbage collected) +
+**Memory-safe systems languages:** Rust (ownership), Zig (comptime verification)
+
+=== 3. Build System [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | Reproducible builds | MANDATORY
+| ✅ | Build scripts in repository | MANDATORY
+| ✅ | No manual build steps | MANDATORY
+| ✅ | Build documentation complete | MANDATORY
+|===
+
+**Rhodium additions:**
+
+* ❌ **NO package.json** - No npm/yarn/pnpm
+* ❌ **NO Node.js** - Use Deno, Bun, or no JavaScript runtime
+* ✅ **justfile with 100+ recipes** OR equivalent (make, nix, cargo)
+* ✅ **Nix flake** for reproducible builds (RECOMMENDED)
+
+=== 4. Documentation [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | README with installation, usage, examples | MANDATORY
+| ✅ | CONTRIBUTING guide | MANDATORY
+| ✅ | CODE_OF_CONDUCT | MANDATORY
+| ✅ | LICENSE file | MANDATORY
+| ✅ | SECURITY.md (security.txt compatible) | MANDATORY
+| ✅ | CHANGELOG | MANDATORY
+| ✅ | API documentation | MANDATORY
+| ✅ | Architecture documentation | MANDATORY
+|===
+
+**Rhodium additions:**
+
+* ✅ **AsciiDoc format (.adoc)** for all documentation
+* **Exceptions (must remain in original format):**
+  - `SECURITY.md` - Required for security.txt standard
+  - `humans.md` - Required for .well-known/humans.txt
+  - `LICENSE.txt` - Legal requirement
+  - `funding.yml` - GitHub-specific format
+* ✅ **Philosophy documentation** if project has philosophical foundations
+* ✅ **Nickel OR Dhall configuration** (type-safe config)
+
+=== 5. Testing [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | Unit tests for all public functions | MANDATORY
+| ✅ | Integration tests for workflows | MANDATORY
+| ✅ | Test coverage ≥80% | MANDATORY
+| ✅ | Tests run in CI | MANDATORY
+| ✅ | Property-based tests | RECOMMENDED
+|===
+
+**Rhodium additions:**
+
+* ✅ **Property-based testing** for pure functions (MANDATORY)
+* ✅ **Benchmarks** for performance-critical code
+* ✅ **Regression tests** for all fixed bugs
+
+=== 6. Security [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | SECURITY.md with disclosure policy | MANDATORY
+| ✅ | No secrets in repository | MANDATORY
+| ✅ | Dependencies audited regularly | MANDATORY
+| ✅ | Input sanitization throughout | MANDATORY
+| ✅ | No hardcoded credentials | MANDATORY
+|===
+
+**Rhodium additions:**
+
+* ✅ **Post-quantum cryptography:**
+  - Digital signatures: Ed448 OR Dilithium
+  - KEM: Kyber-1024 OR NTRU
+  - Hash: SHAKE256 OR BLAKE3
+  - Password: Argon2id (64MB memory, ≥3 iterations)
+* ✅ **Git SSH-only** - No HTTPS for Git remotes
+* ✅ **TLS 1.3+** for network services
+* ✅ **Security headers** (CSP, COEP, COOP, CORP, Permissions Policy)
+* ✅ **Secret scanning** in CI/CD
+* ✅ **Signed commits** required
+
+=== 7. Accessibility [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | WCAG 2.1 Level AA compliance | MANDATORY
+| ✅ | Semantic HTML with ARIA labels | MANDATORY
+| ✅ | Keyboard navigation support | MANDATORY
+| ✅ | Screen reader compatible | MANDATORY
+| ✅ | High contrast mode | MANDATORY
+| ✅ | No `outline: none` without replacement | MANDATORY
+|===
+
+**Rhodium additions:**
+
+* ✅ **`prefers-reduced-motion` support**
+* ✅ **`prefers-color-scheme` support**
+* ✅ **`prefers-contrast` support**
+
+=== 8. Licensing [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | LICENSE file in repository root | MANDATORY
+| ✅ | SPDX headers in all source files | MANDATORY
+| ✅ | License is OSI-approved | MANDATORY
+| ✅ | Dependencies compatible with project license | MANDATORY
+|===
+
+**Rhodium additions:**
+
+* ✅ **Dual licensing** (e.g., MIT OR AGPL-3.0) OR strong copyleft
+* ✅ **Philosophical overlay** (e.g., Palimpsest License) RECOMMENDED
+* ✅ **Clear license decision tree** for dual licensing
+
+=== 9. Version Control [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | Git repository with complete history | MANDATORY
+| ✅ | Semantic versioning (SemVer 2.0.0) | MANDATORY
+| ✅ | Conventional commits OR structured messages | MANDATORY
+| ✅ | `.gitignore` comprehensive | MANDATORY
+| ✅ | No large binaries in history | MANDATORY
+|===
+
+**Rhodium additions:**
+
+* ✅ **Git hooks** enforcing standards (pre-commit, pre-push, commit-msg)
+* ✅ **SSH-only** Git operations
+* ✅ **Signed commits** with SSH OR GPG
+* ✅ **Branch protection** with required reviews
+
+=== 10. Continuous Integration [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | CI pipeline runs on all PRs | MANDATORY
+| ✅ | Tests run automatically | MANDATORY
+| ✅ | Linting runs automatically | MANDATORY
+| ✅ | Security checks run automatically | MANDATORY
+| ✅ | CI configuration in repository | MANDATORY
+|===
+
+**Rhodium additions:**
+
+* ✅ **8+ required status checks:**
+  1. Tests
+  2. Quality (lint, format, type-check)
+  3. Security audit
+  4. RSR compliance verification
+  5. Accessibility checks
+  6. Documentation verification
+  7. Philosophy integrity (if applicable)
+  8. Benchmarks
+* ✅ **Merge queue** enabled
+* ✅ **Required reviews:** ≥2
+* ✅ **CI uses build system** (justfile, not npm)
+
+=== 11. Community [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | CONTRIBUTING.md with clear guidelines | MANDATORY
+| ✅ | CODE_OF_CONDUCT.md (Contributor Covenant OR equivalent) | MANDATORY
+| ✅ | Issue templates | MANDATORY
+| ✅ | PR template | MANDATORY
+| ✅ | MAINTAINERS.md with current maintainers | MANDATORY
+|===
+
+'''
+
+== Rhodium Tier Requirements
+
+[CRITICAL]
+====
+**To achieve Rhodium tier (200%), ALL Silver requirements PLUS all requirements below MUST be met.**
+====
+
+=== 12. Post-Quantum Cryptography [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | Post-quantum digital signatures implemented | MANDATORY
+| ✅ | Post-quantum KEM implemented | MANDATORY
+| ✅ | Quantum-resistant hash functions | MANDATORY
+| ✅ | Password hashing with Argon2id | MANDATORY
+| ✅ | Strong primes from flat distributions | MANDATORY
+|===
+
+**Approved algorithms:**
+
+* **Signatures:** Ed448, Dilithium-512, SPHINCS+
+* **KEM:** Kyber-1024, NTRU, Classic McEliece
+* **Hash:** SHAKE256, BLAKE3
+* **Password:** Argon2id (memory: 64MB, iterations: ≥3)
+* **AEAD:** ChaCha20-Poly1305, AES-256-GCM
+
+**Implementation requirements:**
+
+* ✅ WASM modules for crypto operations
+* ✅ WebCrypto API integration where possible
+* ✅ Constant-time implementations
+* ✅ Side-channel attack resistance
+
+=== 13. WASM-First Architecture [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | WASM modules for performance-critical code | MANDATORY
+| ✅ | JavaScript minimized (only glue code) | MANDATORY
+| ✅ | Rust OR AssemblyScript for WASM | MANDATORY
+| ✅ | WASM bindings to primary language | MANDATORY
+|===
+
+**Required WASM modules:**
+
+* Performance-critical algorithms
+* Cryptographic operations
+* Graph/network algorithms
+* String processing (if intensive)
+
+**Forbidden:**
+
+* ❌ TypeScript for WASM compilation
+* ❌ JavaScript for performance-critical code
+
+=== 14. NO TypeScript/Node.js [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ❌ | Zero TypeScript files (`*.ts`) | MANDATORY
+| ❌ | No `package.json` | MANDATORY
+| ❌ | No `node_modules/` | MANDATORY
+| ❌ | No `tsconfig.json` | MANDATORY
+| ❌ | No npm/yarn/pnpm usage | MANDATORY
+|===
+
+**Use instead:**
+
+* **Primary language:** ReScript, Rust, OCaml, Haskell, F#, Elm, PureScript
+* **Runtime (if needed):** Deno, Bun (NO Node.js)
+* **Build system:** justfile, make, nix, cargo, dune
+
+**Rationale:**
+
+TypeScript and Node.js are eliminated because:
+
+1. **TypeScript is NOT truly type-safe** - Escape hatches (`any`, `as`, `!`) allow runtime type errors
+2. **npm ecosystem has security/supply-chain issues** - Frequent package compromises, typosquatting
+3. **Node.js has performance limitations** - Single-threaded, slow startup
+4. **Better alternatives exist** - ReScript (sound type system), Rust (performance + safety)
+
+=== 15. Massive CLI (100+ Recipes) [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | Build system with ≥100 recipes/commands | MANDATORY
+| ✅ | Comprehensive help documentation | MANDATORY
+| ✅ | Categorized commands | MANDATORY
+| ✅ | No manual build steps | MANDATORY
+|===
+
+**Tool:** justfile, make, nix, or custom CLI
+
+**Required recipe categories (10 minimum):**
+
+1. **Development** - build, clean, watch, dev
+2. **Testing** - test, coverage, test-watch
+3. **Quality** - lint, fmt, type-check
+4. **Security** - audit, crypto-test, ssh-verify
+5. **Benchmarks** - bench, perf-profile
+6. **Documentation** - docs, docs-serve
+7. **Release** - release, package, publish
+8. **RSR Compliance** - verify-rsr, rsr-*
+9. **Git Operations** - commit, push, pre-commit
+10. **CI/CD** - ci, ci-pr, ci-main
+
+=== 16. Browser Future-Proofing [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | Cross-Origin Isolation (COI) enabled | MANDATORY
+| ✅ | COEP: require-corp header | MANDATORY
+| ✅ | COOP: same-origin header | MANDATORY
+| ✅ | CORP: same-origin header | MANDATORY
+| ✅ | Permissions Policy configured | MANDATORY
+| ✅ | Modern web APIs used | MANDATORY
+|===
+
+**Modern APIs:**
+
+* SharedArrayBuffer (requires COI)
+* WebGPU compute
+* WebCodecs
+* File System Access API
+* Storage API
+
+=== 17. Git SSH-Only [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | All Git remotes use SSH (`git@...`) | MANDATORY
+| ✅ | No HTTPS Git remotes (`https://...`) | MANDATORY
+| ✅ | Git hooks verify SSH usage | MANDATORY
+| ✅ | CI/CD uses SSH (deploy keys) | MANDATORY
+|===
+
+**Verification:**
+
+[source,bash]
+----
+git remote -v | grep -q "git@" && echo "✅ SSH" || echo "❌ HTTPS"
+----
+
+=== 18. TLS/SSL Best Practices [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | TLS 1.3+ only | MANDATORY
+| ✅ | HSTS with preload | MANDATORY
+| ✅ | OCSP Stapling | MANDATORY
+| ✅ | Strong ciphers only | MANDATORY
+| ✅ | Certificate pinning (if applicable) | RECOMMENDED
+|===
+
+=== 19. Nickel Configuration [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | Type-safe configuration language | MANDATORY
+| ✅ | All settings in one source of truth | MANDATORY
+| ✅ | Configuration validation at build time | MANDATORY
+|===
+
+**Approved tools:**
+
+* Nickel (RECOMMENDED)
+* Dhall
+* CUE
+* Jsonnet (with strict typing)
+
+=== 20. Formal Verification [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | Critical algorithms have proofs | MANDATORY
+| ✅ | Proof artifacts in repository | MANDATORY
+| ✅ | Proofs verified in CI | MANDATORY
+|===
+
+**Approved tools:**
+
+* TLA+ (distributed systems)
+* Coq (functional correctness)
+* Isabelle/HOL
+* Lean
+* F* (cryptographic protocols)
+
+=== 21. Automated Maintenance [CRITICAL]
+
+[cols="1,3,1"]
+|===
+| Check | Requirement | Status
+
+| ✅ | Automated system detects violations | MANDATORY
+| ✅ | Automated cleanup runs regularly | MANDATORY
+| ✅ | Violation reports generated | MANDATORY
+| ✅ | Manual intervention not required | MANDATORY
+|===
+
+**Example:** Salt Robot (8-phase automated maintenance)
+
+**Required phases:**
+
+1. Detect forbidden files (TypeScript, package.json)
+2. Verify required files present
+3. Clean build artifacts
+4. Verify Git configuration (SSH-only)
+5. Check code quality
+6. Verify RSR compliance
+7. Security scans
+8. Generate report
+
+'''
+
+== Verification Checklist
+
+=== Phase 1: Core Requirements (Silver Tier)
+
+[cols="1,4"]
+|===
+| ☐ | **R1: Type Safety** - 100% type-safe language, no escape hatches
+| ☐ | **R2: Memory Safety** - No manual memory management OR Rust
+| ☐ | **R3: Build System** - Reproducible builds, all scripts in repo
+| ☐ | **R4: Documentation** - All required files (README, CONTRIBUTING, etc.)
+| ☐ | **R5: Testing** - ≥80% coverage, unit + integration tests
+| ☐ | **R6: Security** - SECURITY.md, dependency audits, input sanitization
+| ☐ | **R7: Accessibility** - WCAG 2.1 AA, keyboard navigation, screen readers
+| ☐ | **R8: Licensing** - OSI-approved license, SPDX headers
+| ☐ | **R9: Version Control** - Git, SemVer, conventional commits
+| ☐ | **R10: CI/CD** - Automated tests, linting, security checks
+| ☐ | **R11: Community** - CODE_OF_CONDUCT, issue templates
+|===
+
+=== Phase 2: Rhodium Requirements
+
+[cols="1,4"]
+|===
+| ☐ | **R12: Post-Quantum Crypto** - Ed448, Kyber-1024, SHAKE256, Argon2id
+| ☐ | **R13: WASM-First** - Rust WASM modules for performance-critical code
+| ☐ | **R14: NO TypeScript/Node.js** - Zero .ts files, no package.json
+| ☐ | **R15: Massive CLI** - ≥100 justfile recipes in 10 categories
+| ☐ | **R16: Browser Future-Proofing** - COI (COEP+COOP+CORP headers)
+| ☐ | **R17: Git SSH-Only** - No HTTPS remotes, SSH verified in hooks
+| ☐ | **R18: TLS/SSL** - TLS 1.3+, HSTS with preload
+| ☐ | **R19: Nickel Config** - Type-safe configuration files
+| ☐ | **R20: Formal Verification** - TLA+/Coq proofs for critical algorithms
+| ☐ | **R21: Automated Maintenance** - Salt Robot or equivalent
+|===
+
+'''
+
+== Migration Guide
+
+=== From TypeScript/Node.js to Rhodium Tier
+
+[WARNING]
+====
+This is a **COMPLETE** migration. You will eliminate TypeScript, Node.js, npm, and package.json entirely. This is not compatible with gradual migration - it requires full commitment.
+====
+
+==== Step 1: Choose Your New Stack
+
+**Primary language options:**
+
+1. **ReScript** - Best for web/UI, familiar syntax, excellent interop
+2. **Rust** - Best for systems/CLI/WASM, highest performance
+3. **OCaml** - Best for compilers/parsers, mature ecosystem
+4. **F#** - Best for .NET ecosystem, excellent tooling
+
+**Recommended for most projects:** ReScript + Rust WASM
+
+==== Step 2: Port TypeScript Code to ReScript
+
+[source,bash]
+----
+# Install ReScript
+just rescript-install  # or manual installation
+
+# Create ReScript config
+cat > bsconfig.json <<EOF
+{
+  "name": "your-project",
+  "sources": [{"dir": "src", "subdirs": true}],
+  "package-specs": [{"module": "es6", "in-source": true}],
+  "suffix": ".res.js",
+  "bs-dependencies": []
+}
+EOF
+
+# Port files one by one
+# TypeScript:     src/core/Foo.ts
+# ReScript:       src/core/Foo.res
+----
+
+==== Step 3: Create Rust WASM Modules
+
+[source,bash]
+----
+# Create WASM workspace
+mkdir -p src/wasm
+cd src/wasm
+
+# Initialize Cargo workspace
+cat > Cargo.toml <<EOF
+[workspace]
+members = ["crypto", "algorithms"]
+
+[workspace.dependencies]
+wasm-bindgen = "0.2"
+EOF
+
+# Create crypto module
+cargo new --lib crypto
+cd crypto
+cargo add wasm-bindgen
+----
+
+==== Step 4: Replace package.json with justfile
+
+[source,bash]
+----
+# Delete Node.js artifacts
+rm -rf package.json package-lock.json node_modules tsconfig.json
+
+# Create justfile
+cat > justfile <<'EOF'
+# Development
+build:
+    rescript build
+    cargo build --target wasm32-unknown-unknown
+
+dev:
+    rescript build -w
+
+# Testing
+test:
+    deno test src/
+
+# Quality
+fmt:
+    deno fmt
+
+lint:
+    deno lint
+EOF
+----
+
+==== Step 5: Update CI/CD
+
+Replace npm-based CI with Deno + ReScript + Rust:
+
+[source,yaml]
+----
+- name: Setup Deno
+  uses: denoland/setup-deno@v1
+
+- name: Setup Rust
+  uses: dtolnay/rust-toolchain@stable
+  with:
+    targets: wasm32-unknown-unknown
+
+- name: Build
+  run: just build
+
+- name: Test
+  run: just test
+----
+
+==== Step 6: Implement Post-Quantum Crypto
+
+See Requirement R12 for approved algorithms and implementation guidance.
+
+==== Step 7: Verify RSR Compliance
+
+[source,bash]
+----
+just verify-rsr  # Should report 200% (Rhodium tier)
+----
+
+'''
+
+== FAQ
+
+=== Why eliminate TypeScript?
+
+TypeScript is NOT truly type-safe. It has multiple escape hatches (`any`, `as`, `unknown`, `!`) that allow runtime type errors. RSR requires **sound type systems** where type errors are impossible at runtime.
+
+**Better alternatives:** ReScript, Rust, OCaml, Haskell, F#
+
+=== Why 100+ recipes in the CLI?
+
+A comprehensive CLI demonstrates operational maturity. It means every operation is documented, automated, and reproducible. Manual steps are error-prone and violate RSR's automation principles.
+
+=== Can I use TypeScript for build scripts?
+
+❌ **NO.** Rhodium tier means **zero TypeScript files** anywhere in the repository. Use ReScript, Rust, or shell scripts for build automation.
+
+=== What if my project needs npm packages?
+
+If you need npm packages, you cannot achieve Rhodium tier. Consider:
+
+1. **Port to ReScript** - Many npm packages have ReScript bindings
+2. **Rewrite in Rust** - Implement functionality in Rust WASM
+3. **Use Deno** - Many npm packages work in Deno via CDN
+
+=== Is Deno allowed?
+
+✅ **YES.** Deno is allowed because:
+
+1. It's NOT Node.js (different runtime)
+2. No package.json required
+3. Better security model
+4. Native TypeScript support (though you won't use TypeScript)
+
+=== What about backwards compatibility?
+
+Rhodium tier is NOT about backwards compatibility. It's about **forward progress**. If you need to support legacy Node.js/TypeScript, you cannot achieve Rhodium tier.
+
+=== How long does Rhodium certification take?
+
+Achieving Rhodium tier from scratch typically requires **2-6 months** depending on project size. Migration from existing TypeScript projects may take longer due to the complete rewrite required.
+
+'''
+
+== Extension Points
+
+RSR is designed to evolve without breaking existing implementations. New requirements are added as **optional Appendices** and only become mandatory in **major version updates** (v4.0, v5.0, etc.).
+
+=== Appendix A: Language-Specific Requirements (Optional)
+
+Future language-specific best practices may be added here without breaking v3.0 compliance.
+
+=== Appendix B: Domain-Specific Requirements (Optional)
+
+Industry-specific requirements (e.g., medical, financial, aerospace) may be added here.
+
+=== Appendix C: Future Requirements (Draft)
+
+Requirements being considered for RSR v4.0:
+
+* **Quantum-resistant signatures:** Upgrade to NIST PQC finalists
+* **Zero-knowledge proofs:** For privacy-critical applications
+* **WebGPU compute:** For ML/AI workloads
+* **Formal semantics:** Machine-verified language specifications
+
+'''
+
+== Governance
+
+=== Versioning
+
+RSR follows Semantic Versioning 3.0.0:
+
+* **Major (4.0):** Breaking changes to requirements (new mandatory items)
+* **Minor (3.1):** New optional requirements (Appendices)
+* **Patch (3.0.1):** Clarifications, typo fixes, documentation improvements
+
+=== Change Process
+
+1. **Proposal:** Submit RFC to https://github.com/hyperpolymath/rhodium-standard-repositories/issues
+2. **Discussion:** Community feedback period (14 days minimum)
+3. **Vote:** Maintainers vote (2/3 majority required)
+4. **Implementation:** Version bump, changelog update
+5. **Announcement:** Blog post, documentation update
+
+=== Maintainers
+
+Current RSR maintainers:
+
+* Jonathan (@Hyperpolymath) - Creator, Fogbinder reference implementation
+
+**To become a maintainer:**
+
+* Achieve Rhodium tier in ≥2 projects
+* Active community participation (6+ months)
+* Nominated by existing maintainer
+* Approved by maintainer vote (2/3 majority)
+
+'''
+
+== Reference Implementations
+
+=== Fogbinder
+
+**Repository:** https://github.com/Hyperpolymath/fogbinder +
+**Tier:** Rhodium (200%) +
+**Status:** Complete +
+**Architecture:** ReScript + Rust WASM + Deno
+
+**Stats:**
+
+* **0** TypeScript files
+* **0** Node.js dependencies
+* **128** justfile recipes
+* **8** required CI checks
+* **4** WASM modules (crypto, contradiction detector, graph algorithms, string similarity)
+* **3** Git hooks (pre-commit, pre-push, commit-msg)
+* **1** Salt Robot automation system
+
+**Crypto:**
+
+* Ed448 signatures
+* Kyber-1024 KEM
+* SHAKE256 + BLAKE3 hashing
+* Argon2id password hashing (64MB, 3 iterations)
+
+'''
+
+== License
+
+This standard is released under **CC BY-SA 4.0** (Creative Commons Attribution-ShareAlike 4.0 International).
+
+**You are free to:**
+
+* **Share** - Copy and redistribute in any medium or format
+* **Adapt** - Remix, transform, and build upon the material
+
+**Under these terms:**
+
+* **Attribution** - Give appropriate credit, provide link to license
+* **ShareAlike** - Distribute contributions under same license
+* **No additional restrictions** - No DRM, patent claims, or legal terms
+
+'''
+
+== Changelog
+
+=== v3.0.0 (2025-11-29)
+
+**Added:**
+
+* Rhodium tier requirements fully specified (R12-R21)
+* Post-quantum cryptography mandatory (Ed448, Kyber-1024, SHAKE256)
+* WASM-first architecture requirement
+* NO TypeScript/Node.js requirement with rationale
+* Massive CLI (100+ recipes) requirement
+* Nickel/Dhall type-safe configuration requirement
+* Automated maintenance requirement (Salt Robot)
+* Migration guide from TypeScript/Node.js
+* Extension points for future requirements (Appendices A-C)
+* Comprehensive FAQ section
+* Reference implementation section
+* Official RSR badges (Rhodium/Gold/Silver/Bronze)
+* Checklist format for all requirements
+* LLM optimization ([CRITICAL] markers, structured format)
+
+**Changed:**
+
+* Restructured document for LLM comprehension
+* All mandatory requirements now marked [CRITICAL]
+* Checklist format for easy verification
+* Clearer tier separation and progression
+
+**Deprecated:**
+
+* RSR v1.0, v2.0 specifications (use v3.0)
+
+'''
+
+[.text-center]
+**RSR: Rhodium Standard Repository v3.0** +
+Last Updated: 2025-11-29 +
+Status: Stable +
+License: CC BY-SA 4.0 +
+Repository: https://github.com/hyperpolymath/rhodium-standard-repositories
+
+[.text-center]
+link:https://github.com/hyperpolymath/rhodium-standard-repositories[image:badges/rhodium.svg[RSR Rhodium,width=200]]
+
+[.text-center]
+_"Excellence through automation, security through design, quality through verification."_

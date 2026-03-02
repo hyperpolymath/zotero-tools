@@ -1,0 +1,650 @@
+= Contributing to Fogbinder
+:toc: left
+:toclevels: 3
+:icons: font
+
+Thank you for your interest in contributing to Fogbinder! This document provides guidelines for contributing to the project.
+
+'''
+
+== Code of Conduct
+
+All contributors must adhere to our link:CODE_OF_CONDUCT.adoc[Code of Conduct]. We are committed to providing a welcoming and inclusive environment for everyone.
+
+**TL;DR:** Be kind, be professional, be respectful.
+
+'''
+
+== Getting Started
+
+=== Prerequisites
+
+* **Deno** >= 1.40 (link:https://deno.land/[Install Deno])
+* **ReScript** compiler (link:https://rescript-lang.org/[Install ReScript])
+* **Rust** + Cargo for WASM modules (link:https://rustup.rs/[Install Rust])
+* **just** command runner (link:https://just.systems/[Install just])
+* **Git with SSH** (link:https://git-scm.com/[Install Git])
+* **Nix** (optional, for reproducible builds) (link:https://nixos.org/download.html[Install Nix])
+
+[IMPORTANT]
+====
+**NO TypeScript, NO Node.js, NO npm** +
+Fogbinder uses ReScript + WASM exclusively. If you're coming from a TypeScript/Node.js background, see link:CLAUDE.adoc[CLAUDE.adoc] for migration guidance.
+====
+
+=== First-Time Setup
+
+[source,bash]
+----
+# 1. Fork the repository on GitHub
+
+# 2. Clone your fork via SSH (HTTPS forbidden)
+git clone git@github.com:YOUR_USERNAME/fogbinder.git
+cd fogbinder
+
+# 3. Build ReScript
+just build-rescript
+
+# 4. Build WASM modules
+just build-wasm
+
+# 5. Run tests
+just test
+
+# 6. Verify RSR Rhodium compliance
+just verify-rsr
+
+# 7. View all available commands
+just --list
+----
+
+[WARNING]
+====
+**Git SSH-only:** All Git operations must use SSH, never HTTPS. +
+See link:security/GIT_SSH_CONFIG.adoc[GIT_SSH_CONFIG.adoc] for SSH configuration.
+====
+
+=== Finding Issues to Work On
+
+Good first issues are tagged with:
+
+* `good first issue` - Great for newcomers
+* `help wanted` - Maintainers need help
+* `documentation` - Writing and improving docs
+* `bug` - Something isn't working
+* `rescript` - ReScript-specific issues
+* `wasm` - WASM module development
+
+**Before starting:** Comment on the issue to let us know you're working on it.
+
+'''
+
+== TPCF Contribution Model
+
+Fogbinder uses the **Tri-Perimeter Contribution Framework (TPCF)** - see link:TPCF.adoc[TPCF.adoc] for details.
+
+=== Perimeter 3: Community Sandbox (Default)
+
+**Most contributors operate here:**
+
+✅ **Can do:**
+
+* Fork repository
+* Submit pull requests
+* Report issues
+* Participate in discussions
+* Propose new features
+
+❌ **Cannot do:**
+
+* Direct commits to `main` branch
+* Merge pull requests
+* Create releases
+* Modify core architecture without approval
+
+=== Perimeter 2: Extended Team (By Invitation)
+
+**Trusted contributors with elevated access:**
+
+✅ **Additional privileges:**
+
+* Triage issues
+* Review pull requests
+* Merge approved PRs
+* Participate in roadmap discussions
+
+**How to join:** Consistent, high-quality contributions over 3+ months.
+
+=== Perimeter 1: Core Team (Maintainers)
+
+See link:MAINTAINERS.adoc[MAINTAINERS.adoc] for current core team members.
+
+'''
+
+== Development Workflow
+
+=== Branch Strategy
+
+We use **GitHub Flow**:
+
+[source,bash]
+----
+# 1. Create feature branch from main
+git checkout main
+git pull origin main
+git checkout -b feature/your-feature-name
+
+# 2. Make changes
+# ... code ...
+
+# 3. Commit frequently
+git add .
+git commit -m "Add feature X"
+
+# 4. Push to your fork via SSH
+git push origin feature/your-feature-name
+
+# 5. Open pull request on GitHub
+----
+
+=== Branch Naming
+
+* `feature/description` - New features
+* `fix/description` - Bug fixes
+* `docs/description` - Documentation
+* `refactor/description` - Code refactoring
+* `test/description` - Test additions
+* `wasm/description` - WASM module work
+* `rescript/description` - ReScript improvements
+
+=== Commit Messages
+
+Follow **Conventional Commits**:
+
+[source]
+----
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+----
+
+**Types:**
+
+* `feat`: New feature
+* `fix`: Bug fix
+* `docs`: Documentation
+* `style`: Formatting (no code change)
+* `refactor`: Code restructuring
+* `test`: Adding tests
+* `perf`: Performance improvement
+* `chore`: Build/tooling changes
+* `wasm`: WASM module changes
+* `rescript`: ReScript migration
+
+**Examples:**
+
+[source]
+----
+feat(contradiction): Add language game conflict detection
+
+Implements Wittgensteinian contradiction detection that identifies
+language game conflicts rather than logical contradictions.
+
+Closes #42
+----
+
+[source]
+----
+fix(mood): Correct felicity condition checking
+
+Austin's felicity conditions were incorrectly evaluated in edge cases.
+This fixes the logic to properly handle infelicitous speech acts.
+----
+
+[source]
+----
+rescript: Migrate EpistemicState from TypeScript to ReScript
+
+Complete migration of EpistemicState module to ReScript with
+full type safety and property-based testing.
+
+BREAKING CHANGE: Removes TypeScript implementation
+----
+
+'''
+
+== Coding Standards
+
+=== ReScript
+
+[source,rescript]
+----
+// 1. Use descriptive names
+let analyzeEpistemicState = (state: t) => {
+  // Implementation
+}
+
+// 2. Document complex logic
+/**
+ * Detects contradictions as language game conflicts.
+ * NOTE: This is NOT logical contradiction!
+ */
+let detectContradiction = (act1, act2) => {
+  // Implementation
+}
+
+// 3. Prefer pattern matching over if/else
+let classify = state =>
+  switch state.certainty {
+  | Known => "Clear"
+  | Mysterious => "Opaque"
+  | _ => "Ambiguous"
+  }
+
+// 4. No Obj.magic (unsafe casts)
+// If you need it, your types are wrong
+
+// 5. Avoid imperative code
+// Prefer map/filter/reduce over for loops
+
+// 6. Use Belt standard library
+Belt.Array.map(items, processItem)
+
+// 7. Type all function signatures
+let processData: (array<string>, context) => result<output, error>
+----
+
+=== Rust/WASM
+
+[source,rust]
+----
+// 1. Use descriptive names
+pub fn detect_contradictions(sources: &[String]) -> Vec<Contradiction> {
+    // Implementation
+}
+
+// 2. Document public APIs
+/// Detects contradictions using language game analysis.
+///
+/// # Arguments
+/// * `sources` - Array of source texts
+/// * `context` - Language game context
+///
+/// # Returns
+/// Vector of detected contradictions
+#[wasm_bindgen]
+pub fn detect_contradictions(sources: Vec<String>) -> Vec<Contradiction> {
+    // Implementation
+}
+
+// 3. Handle errors properly
+pub fn analyze(input: &str) -> Result<Analysis, AnalysisError> {
+    // Implementation
+}
+
+// 4. No unsafe code without justification
+// Document why unsafe is needed
+
+// 5. Use #[wasm_bindgen] for exports
+#[wasm_bindgen]
+pub struct EpistemicState {
+    // Fields
+}
+----
+
+=== General
+
+* **100 characters max line length**
+* **2 spaces for indentation** (ReScript, Rust)
+* **No trailing whitespace**
+* **Newline at end of file**
+* **No emojis in code** (professional unless explicitly requested)
+
+**Formatting:**
+
+[source,bash]
+----
+# Auto-format code
+just fmt
+
+# Individual formatters
+just fmt-rescript
+just fmt-rust
+deno fmt
+----
+
+'''
+
+== Testing Requirements
+
+=== All contributions must include tests
+
+**Minimum requirements:**
+
+* Unit tests for new functions
+* Integration tests for new features
+* Property-based tests for pure functions
+* Existing tests must pass
+
+=== Running Tests
+
+[source,bash]
+----
+# All tests
+just test
+
+# ReScript tests only
+just test-rescript
+
+# WASM tests only
+just test-wasm
+
+# Specific test file
+deno test src/EpistemicState.test.res.js
+
+# Watch mode
+just test-watch
+
+# With coverage
+just coverage
+----
+
+=== Writing Tests (ReScript)
+
+[source,rescript]
+----
+// EpistemicState.test.res
+module EpistemicStateTest = {
+  open EpistemicState
+
+  // Unit test
+  let testKnownState = () => {
+    let state = make(Known, "Context", ["Evidence"], None)
+    assert(state.certainty == Known)
+    assert(isUncertain(state) == false)
+  }
+
+  // Property-based test
+  let testMergeCommutativity = () => {
+    let state1 = make(Known, "A", ["E1"], None)
+    let state2 = make(Probable(0.8), "B", ["E2"], None)
+
+    let mergeAB = merge(state1, state2)
+    let mergeBA = merge(state2, state1)
+
+    assert(mergeAB.certainty == mergeBA.certainty)
+  }
+
+  // Run all tests
+  let runTests = () => {
+    testKnownState()
+    testMergeCommutativity()
+    Js.Console.log("✅ All tests passed")
+  }
+}
+----
+
+=== Test Coverage Goals
+
+* **New features:** 80%+ coverage
+* **Bug fixes:** Add regression test
+* **Refactoring:** Maintain existing coverage
+
+'''
+
+== Documentation
+
+=== Code Documentation
+
+**ReScript:**
+
+[source,rescript]
+----
+/**
+ * Analyzes epistemic state for genuine ambiguity.
+ *
+ * Returns true if state represents uncertainty that cannot
+ * be reduced to lack of information (Wittgenstein's sense).
+ */
+let isGenuinelyAmbiguous: t => bool
+----
+
+**Rust:**
+
+[source,rust]
+----
+/// Analyzes source texts for epistemic patterns
+///
+/// # Arguments
+/// * `sources` - Array of citation texts
+/// * `context` - Language game context
+///
+/// # Returns
+/// Complete analysis result
+///
+/// # Example
+/// ```
+/// let result = analyze(vec!["source 1"], context);
+/// ```
+#[wasm_bindgen]
+pub fn analyze(sources: Vec<String>, context: Context) -> AnalysisResult {
+    // Implementation
+}
+----
+
+=== User Documentation (AsciiDoc)
+
+Update when adding user-facing features:
+
+* `README.adoc` - Usage examples
+* `API.adoc` - API reference
+* `PHILOSOPHY.adoc` - Philosophical rationale (if applicable)
+* `docs/cookbooks/` - Working examples
+
+[IMPORTANT]
+====
+**All documentation must be in AsciiDoc (.adoc)** except:
+
+* `SECURITY.md` - Required for security.txt compatibility
+* `humans.md` - Required for .well-known/humans.txt
+* `LICENSE.txt` - Legal requirement
+* `funding.yml` - GitHub-specific YAML
+====
+
+'''
+
+== Submitting Changes
+
+=== Before Submitting
+
+✅ **Checklist:**
+
+* [ ] Code follows style guide
+* [ ] Tests added and passing
+* [ ] Documentation updated (AsciiDoc format)
+* [ ] Commits follow conventional format
+* [ ] No merge conflicts with `main`
+* [ ] `just quality` passes
+* [ ] `just security-audit` passes
+* [ ] `just verify-rsr` passes
+* [ ] No TypeScript, Node.js, or npm introduced
+* [ ] Git operations use SSH only
+
+=== Pull Request Process
+
+1. **Create PR** on GitHub
+2. **Fill out PR template** (see `.github/PULL_REQUEST_TEMPLATE.md`)
+3. **Link related issues** ("Closes #42")
+4. **Request review** from maintainers
+5. **Address feedback**
+6. **Wait for approval** (2 approvals required)
+7. **Merge** (maintainers will merge)
+
+=== PR Title Format
+
+[source]
+----
+<type>(<scope>): <description>
+----
+
+**Example:**
+
+[source]
+----
+feat(mood): Add speech act analysis for Zotero notes
+----
+
+'''
+
+== Review Process
+
+=== What We Look For
+
+✅ **Code Quality:**
+
+* Follows style guide
+* Well-structured and readable
+* Appropriate abstractions
+* No unnecessary complexity
+* 100% type-safe (ReScript)
+
+✅ **Philosophical Alignment:**
+
+* Respects late Wittgenstein / Austin foundations
+* Types encode correct commitments
+* No over-formalization
+
+✅ **Testing:**
+
+* Adequate test coverage
+* Tests are meaningful
+* Edge cases handled
+* Property-based tests for pure functions
+
+✅ **Documentation:**
+
+* Code is documented
+* User docs updated if needed (in AsciiDoc)
+* CHANGELOG.adoc updated
+
+✅ **Security:**
+
+* Input sanitization present
+* No weak cryptography
+* No secrets in code
+* Post-quantum crypto used where applicable
+
+✅ **Architecture:**
+
+* ReScript + WASM only
+* No TypeScript, Node.js, or npm
+* Deno runtime
+* Git SSH-only
+
+=== Review Timeline
+
+* **Initial review:** Within 3 business days
+* **Subsequent reviews:** Within 2 business days
+* **Merge:** After 2 approvals + CI passing
+
+=== Addressing Feedback
+
+* **Be responsive** to review comments
+* **Ask questions** if feedback is unclear
+* **Don't take it personally** - we're all learning
+* **Update PR** based on feedback
+* **Request re-review** when ready
+
+'''
+
+== Communication
+
+=== GitHub
+
+* **Issues:** Bug reports, feature requests
+* **Discussions:** General questions, ideas
+* **Pull Requests:** Code contributions
+
+=== Response Times
+
+* **Critical bugs:** 24 hours
+* **Security issues:** Immediate (see link:SECURITY.md[SECURITY.md])
+* **Issues:** 3 business days
+* **PRs:** 3 business days
+* **Discussions:** Best effort
+
+=== Getting Help
+
+**Stuck?** Ask for help!
+
+1. Check link:DEVELOPMENT.adoc[DEVELOPMENT.adoc]
+2. Check link:CLAUDE.adoc[CLAUDE.adoc] (technical guide)
+3. Search existing issues/discussions
+4. Ask in PR comments
+5. Open a discussion thread
+
+'''
+
+== Recognition
+
+=== Contributors
+
+All contributors are listed in:
+
+* `CONTRIBUTORS.adoc` (auto-generated)
+* `.well-known/humans.txt`
+* GitHub contributors page
+
+=== Significant Contributions
+
+We recognize significant contributions with:
+
+* Mention in release notes
+* Featured in CHANGELOG.adoc
+* Invitation to Perimeter 2 (Extended Team)
+
+'''
+
+== License
+
+By contributing, you agree that your contributions will be licensed under **BOTH** the MIT and AGPL-3.0 licenses (dual licensing). See link:LICENSE_DUAL.adoc[LICENSE_DUAL.adoc] for details.
+
+**Important:**
+
+* Your contributions must be your original work
+* You must have rights to contribute the code
+* No proprietary/copyrighted code
+* Contributors sign the Contributor License Agreement (CLA)
+
+=== Contributor License Agreement (CLA)
+
+By submitting a pull request, you agree to:
+
+1. Grant rights under **both** MIT and AGPL-3.0 licenses
+2. Certify that your contribution is your original work
+3. Accept the Palimpsest License philosophical commitments
+
+'''
+
+== Questions?
+
+* **General:** Open a GitHub Discussion
+* **Security:** See link:SECURITY.md[SECURITY.md]
+* **Philosophical:** See link:PHILOSOPHY.adoc[PHILOSOPHY.adoc]
+* **Development:** See link:DEVELOPMENT.adoc[DEVELOPMENT.adoc]
+* **Technical:** See link:CLAUDE.adoc[CLAUDE.adoc]
+
+'''
+
+**Thank you for contributing to Fogbinder!**
+
+Every contribution, no matter how small, helps advance the project's mission of navigating epistemic ambiguity in research.
+
+'''
+
+**Last Updated:** 2025-11-29 +
+**Version:** 0.1.0 +
+**License:** MIT OR AGPL-3.0 (with Palimpsest) +
+**RSR Tier:** Rhodium

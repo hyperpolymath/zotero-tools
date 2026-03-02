@@ -1,0 +1,27 @@
+version: 2
+updates:
+  # Keep GitHub Actions up to date with commit SHAs
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    open-pull-requests-limit: 10
+
+  # Keep Cargo dependencies up to date (WASM modules)
+  - package-ecosystem: "cargo"
+    directory: "/src/wasm"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "rust"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    open-pull-requests-limit: 5

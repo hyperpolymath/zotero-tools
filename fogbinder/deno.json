@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"],
+    "strict": true,
+    "checkJs": false
+  },
+  "tasks": {
+    "dev": "deno run --allow-all --watch src/main.ts",
+    "build": "deno run --allow-all scripts/build.ts",
+    "build:wasm": "deno run --allow-all scripts/build_wasm.ts",
+    "test": "deno test --allow-all",
+    "bundle": "deno bundle src/main.ts dist/fogbinder.js",
+    "fmt": "deno fmt",
+    "lint": "deno lint"
+  },
+  "imports": {
+    "@/": "./src/",
+    "@core/": "./src/core/",
+    "@engine/": "./src/engine/",
+    "@zotero/": "./src/zotero/"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "preserve"
+  }
+}

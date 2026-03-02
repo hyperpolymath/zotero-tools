@@ -1,0 +1,11 @@
+/* Accessibility-conscious styles */
+:focus {
+  outline: 2px solid #005fcc;
+}
+.high-contrast {
+  background-color: #000;
+  color: #fff;
+}
+[aria-label]::after {
+  content: attr(aria-label);
+}

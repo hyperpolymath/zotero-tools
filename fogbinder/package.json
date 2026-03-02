@@ -1,0 +1,9 @@
+{
+  "name": "fogbinder",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "rescript": "^12.0.2"
+  }
+}

@@ -1,0 +1,418 @@
+# Fogbinder Architecture: ReScript + WASM Only
+
+**Pure functional architecture with zero TypeScript/Node.js**
+
+---
+
+## Core Philosophy
+
+**"One language to rule them all, and in the WASM bind them"**
+
+- **ReScript** for ALL logic (no TypeScript, minimal JavaScript)
+- **WASM** (WebAssembly) for performance-critical paths
+- **Deno** as runtime (supports WASM natively)
+- **Zero Node.js** dependency
+
+---
+
+## Architecture Layers
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  USER LAYER                                                  │
+│  - Zotero Desktop                                            │
+│  - Deno CLI (for standalone usage)                           │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  API LAYER (ReScript)                                        │
+│  - Fogbinder.res (main orchestration)                        │
+│  - Public API functions                                      │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  CORE LOGIC (ReScript)                                       │
+│  - EpistemicState.res                                        │
+│  - SpeechAct.res                                             │
+│  - FamilyResemblance.res                                     │
+│  - ContradictionDetector.res                                 │
+│  - MoodScorer.res                                            │
+│  - MysteryClustering.res                                     │
+│  - FogTrailVisualizer.res                                    │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  WASM LAYER (Performance-Critical)                           │
+│  - ReScript → WASM compilation                               │
+│  - Heavy computation (100+ source analysis)                  │
+│  - Large graph operations                                    │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  RUNTIME (Deno)                                              │
+│  - Execute ReScript-compiled JavaScript                      │
+│  - Execute WASM modules                                      │
+│  - No Node.js, no npm                                        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Compilation Pipeline
+
+### Current (To Be Removed)
+```
+TypeScript → tsc → JavaScript
+ReScript → rescript → JavaScript
+npm → Node.js → package management
+```
+
+### New (Pure ReScript)
+```
+ReScript → rescript → JavaScript (ES6) → Deno
+ReScript → rescript → WASM → Deno
+```
+
+---
+
+## Testing Architecture
+
+### Current (TypeScript-based)
+- `*.test.ts` files
+- Deno test runner
+- fast-check (npm package)
+
+### New (ReScript-based)
+- `*.test.res` files (ReScript tests)
+- Inline tests with `%%private` annotations
+- Property tests in ReScript
+- No external testing dependencies
+
+---
+
+## Build System
+
+### Removed
+- `npm` / `package.json` / `node_modules/`
+- TypeScript compiler (`tsc`)
+- Node.js runtime
+
+### Kept
+- **ReScript compiler** (installed via Deno or standalone)
+- **Deno** (JavaScript + WASM runtime)
+- **just** (task runner)
+- **Nix** (reproducible builds)
+- **Nickel** (NEW - configuration language)
+
+---
+
+## ReScript → WASM Compilation
+
+### Strategy
+
+ReScript doesn't directly compile to WASM yet, so we use:
+
+**Option 1: AssemblyScript Bridge**
+```
+ReScript → JavaScript → AssemblyScript → WASM
+```
+
+**Option 2: Rust/C Bridge (for critical paths)**
+```
+ReScript → JavaScript (orchestration)
+Rust → WASM (heavy computation)
+ReScript bindings → Rust WASM
+```
+
+**Option 3: Grain Language**
+```
+Grain (WASM-first functional language) → WASM
+ReScript → JavaScript (high-level logic)
+Grain WASM modules (low-level computation)
+```
+
+**Chosen: Option 2** (Rust for WASM, ReScript for logic)
+
+### WASM Modules
+
+Create standalone WASM modules for:
+1. **Contradiction detection** (pairwise comparison O(n²))
+2. **Graph algorithms** (FogTrail visualization)
+3. **String similarity** (family resemblance clustering)
+
+---
+
+## File Structure (New)
+
+```
+fogbinder/
+├── src/
+│   ├── core/
+│   │   ├── EpistemicState.res
+│   │   ├── SpeechAct.res
+│   │   └── FamilyResemblance.res
+│   ├── engine/
+│   │   ├── ContradictionDetector.res
+│   │   ├── MoodScorer.res
+│   │   ├── MysteryClustering.res
+│   │   └── FogTrailVisualizer.res
+│   ├── wasm/
+│   │   ├── contradiction_detector.rs  # NEW
+│   │   ├── graph_algorithms.rs        # NEW
+│   │   └── string_similarity.rs       # NEW
+│   ├── bindings/
+│   │   ├── WasmBindings.res          # NEW
+│   │   └── ZoteroBindings.res
+│   ├── tests/
+│   │   ├── EpistemicState.test.res   # NEW (was .ts)
+│   │   ├── SpeechAct.test.res        # NEW
+│   │   └── ...
+│   └── Fogbinder.res
+├── wasm/                              # NEW
+│   └── pkg/                           # Compiled WASM modules
+├── build/
+│   └── bundle.js                      # ReScript → JS output
+├── bsconfig.json                      # ReScript config
+├── deno.json                          # Deno config (NO tsconfig!)
+├── justfile                           # Enhanced CLI
+├── flake.nix                          # Nix builds
+├── nickel.ncl                         # NEW - Nickel config
+├── Cargo.toml                         # NEW - Rust/WASM deps
+└── LICENSE                            # Dual MIT/AGPL + Palimpsest
+```
+
+---
+
+## Removed Files
+
+```
+package.json          → DELETED (no npm!)
+node_modules/         → DELETED
+src/**/*.test.ts      → Converted to .res
+src/main.ts           → Converted to Fogbinder.res API
+scripts/**/*.ts       → Converted to .res
+benchmarks/**/*.ts    → Converted to .res
+tsconfig.json         → DELETED (no TypeScript!)
+```
+
+---
+
+## Deno Configuration (No TypeScript)
+
+**deno.json** (simplified)
+```json
+{
+  "tasks": {
+    "build": "deno run --allow-all scripts/build.res.js",
+    "test": "deno test --allow-all src/**/*.test.res.js",
+    "dev": "deno run --allow-all --watch src/Fogbinder.bs.js",
+    "wasm:build": "cargo build --target wasm32-unknown-unknown --release"
+  },
+  "imports": {
+    "std/": "https://deno.land/std@0.208.0/"
+  },
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"]
+  }
+}
+```
+
+**Note:** No `strict`, no TypeScript checking!
+
+---
+
+## ReScript Configuration
+
+**bsconfig.json** (enhanced)
+```json
+{
+  "name": "fogbinder",
+  "version": "0.1.0",
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    }
+  ],
+  "package-specs": [
+    {
+      "module": "es6",
+      "in-source": true
+    }
+  ],
+  "suffix": ".bs.js",
+  "bs-dependencies": [],
+  "warnings": {
+    "error": "+101+8"
+  },
+  "ppx-flags": [],
+  "bsc-flags": ["-bs-no-version-header"],
+  "namespace": true,
+  "reason": {
+    "react-jsx": 3
+  }
+}
+```
+
+---
+
+## Testing in ReScript
+
+### Example: EpistemicState.test.res
+
+```rescript
+// EpistemicState.test.res
+// Pure ReScript tests, no TypeScript!
+
+open EpistemicState
+
+// Inline test (ReScript feature)
+%%private(
+  let testMergeCommutativity = () => {
+    let state1 = make(Known, context, ["Evidence A"], None)
+    let state2 = make(Probable(0.8), context, ["Evidence B"], None)
+
+    let mergeAB = merge(state1, state2)
+    let mergeBA = merge(state2, state1)
+
+    assert(mergeAB.certainty == mergeBA.certainty)
+    assert(Belt.Array.length(mergeAB.evidence) == Belt.Array.length(mergeBA.evidence))
+  }
+
+  testMergeCommutativity()
+)
+
+// Property-based test (ReScript implementation)
+module PropertyTests = {
+  type arbitrary<'a> = unit => 'a
+
+  let rec check = (property, iterations) => {
+    if iterations <= 0 {
+      true
+    } else {
+      property() && check(property, iterations - 1)
+    }
+  }
+
+  let testMergeCommutative = () => {
+    check(() => {
+      let state1 = generateRandomState()
+      let state2 = generateRandomState()
+
+      let mergeAB = merge(state1, state2)
+      let mergeBA = merge(state2, state1)
+
+      mergeAB.certainty == mergeBA.certainty
+    }, 100)
+  }
+}
+```
+
+---
+
+## WASM Integration
+
+### Rust WASM Module: contradiction_detector.rs
+
+```rust
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub struct Contradiction {
+    pub source1_idx: usize,
+    pub source2_idx: usize,
+    pub severity: f64,
+}
+
+#[wasm_bindgen]
+pub fn detect_contradictions_wasm(
+    sources: Vec<JsValue>,
+    language_games: Vec<String>,
+) -> Vec<Contradiction> {
+    // High-performance pairwise comparison
+    // O(n²) but optimized in WASM
+    let mut contradictions = Vec::new();
+
+    for i in 0..sources.len() {
+        for j in (i+1)..sources.len() {
+            if has_contradiction(&sources[i], &sources[j]) {
+                contradictions.push(Contradiction {
+                    source1_idx: i,
+                    source2_idx: j,
+                    severity: calculate_severity(&sources[i], &sources[j]),
+                });
+            }
+        }
+    }
+
+    contradictions
+}
+```
+
+### ReScript Binding: WasmBindings.res
+
+```rescript
+// WasmBindings.res
+// ReScript bindings to WASM modules
+
+type contradiction = {
+  source1Idx: int,
+  source2Idx: int,
+  severity: float,
+}
+
+@module("./wasm/pkg/contradiction_detector_bg.wasm")
+external detectContradictionsWasm: (
+  array<string>,
+  array<string>,
+) => array<contradiction> = "detect_contradictions_wasm"
+
+// Wrapper for type safety
+let detectContradictions = (sources: array<string>, languageGames: array<string>): array<contradiction> => {
+  detectContradictionsWasm(sources, languageGames)
+}
+```
+
+---
+
+## justfile Enhancement (Coming Next)
+
+The justfile will be massively enhanced with:
+- CLI argument parsing
+- Conditional execution
+- Multi-target builds
+- Comprehensive recipes (100+)
+
+---
+
+## Licensing Strategy
+
+### Dual License: MIT OR AGPL-3.0
+
+Users can choose:
+- **MIT**: Permissive, commercial-friendly
+- **AGPL-3.0**: Copyleft, network copyleft
+
+### Palimpsest License (Philosophical Layer)
+
+Overlay of ethical/philosophical commitments:
+- Code as palimpsest (layered meanings)
+- Embrace contradictions
+- Epistemic humility
+- Open inquiry
+
+---
+
+## Migration Path
+
+1. **Phase 1**: Convert TypeScript tests to ReScript ✓ (next)
+2. **Phase 2**: Remove Node.js/npm ✓
+3. **Phase 3**: Add WASM modules ✓
+4. **Phase 4**: Update licenses ✓
+5. **Phase 5**: Add Nickel config ✓
+6. **Phase 6**: Enhance justfile ✓
+
+---
+
+**Next:** Implement Phase 1 - Convert TypeScript to ReScript

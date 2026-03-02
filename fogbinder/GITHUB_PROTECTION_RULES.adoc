@@ -1,0 +1,535 @@
+= GitHub Repository Protection Rules
+:toc: left
+:toclevels: 3
+:icons: font
+
+== CRITICAL: Bullet-Proof Repository Settings
+
+This document contains the **EXACT** settings you must configure in GitHub's repository settings GUI to make Fogbinder utterly bullet-proof.
+
+'''
+
+== Branch Protection Rules
+
+Navigate to: **Settings → Branches → Branch protection rules → Add rule**
+
+=== Main Branch Protection
+
+**Branch name pattern:** `main`
+
+==== Protect matching branches
+
+✅ **Require a pull request before merging**
+
+* ✅ Require approvals: **2**
+* ✅ Dismiss stale pull request approvals when new commits are pushed
+* ✅ Require review from Code Owners
+* ✅ Restrict who can dismiss pull request reviews
+* ✅ Allow specified actors to bypass required pull requests (leave EMPTY)
+* ✅ Require approval of the most recent reviewable push
+
+✅ **Require status checks to pass before merging**
+
+* ✅ Require branches to be up to date before merging
+* **Required status checks (select ALL):**
+  - [ ] `test` - Test suite
+  - [ ] `quality / Code Quality` - Linting, formatting, type-check
+  - [ ] `security / Security Scan` - Security audit
+  - [ ] `rsr-compliance / RSR Rhodium Compliance` - RSR verification
+  - [ ] `accessibility / Accessibility Check` - Accessibility compliance
+  - [ ] `documentation / Documentation Check` - Docs verification
+  - [ ] `philosophy / Philosophical Integrity` - Philosophy check
+  - [ ] `benchmarks / Performance Benchmarks` - Performance tests
+
+✅ **Require conversation resolution before merging**
+
+✅ **Require signed commits**
+
+✅ **Require linear history**
+
+✅ **Require merge queue**
+
+* Merge method: **Squash**
+* Build concurrency: **5**
+* Minimum number of pull requests: **1**
+* Maximum waiting time: **60 minutes**
+
+✅ **Require deployments to succeed before merging** (if applicable)
+
+❌ **Do not allow bypassing the above settings**
+
+❌ **Do not allow force pushes**
+
+❌ **Do not allow deletions**
+
+==== Rules applied to everyone including administrators
+
+✅ **Include administrators**
+
+==== Restrict who can push to matching branches
+
+✅ **Restrict pushes that create matching branches**
+
+* Leave empty (no one can push directly)
+
+'''
+
+== Repository Security Settings
+
+Navigate to: **Settings → Security**
+
+=== Code security and analysis
+
+✅ **Dependency graph** - Enabled
+
+✅ **Dependabot alerts** - Enabled
+
+✅ **Dependabot security updates** - Enabled
+
+✅ **Secret scanning** - Enabled
+
+* ✅ **Secret scanning push protection** - Enabled
+
+✅ **Code scanning** - Configure CodeQL
+
+==== CodeQL Configuration
+
+* ✅ **Default setup**
+* Languages: **JavaScript**, **Rust**
+* Query suite: **Extended**
+
+'''
+
+== Actions Permissions
+
+Navigate to: **Settings → Actions → General**
+
+=== Actions permissions
+
+◉ **Allow all actions and reusable workflows**
+
+(We need this for GitHub Actions CI/CD)
+
+=== Workflow permissions
+
+◉ **Read repository contents and packages permissions**
+
+✅ **Allow GitHub Actions to create and approve pull requests** - DISABLED
+
+'''
+
+== Secrets and Variables
+
+Navigate to: **Settings → Secrets and variables → Actions**
+
+=== Repository secrets
+
+**None required** (Fogbinder has no external dependencies or API keys)
+
+If deploying to production, add:
+
+* `ZOTERO_PLUGIN_REGISTRY_TOKEN` (if publishing to Zotero)
+
+'''
+
+== Rulesets (New GitHub Feature)
+
+Navigate to: **Settings → Rules → Rulesets → New ruleset → New branch ruleset**
+
+=== RSR Rhodium Compliance Ruleset
+
+**Ruleset name:** `RSR Rhodium Enforcement`
+
+**Enforcement status:** ✅ Active
+
+**Target branches:**
+
+* Include by pattern: `main`, `claude/*`
+
+==== Rules
+
+===== Restrict creations
+
+✅ Enabled
+
+===== Restrict updates
+
+✅ Enabled
+
+* ✅ Require linear history
+* ✅ Require signed commits
+
+===== Restrict deletions
+
+✅ Enabled
+
+===== Require status checks to pass
+
+✅ Enabled
+
+**Status checks:**
+
+* [ ] `test`
+* [ ] `quality / Code Quality`
+* [ ] `security / Security Scan`
+* [ ] `rsr-compliance / RSR Rhodium Compliance`
+* [ ] `accessibility / Accessibility Check`
+* [ ] `documentation / Documentation Check`
+* [ ] `philosophy / Philosophical Integrity`
+
+===== Block force pushes
+
+✅ Enabled
+
+===== Require pull request before merging
+
+✅ Enabled
+
+* Required approvals: **2**
+* Dismiss stale reviews: ✅
+* Require review from code owners: ✅
+* Require approval of most recent push: ✅
+
+'''
+
+== Required Status Checks (Details)
+
+=== test
+
+**Job:** `.github/workflows/ci.yml` - `test`
+
+**What it checks:**
+
+* ReScript compilation
+* WASM module compilation
+* Deno test suite execution
+* Test coverage ≥80%
+
+**Must pass:** ✅ YES
+
+=== quality / Code Quality
+
+**Job:** `.github/workflows/ci.yml` - `quality`
+
+**What it checks:**
+
+* Deno linting (`deno lint`)
+* Code formatting (`deno fmt --check`)
+* ReScript type checking (`rescript build`)
+
+**Must pass:** ✅ YES
+
+=== security / Security Scan
+
+**Job:** `.github/workflows/ci.yml` - `security`
+
+**What it checks:**
+
+* Security audit (`just security-audit`)
+* TruffleHog secret scanning
+* Git SSH verification
+* NO TypeScript files exist
+* NO package.json exists
+
+**Must pass:** ✅ YES
+
+=== rsr-compliance / RSR Rhodium Compliance
+
+**Job:** `.github/workflows/ci.yml` - `rsr-compliance`
+
+**What it checks:**
+
+* `just verify-rsr` - Full RSR Rhodium verification
+* Documentation requirements
+* Build system requirements (justfile, no npm)
+* Licensing requirements
+
+**Must pass:** ✅ YES
+
+=== accessibility / Accessibility Check
+
+**Job:** `.github/workflows/ci.yml` - `accessibility`
+
+**What it checks:**
+
+* `just a11y` - WCAG 2.1 Level AA compliance
+* No `outline: none` in CSS
+* No disabled focus outlines
+* Keyboard navigation support
+
+**Must pass:** ✅ YES
+
+=== documentation / Documentation Check
+
+**Job:** `.github/workflows/ci.yml` - `documentation`
+
+**What it checks:**
+
+* All required .adoc files exist
+* NO .md files except exceptions
+* NO TypeScript files exist
+* NO package.json exists
+* CHANGELOG.adoc updated (for PRs)
+
+**Must pass:** ✅ YES
+
+=== philosophy / Philosophical Integrity
+
+**Job:** `.github/workflows/ci.yml` - `philosophy`
+
+**What it checks:**
+
+* `just philosophy` verification
+* Wittgenstein references present
+* Austin references present
+* Language game concepts intact
+
+**Must pass:** ✅ YES
+
+=== benchmarks / Performance Benchmarks
+
+**Job:** `.github/workflows/ci.yml` - `benchmarks`
+
+**What it checks:**
+
+* `just bench` - Performance benchmarks
+* No performance regressions
+* Results saved to artifacts
+
+**Must pass:** ⚠️ INFORMATIONAL (doesn't block)
+
+'''
+
+== Merge Queue Settings
+
+Navigate to: **Settings → Code and automation → Merge queue**
+
+✅ **Enable merge queue for main branch**
+
+**Settings:**
+
+* Merge method: **Squash and merge**
+* Maximum queue size: **5**
+* Maximum CI runtime: **60 minutes**
+* Minimum time in queue: **5 minutes**
+* Status check timeout: **60 minutes**
+
+'''
+
+== Collaborators and Teams
+
+Navigate to: **Settings → Collaborators and teams**
+
+=== Base permissions
+
+**Base role:** `Read`
+
+(Contributors must fork and submit PRs)
+
+=== Teams
+
+**@fogbinder/core** (if organization):
+
+* Permission: `Maintain`
+* Members: Core maintainers only
+
+**@fogbinder/reviewers** (if organization):
+
+* Permission: `Write`
+* Members: Trusted reviewers
+
+'''
+
+== Advanced Security Features
+
+=== Code owners
+
+Create `.github/CODEOWNERS`:
+
+[source]
+----
+# RSR Rhodium Standard enforcement
+# All changes require review from code owners
+
+# Default owners for everything
+* @Hyperpolymath
+
+# Critical files require extra scrutiny
+justfile @Hyperpolymath
+fogbinder.ncl @Hyperpolymath
+.github/workflows/ @Hyperpolymath
+src/wasm/ @Hyperpolymath
+
+# Security files
+security/ @Hyperpolymath
+SECURITY.md @Hyperpolymath
+.git/hooks/ @Hyperpolymath
+
+# Documentation
+*.adoc @Hyperpolymath
+LICENSE_DUAL.adoc @Hyperpolymath
+----
+
+=== Auto-link references
+
+Navigate: **Settings → General → Features → Issues → Auto-link references**
+
+**Add reference:**
+
+* Reference prefix: `RSR-`
+* Target URL: `https://github.com/Hyperpolymath/fogbinder/blob/main/RSR_RHODIUM_STANDARD_V2.adoc#<num>`
+
+'''
+
+== Notifications
+
+=== Watch settings
+
+For **all collaborators**, recommend:
+
+* ✅ Watch: **All Activity**
+* ✅ Get notified: **Pull request reviews**, **Issues**, **Discussions**
+
+'''
+
+== Repository Labels
+
+Navigate: **Issues → Labels**
+
+**Create these labels:**
+
+=== Priority
+
+* `priority: critical` - 🔴 Red - Blocks release
+* `priority: high` - 🟠 Orange - Important
+* `priority: medium` - 🟡 Yellow - Normal
+* `priority: low` - 🟢 Green - Nice to have
+
+=== Type
+
+* `type: bug` - 🐛 Red - Something broken
+* `type: feature` - ✨ Blue - New functionality
+* `type: docs` - 📚 Green - Documentation
+* `type: security` - 🔒 Red - Security issue
+* `type: performance` - ⚡ Yellow - Performance improvement
+* `type: rescript` - 🟦 Blue - ReScript code
+* `type: wasm` - 🦀 Orange - WASM/Rust code
+
+=== Status
+
+* `status: blocked` - ⛔ Red - Cannot proceed
+* `status: in progress` - 🔄 Blue - Being worked on
+* `status: needs review` - 👀 Purple - Ready for review
+* `status: needs rsr` - 🏆 Gold - Needs RSR compliance check
+
+=== Philosophy
+
+* `philosophy: wittgenstein` - 🧠 Purple - Wittgensteinian concepts
+* `philosophy: austin` - 💬 Blue - Speech act theory
+* `rsr: rhodium` - 💎 Gold - RSR Rhodium compliance
+
+'''
+
+== Repository Topics
+
+Navigate: **Settings → General → Topics**
+
+**Add topics:**
+
+* `zotero`
+* `epistemic-ambiguity`
+* `philosophy`
+* `wittgenstein`
+* `rescript`
+* `webassembly`
+* `deno`
+* `post-quantum-cryptography`
+* `rsr-rhodium`
+* `accessibility`
+* `wcag`
+
+'''
+
+== Pre-Commit Checks Automation
+
+=== Require status checks in PRs
+
+**Critical checks that MUST pass:**
+
+1. ✅ **No TypeScript files** (`*.ts`)
+2. ✅ **No package.json**
+3. ✅ **No node_modules**
+4. ✅ **All docs in AsciiDoc** (except exceptions)
+5. ✅ **Code formatted** (`deno fmt --check`)
+6. ✅ **Code linted** (`deno lint`)
+7. ✅ **Tests pass** (`just test`)
+8. ✅ **Security audit** (`just security-audit`)
+9. ✅ **RSR verification** (`just verify-rsr`)
+10. ✅ **Git uses SSH** (not HTTPS)
+11. ✅ **Commits signed**
+12. ✅ **Conventional commit format**
+
+'''
+
+== Deployment Protection Rules
+
+Navigate: **Settings → Environments**
+
+=== Production Environment
+
+**Environment name:** `production`
+
+==== Protection rules
+
+✅ **Required reviewers:** 2
+
+✅ **Wait timer:** 5 minutes
+
+✅ **Deployment branches:**
+
+* Selected branches only: `main`
+
+'''
+
+== Commit Signature Verification
+
+Navigate: **Settings → SSH and GPG keys**
+
+=== For administrators:
+
+✅ **Vigilant mode** - Flag unsigned commits
+
+=== Repository setting:
+
+Navigate: **Settings → Branches → Main → Require signed commits**
+
+✅ **Enabled**
+
+'''
+
+== Final Verification Checklist
+
+After configuring all settings:
+
+* [ ] Branch protection on `main` enabled with 2 required reviews
+* [ ] All 8 status checks required
+* [ ] Signed commits required
+* [ ] Linear history enforced
+* [ ] Force pushes blocked
+* [ ] Branch deletions blocked
+* [ ] Secret scanning enabled with push protection
+* [ ] CodeQL scanning enabled
+* [ ] Merge queue enabled
+* [ ] CODEOWNERS file created
+* [ ] Repository topics added
+* [ ] Labels created
+* [ ] .github/workflows/ci.yml updated and working
+* [ ] Git hooks installed locally (pre-commit, pre-push, commit-msg)
+* [ ] Salt Robot automation script executable
+
+'''
+
+**Last Updated:** 2025-11-29 +
+**RSR Tier:** Rhodium +
+**Security Level:** Maximum +
+**Automation:** Full

@@ -1,0 +1,44 @@
+[workspace]
+members = [
+    "crypto",
+    "contradiction_detector",
+    "graph_algorithms",
+    "string_similarity",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.2.0"
+authors = ["Jonathan <email@example.com>"]
+license = "MIT OR AGPL-3.0"
+edition = "2021"
+rust-version = "1.70"
+
+[workspace.dependencies]
+# WASM bindings
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+web-sys = "0.3"
+
+# Post-quantum cryptography
+pqcrypto-kyber = "0.8"
+pqcrypto-traits = "0.3"
+
+# Cryptography
+ed25519-dalek = "2.0"
+sha3 = "0.10"
+blake3 = "1.5"
+argon2 = "0.5"
+chacha20poly1305 = "0.10"
+
+# Utilities
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+getrandom = { version = "0.3", features = ["js"] }
+
+[profile.release]
+opt-level = "z"     # Optimize for size
+lto = true          # Link-time optimization
+codegen-units = 1   # Better optimization
+panic = "abort"     # Smaller binary
+strip = true        # Remove symbols

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="165" height="35" role="img" aria-label="RSR: Silver">
+  <title>RSR: Silver (100%)</title>
+  <defs>
+    <linearGradient id="silver-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#C0C0C0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#E8E8E8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A8A8A8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="silver-text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4A5568;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2D3748;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="165" height="35" rx="5" fill="url(#silver-gradient)" filter="url(#shadow)"/>
+
+  <!-- Left section -->
+  <rect width="50" height="35" rx="5" fill="#2D3748"/>
+  <text x="25" y="22" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" font-weight="600" fill="#FFFFFF" text-anchor="middle">RSR</text>
+
+  <!-- Right section text -->
+  <text x="107.5" y="22" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="url(#silver-text-gradient)" text-anchor="middle">SILVER</text>
+
+  <!-- Percentage badge -->
+  <circle cx="150" cy="17.5" r="8" fill="#4A5568"/>
+  <text x="150" y="21" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="9" font-weight="700" fill="#FFFFFF" text-anchor="middle">100</text>
+</svg>

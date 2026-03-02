@@ -1,0 +1,264 @@
+= Fogbinder Testing Report
+:toc: auto
+:sectnums:
+:icons: font
+:source-highlighter: rouge
+
+== Executive Summary
+
+[cols="1,3"]
+|===
+| Project | Fogbinder
+| Version | 0.1.0
+| Test Date | 2025-12-29
+| Overall Status | *PASS*
+| Test Suites | 3
+| Total Tests | 53
+| Passed | 53
+| Failed | 0
+|===
+
+Fogbinder is a Zotero plugin for epistemic analysis, implementing late Wittgenstein philosophy (language games, family resemblance) and J.L. Austin's speech act theory. The project compiles and all tests pass after resolving build issues.
+
+== Project Structure
+
+----
+fogbinder/
++-- src/
+|   +-- Fogbinder.res           # Main orchestrator
+|   +-- core/
+|   |   +-- EpistemicState.res  # Epistemic uncertainty modeling
+|   |   +-- SpeechAct.res       # Austin's speech act theory
+|   |   +-- FamilyResemblance.res # Wittgenstein's family resemblance
+|   |   +-- *.test.res          # Test files
+|   +-- engine/
+|   |   +-- ContradictionDetector.res # Contradiction detection
+|   |   +-- MoodScorer.res      # Mood analysis
+|   |   +-- MysteryClustering.res # Mystery clustering
+|   |   +-- FogTrailVisualizer.res # Network visualization
+|   +-- zotero/
+|       +-- ZoteroBindings.res  # Zotero API bindings
++-- rescript.json               # ReScript configuration
++-- package.json                # NPM dependencies
++-- justfile                    # Build recipes (100+ recipes)
+----
+
+== Build Process
+
+=== Build Tool
+
+ReScript 12 via npm/npx
+
+=== Issues Found and Fixed
+
+==== 1. Missing rescript.json
+
+[source,bash]
+----
+Error: rescript.json not found
+----
+
+*Fix:* Created `rescript.json` from `bsconfig.json` (ReScript 12 no longer reads bsconfig.json)
+
+==== 2. Missing package.json name field
+
+[source,bash]
+----
+Error: package.json must have a name field
+----
+
+*Fix:* Added `"name": "fogbinder", "version": "0.1.0", "private": true` to package.json
+
+==== 3. Js.Array2.reduce argument order
+
+ReScript 12 changed the signature from `(array, initialValue, callback)` to `(array, callback, initialValue)`.
+
+Files affected:
+
+* `src/core/FamilyResemblance.res` (3 occurrences)
+* `src/engine/FogTrailVisualizer.res` (3 occurrences)
+
+*Fix:* Reordered arguments in all reduce calls
+
+==== 4. Type declaration ordering
+
+ReScript requires types to be declared before use. Several files had types referenced before their declarations.
+
+Files fixed:
+
+* `src/engine/ContradictionDetector.res` - Moved `conflictType` before `contradiction`
+* `src/engine/MysteryClustering.res` - Moved `opacityLevel` and `resistanceType` before `mystery`
+* `src/engine/FogTrailVisualizer.res` - Moved `nodeType`, `edgeType`, `trailMetadata` before their consumers
+* `src/Fogbinder.res` - Moved `analysisMetadata` before `analysisResult`
+
+==== 5. Edge type name collision
+
+[source,rescript]
+----
+type edgeType = | ... | Mystery  // Conflicted with nodeType Mystery
+----
+
+*Fix:* Renamed to `MysteryEdge`
+
+==== 6. Test files using non-existent API
+
+Original test files used RescriptMocha (not installed) and incorrect function signatures.
+
+*Fix:* Completely rewrote all three test files:
+
+* `src/core/EpistemicState.test.res`
+* `src/core/SpeechAct.test.res`
+* `src/core/FamilyResemblance.test.res`
+
+=== Build Command
+
+[source,bash]
+----
+npx rescript build
+----
+
+=== Build Output
+
+Build completed successfully with deprecation warnings (non-blocking). ReScript 12 deprecates `Js.Array2` and `Js.Dict` APIs in favor of `Array` and `Dict`.
+
+== Test Results
+
+=== EpistemicState Tests (18 tests)
+
+[%header,cols="3,1"]
+|===
+| Test | Status
+| Known state should have Known certainty | PASS
+| Context should be preserved | PASS
+| Should have 1 evidence | PASS
+| Known state should not be ambiguous | PASS
+| Probable state should not be ambiguous | PASS
+| Mysterious state should be ambiguous | PASS
+| Vague state should be ambiguous | PASS
+| Ambiguous state should be ambiguous | PASS
+| Contradictory state should be ambiguous | PASS
+| Should return 3 interpretations | PASS
+| Should return 2 conflicts | PASS
+| Known should have no interpretations | PASS
+| Merged state should preserve all evidence | PASS
+| Known + Known should be Known | PASS
+| Probabilities should be averaged | PASS
+| Known + Mysterious should be Mysterious | PASS
+| Should combine interpretations | PASS
+| toJson should produce valid JSON | PASS
+|===
+
+=== SpeechAct Tests (19 tests)
+
+[%header,cols="3,1"]
+|===
+| Test | Status
+| Utterance should be preserved | PASS
+| Assertive should not be performative | PASS
+| Declaration should be performative | PASS
+| Commissive should be performative | PASS
+| Directive should not be performative | PASS
+| Expressive should not be performative | PASS
+| Felicitous speech act should be happy | PASS
+| conventionalProcedure should be true | PASS
+| appropriateCircumstances should be true | PASS
+| executedCorrectly should be true | PASS
+| executedCompletely should be true | PASS
+| sincereIntentions should be true | PASS
+| Should describe assertive mood | PASS
+| Should describe directive mood | PASS
+| Should extract emotional tone | PASS
+| Correctly returned None for non-expressive | PASS
+| Different assertives should conflict | PASS
+| Same assertives should not conflict | PASS
+| Different force types should not conflict | PASS
+|===
+
+=== FamilyResemblance Tests (16 tests)
+
+[%header,cols="3,1"]
+|===
+| Test | Status
+| Label should be Games | PASS
+| Should have 6 members | PASS
+| Boundaries should be vague | PASS
+| No center of gravity initially | PASS
+| Chess should belong to Games family | PASS
+| Prototype should be a game with multiple features | PASS
+| Merged should have 2 features | PASS
+| Merged should have 4 members | PASS
+| Merged boundaries should be contested | PASS
+| Label should be combined | PASS
+| Chess and tennis should have high resemblance | PASS
+| Chess and dice should have no resemblance | PASS
+| Resemblance should be symmetric | PASS
+| Network should have edges | PASS
+| Network should have no self-edges | PASS
+| Boundaries should be vague | PASS
+|===
+
+== Deprecation Warnings
+
+The codebase uses deprecated ReScript APIs. These are non-blocking but should be migrated:
+
+[%header,cols="1,1"]
+|===
+| Deprecated | Replacement
+| `Js.Array2.*` | `Array.*`
+| `Js.Dict.*` | `Dict.*`
+| `Js.Date.now` | `Date.now`
+| `Js.Json.*` | `JSON.*`
+| `Js.log` | `Console.log`
+|===
+
+Migration command available:
+[source,bash]
+----
+rescript-tools migrate-all /var/home/hyper/repos/fogbinder
+----
+
+== Recommendations
+
+=== High Priority
+
+1. **Run API migration tool** - Migrate from deprecated `Js.*` APIs to modern equivalents
+2. **Add WASM build** - The `src/wasm/` directory exists but WASM build was not tested
+
+=== Medium Priority
+
+3. **Add integration tests** - Test the full analysis pipeline
+4. **Add Zotero integration tests** - Mock Zotero API for testing
+
+=== Low Priority
+
+5. **Fix unused variable warnings** - The `features` parameter in `belongsToFamily` is unused
+6. **Remove dead code** - The `_` case in `findPrototype` is unreachable
+
+== Files Modified
+
+=== Configuration Files
+
+* `rescript.json` - Created from bsconfig.json
+* `package.json` - Added name, version, private, type fields
+
+=== Source Files
+
+* `src/core/FamilyResemblance.res` - Fixed Js.Array2.reduce argument order
+* `src/engine/ContradictionDetector.res` - Fixed type declaration order
+* `src/engine/MysteryClustering.res` - Fixed type declaration order
+* `src/engine/FogTrailVisualizer.res` - Fixed type order, reduce args, renamed Mystery to MysteryEdge
+* `src/Fogbinder.res` - Fixed type declaration order
+
+=== Test Files (Completely Rewritten)
+
+* `src/core/EpistemicState.test.res`
+* `src/core/SpeechAct.test.res`
+* `src/core/FamilyResemblance.test.res`
+
+== Conclusion
+
+Fogbinder builds and tests successfully after resolving ReScript 12 compatibility issues. The project implements sophisticated philosophical concepts (Wittgenstein's language games, Austin's speech acts) in a type-safe manner. All 53 tests pass.
+
+---
+
+_Testing performed by Claude Code on 2025-12-29_

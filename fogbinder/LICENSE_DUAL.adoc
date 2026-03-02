@@ -1,0 +1,250 @@
+# Fogbinder Dual License
+
+**Copyright © 2024-2025 Jonathan (Hyperpolymath)**
+
+Fogbinder is licensed under a **dual license** system. You may choose to use Fogbinder under **either**:
+
+1. **MIT License** (permissive)
+2. **GNU Affero General Public License v3.0** (copyleft)
+
+Additionally, the project embraces the **Palimpsest License** as a philosophical overlay.
+
+---
+
+## Option 1: MIT License
+
+```
+MIT License
+
+Copyright (c) 2024-2025 Jonathan (Hyperpolymath)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+**When to choose MIT:**
+- You want maximum freedom to use, modify, and distribute
+- You're building proprietary/commercial software
+- You prefer permissive licensing
+- You don't want copyleft obligations
+
+---
+
+## Option 2: GNU Affero General Public License v3.0
+
+**Full text:** See [LICENSE_AGPL](./LICENSE) (the original full AGPLv3 text)
+
+**Summary:**
+- You must provide source code to users over a network
+- Derivative works must also be licensed under AGPLv3
+- Network copyleft ensures software freedom
+- Strong copyleft provisions
+
+**When to choose AGPL:**
+- You're building open-source/free software
+- You want to ensure derivatives remain open
+- You're running software as a service
+- You support software freedom
+
+**Note:** AGPLv3 is the **strongest copyleft license**. If you modify Fogbinder and make it available over a network (e.g., web service), you **must** provide source code to users.
+
+---
+
+## Palimpsest License (Philosophical Overlay)
+
+**Version 1.0**
+
+### Preamble
+
+A palimpsest is a manuscript page that has been written on, scraped off, and used again. The earlier writing remains visible beneath the new text, creating layers of meaning.
+
+Fogbinder embraces this philosophy: code is not a single truth, but **layers of interpretation, contradiction, and evolving understanding**.
+
+### Philosophical Commitments
+
+By using Fogbinder, you acknowledge and embrace:
+
+#### 1. **Epistemic Humility**
+- Knowledge is provisional, not absolute
+- Uncertainty is valuable, not a flaw
+- Contradictions invite deeper analysis
+
+#### 2. **Ordinary Language**
+- Meaning emerges from use, not definition
+- Language games shape understanding
+- Context matters more than formal logic
+
+#### 3. **Code as Palimpsest**
+- Code has layers of meaning
+- Comments, commits, and history are part of the text
+- Previous versions inform current understanding
+
+#### 4. **Embrace Contradiction**
+- Contradictions are not always errors
+- Different frameworks can be incommensurable
+- Multiple truths can coexist
+
+#### 5. **Open Inquiry**
+- Question assumptions
+- Follow the argument where it leads
+- Prioritize understanding over winning
+
+#### 6. **Accessibility**
+- Software should be usable by all
+- Screen readers, keyboard navigation, high contrast
+- No user left in the fog
+
+#### 7. **Privacy & Autonomy**
+- No surveillance, no tracking, no data collection
+- Users control their own data
+- Offline-first by design
+
+#### 8. **Community Over Profit**
+- Software freedom > commercial gain
+- Share knowledge freely
+- Contribute upstream
+
+### Legal Effect
+
+The Palimpsest License is a **philosophical overlay**. It has **no legal force** beyond the chosen legal license (MIT or AGPL).
+
+It is a **social contract**, not a legal contract.
+
+It expresses the **spirit** of the project, not the **letter** of the law.
+
+### Violations
+
+If someone violates the Palimpsest principles:
+- They do not violate the legal license
+- They may lose community goodwill
+- The project may fork, disassociate, or criticize
+
+**But:** We will not sue, threaten, or harass. We will engage in **rational discourse**.
+
+---
+
+## Choosing a License
+
+### Quick Decision Tree
+
+```
+Do you want to ensure derivatives remain open source?
+├─ Yes → Choose AGPL-3.0
+└─ No
+    └─ Do you want maximum freedom and commercial use?
+        ├─ Yes → Choose MIT
+        └─ Unsure → Choose AGPL-3.0 (you can relicense your derivative under MIT later if you're the copyright holder)
+```
+
+### Compatibility
+
+- **MIT + MIT** → ✓ Compatible
+- **MIT + AGPL** → ✓ Compatible (AGPL wins)
+- **AGPL + AGPL** → ✓ Compatible
+- **MIT + GPL** → ✓ Compatible (GPL wins)
+
+### Relicensing
+
+- **MIT → AGPL**: ✓ Allowed
+- **AGPL → MIT**: ❌ Not allowed (copyleft is permanent)
+
+---
+
+## Attribution
+
+Regardless of which license you choose, please include:
+
+```
+This software uses Fogbinder, developed by Jonathan (Hyperpolymath).
+Licensed under MIT OR AGPL-3.0, with Palimpsest philosophical overlay.
+https://github.com/Hyperpolymath/fogbinder
+```
+
+---
+
+## License Headers
+
+### For MIT-licensed derivatives
+
+```rescript
+// SPDX-License-Identifier: MPL-2.0-or-later
+// Copyright (c) 2024-2025 Jonathan (Hyperpolymath)
+// Fogbinder - Epistemic ambiguity analysis
+// Licensed under MIT OR AGPL-3.0
+```
+
+### For AGPL-licensed derivatives
+
+```rescript
+// SPDX-License-Identifier: MPL-2.0-or-later
+// Copyright (c) 2024-2025 Jonathan (Hyperpolymath)
+// Fogbinder - Epistemic ambiguity analysis
+// Licensed under MIT OR AGPL-3.0
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+```
+
+---
+
+## FAQ
+
+### Can I use Fogbinder in commercial software?
+- **MIT**: Yes, with attribution
+- **AGPL**: Yes, but must provide source code to users
+
+### Can I fork Fogbinder and keep it proprietary?
+- **MIT**: Yes
+- **AGPL**: No (must remain AGPL)
+
+### What if I only use Fogbinder as a library?
+- **MIT**: No obligations beyond attribution
+- **AGPL**: Must provide source code if distributed
+
+### What if I run Fogbinder as a web service?
+- **MIT**: No obligations
+- **AGPL**: Must provide source code to users (network copyleft)
+
+### Do I have to follow the Palimpsest principles?
+- **Legally**: No
+- **Philosophically**: We hope you will
+
+### Can I change the license of my fork?
+- **MIT-licensed fork**: Yes, to any license (MIT, AGPL, proprietary, etc.)
+- **AGPL-licensed fork**: No, must remain AGPL
+
+### What if I contribute code to Fogbinder?
+- Your contribution is dual-licensed MIT OR AGPL
+- You retain copyright
+- You grant the project permission to use your code under both licenses
+
+---
+
+## Contact
+
+- **License questions**: https://github.com/Hyperpolymath/fogbinder/issues
+- **Philosophical discussions**: https://github.com/Hyperpolymath/fogbinder/discussions
+- **Security issues**: See `.well-known/security.txt`
+
+---
+
+**The fog is not an obstacle. It's the medium of inquiry.** 🌫️
+
+**Choose freedom. Choose openness. Choose epistemic humility.**

@@ -1,0 +1,442 @@
+# Fogbinder Cryptography Specification
+
+**Post-quantum ready, zero-knowledge friendly, maximum security**
+
+---
+
+## Cryptographic Primitives
+
+### Digital Signatures
+
+**Primary: EdDSA with Curve448 (Ed448)**
+- Algorithm: Edwards-curve Digital Signature Algorithm
+- Curve: Curve448 (448-bit elliptic curve)
+- Security level: 224-bit (quantum-resistant equivalent: 112-bit)
+- RFC: RFC 8032
+- Library: libsodium, noble-curves
+
+**Why Ed448:**
+- Faster than RSA
+- Smaller signatures than RSA
+- Side-channel resistant
+- No trusted setup required
+- Deterministic signatures
+
+**Implementation:**
+```rescript
+// WasmCrypto.res
+type publicKey = array<int> // 57 bytes for Ed448
+type secretKey = array<int> // 57 bytes for Ed448
+type signature = array<int> // 114 bytes for Ed448
+
+@module("./wasm/crypto/ed448.wasm")
+external sign: (secretKey, array<int>) => signature = "ed448_sign"
+
+@module("./wasm/crypto/ed448.wasm")
+external verify: (publicKey, array<int>, signature) => bool = "ed448_verify"
+
+@module("./wasm/crypto/ed448.wasm")
+external keypair: unit => (publicKey, secretKey) = "ed448_keypair"
+```
+
+---
+
+### Hash Functions
+
+**Primary: SHAKE256 (SHA-3 family)**
+- Algorithm: SHAKE256 (Secure Hash Algorithm Keccak, extendable-output)
+- Output: Variable length (256-bit default, extendable to any length)
+- Security: 256-bit
+- NIST FIPS 202
+
+**Secondary: BLAKE3**
+- Algorithm: BLAKE3 (fastest cryptographic hash)
+- Output: 256-bit (extendable)
+- Security: 256-bit
+- Parallelizable, tree-mode hashing
+
+**Why both:**
+- SHAKE256: NIST standard, post-quantum secure, extendable output
+- BLAKE3: Extremely fast, good for large data, parallelizable
+
+**Implementation:**
+```rescript
+// Hash with SHAKE256
+@module("./wasm/crypto/shake256.wasm")
+external shake256: (array<int>, int) => array<int> = "shake256_hash"
+
+// Hash with BLAKE3
+@module("./wasm/crypto/blake3.wasm")
+external blake3: array<int> => array<int> = "blake3_hash"
+
+// Combined hash (belt-and-suspenders)
+let doubleHash = (data: array<int>): array<int> => {
+  let shake = shake256(data, 32) // 32 bytes = 256 bits
+  let blake = blake3(data)
+
+  // XOR the two hashes for maximum security
+  Belt.Array.mapWithIndex(shake, (i, byte) => {
+    byte lxor Belt.Array.getExn(blake, i)
+  })
+}
+```
+
+---
+
+### Post-Quantum Cryptography
+
+**Key Encapsulation: Kyber-1024**
+- Algorithm: CRYSTALS-Kyber (NIST PQC finalist)
+- Security level: 5 (highest, equivalent to AES-256)
+- Key size: 1568 bytes (public), 3168 bytes (secret)
+- Ciphertext: 1568 bytes
+- Shared secret: 32 bytes
+
+**Why Kyber-1024:**
+- Post-quantum secure (resistant to quantum computers)
+- NIST selected algorithm
+- Lattice-based (Learning With Errors)
+- Fast key generation and encapsulation
+
+**Implementation:**
+```rescript
+// Kyber-1024 bindings
+type kyberPublicKey = array<int> // 1568 bytes
+type kyberSecretKey = array<int> // 3168 bytes
+type kyberCiphertext = array<int> // 1568 bytes
+type sharedSecret = array<int> // 32 bytes
+
+@module("./wasm/crypto/kyber1024.wasm")
+external kyberKeypair: unit => (kyberPublicKey, kyberSecretKey) = "kyber1024_keypair"
+
+@module("./wasm/crypto/kyber1024.wasm")
+external kyberEncapsulate: kyberPublicKey => (kyberCiphertext, sharedSecret) = "kyber1024_encapsulate"
+
+@module("./wasm/crypto/kyber1024.wasm")
+external kyberDecapsulate: (kyberSecretKey, kyberCiphertext) => sharedSecret = "kyber1024_decapsulate"
+```
+
+---
+
+### Password Hashing
+
+**Algorithm: Argon2id**
+- Winner of Password Hashing Competition (2015)
+- Mode: Argon2id (hybrid of Argon2i and Argon2d)
+- Memory: 64 MB (configurable)
+- Iterations: 3 (configurable)
+- Parallelism: 4 threads (configurable)
+- Output: 32 bytes (256-bit)
+
+**Why Argon2id:**
+- Resistant to GPU/ASIC attacks
+- Side-channel resistant (Argon2i component)
+- Tradeoff attacks resistant (Argon2d component)
+- Memory-hard function
+
+**Implementation:**
+```rescript
+type argon2Params = {
+  memoryKiB: int,      // 64 * 1024 = 65536 KiB = 64 MB
+  iterations: int,      // 3
+  parallelism: int,     // 4
+  outputLength: int,    // 32 bytes
+}
+
+let defaultArgon2Params: argon2Params = {
+  memoryKiB: 65536,
+  iterations: 3,
+  parallelism: 4,
+  outputLength: 32,
+}
+
+@module("./wasm/crypto/argon2id.wasm")
+external argon2id: (array<int>, array<int>, argon2Params) => array<int> = "argon2id_hash"
+
+// Hash password with salt
+let hashPassword = (password: string, salt: array<int>): array<int> => {
+  let passwordBytes = Js.String2.encodeURIComponent(password)->Js.String2.split("")->Belt.Array.map(c => Js.String2.charCodeAt(c, 0))
+  argon2id(passwordBytes, salt, defaultArgon2Params)
+}
+```
+
+---
+
+### Random Number Generation
+
+**CSPRNG: WebCrypto API (crypto.getRandomValues)**
+- Source: OS entropy (/dev/urandom on Linux, CryptGenRandom on Windows)
+- Algorithm: Platform-specific CSPRNG
+- No user-space PRNG (rely on OS)
+
+**Rejection Sampling for Primes:**
+- Generate random bytes
+- Convert to bigint
+- Test primality (Miller-Rabin)
+- Reject if not from flat distribution
+
+**Implementation:**
+```rescript
+// Secure random bytes
+@val @scope("crypto")
+external getRandomValues: Js.TypedArray2.Uint8Array.t => unit = "getRandomValues"
+
+let secureRandomBytes = (length: int): array<int> => {
+  let buffer = Js.TypedArray2.Uint8Array.fromLength(length)
+  getRandomValues(buffer)
+  Js.TypedArray2.Uint8Array.toArray(buffer)
+}
+
+// Secure random in range [0, max)
+let secureRandomRange = (max: int): int => {
+  let bytes = secureRandomBytes(4)
+  let randomInt = Belt.Array.reduce(bytes, 0, (acc, byte) => {
+    (acc lsl 8) lor byte
+  })
+
+  // Rejection sampling to avoid bias
+  let limit = (max * (2147483647 / max)) // 2^31 - 1 = max int32
+  if randomInt < limit {
+    randomInt mod max
+  } else {
+    secureRandomRange(max) // Retry
+  }
+}
+```
+
+---
+
+### Prime Number Generation
+
+**Strong Primes from Flat Distributions**
+
+Requirements:
+1. **Cryptographically random** (from CSPRNG)
+2. **Proven prime** (deterministic primality test)
+3. **Flat distribution** (no bias toward specific primes)
+4. **Safe primes** (p = 2q + 1 where q is also prime)
+
+**Implementation:**
+```rescript
+// Miller-Rabin primality test (deterministic for small witnesses)
+let isPrime = (n: bigint): bool => {
+  // Use proven witnesses for deterministic test up to 2^64
+  let witnesses = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
+
+  // Implementation of Miller-Rabin
+  // (Details omitted for brevity)
+  true // Placeholder
+}
+
+// Generate strong prime (safe prime)
+let generateStrongPrime = (bits: int): bigint => {
+  let rec loop = () => {
+    // 1. Generate random odd number of specified bit length
+    let bytes = secureRandomBytes(bits / 8)
+    bytes[0] = bytes[0] lor 0x80 // Set MSB (ensure bit length)
+    bytes[Belt.Array.length(bytes) - 1] = bytes[Belt.Array.length(bytes) - 1] lor 0x01 // Set LSB (ensure odd)
+
+    let candidate = bytesToBigint(bytes)
+
+    // 2. Check if candidate is prime
+    if isPrime(candidate) {
+      // 3. Check if (candidate - 1) / 2 is also prime (safe prime test)
+      let q = (candidate - 1n) / 2n
+      if isPrime(q) {
+        candidate // Strong prime found
+      } else {
+        loop() // Retry
+      }
+    } else {
+      loop() // Retry
+    }
+  }
+
+  loop()
+}
+
+// Proven safe primes (precomputed, RFC 3526)
+let safePrime2048: bigint = 0xFFFFFFFF_FFFFFFFF_C90FDAA2_2168C234_C4C6628B_80DC1CD1_29024E08_8A67CC74_020BBEA6_3B139B22_514A0879_8E3404DD_EF9519B3_CD3A431B_302B0A6D_F25F1437_4FE1356D_6D51C245_E485B576_625E7EC6_F44C42E9_A637ED6B_0BFF5CB6_F406B7ED_EE386BFB_5A899FA5_AE9F2411_7C4B1FE6_49286651_ECE45B3D_C2007CB8_A163BF05_98DA4836_1C55D39A_69163FA8_FD24CF5F_83655D23_DCA3AD96_1C62F356_208552BB_9ED52907_7096966D_670C354E_4ABC9804_F1746C08_CA18217C_32905E46_2E36CE3B_E39E772C_180E8603_9B2783A2_EC07A28F_B5C55DF0_6F4C52C9_DE2BCBF6_95581718_3995497C_EA956AE5_15D22618_98FA0510_15728E5A_8AACAA68_FFFFFFFF_FFFFFFFFn
+```
+
+**Known Safe Primes:**
+- 2048-bit: RFC 3526 Group 14
+- 3072-bit: RFC 3526 Group 15
+- 4096-bit: RFC 3526 Group 16
+- 6144-bit: RFC 3526 Group 17
+- 8192-bit: RFC 3526 Group 18
+
+---
+
+### Authenticated Encryption
+
+**Algorithm: ChaCha20-Poly1305**
+- Cipher: ChaCha20 (stream cipher)
+- MAC: Poly1305 (authenticator)
+- Nonce: 96-bit (never reuse!)
+- Key: 256-bit
+- RFC 8439
+
+**Why ChaCha20-Poly1305:**
+- Fast in software (no AES-NI needed)
+- Constant-time (side-channel resistant)
+- No IV reuse vulnerabilities (like AES-GCM)
+
+**Implementation:**
+```rescript
+type encryptionKey = array<int> // 32 bytes
+type nonce = array<int> // 12 bytes
+type ciphertext = array<int>
+type tag = array<int> // 16 bytes
+
+@module("./wasm/crypto/chacha20poly1305.wasm")
+external encrypt: (encryptionKey, nonce, array<int>, array<int>) => (ciphertext, tag) = "chacha20poly1305_encrypt"
+
+@module("./wasm/crypto/chacha20poly1305.wasm")
+external decrypt: (encryptionKey, nonce, ciphertext, tag, array<int>) => option<array<int>> = "chacha20poly1305_decrypt"
+```
+
+---
+
+## Cryptographic Protocols
+
+### Key Derivation
+
+**Algorithm: HKDF-SHAKE256**
+- Extract-then-Expand paradigm
+- Hash: SHAKE256
+- Input: Shared secret (from Kyber or ECDH)
+- Output: Multiple keys (encryption, MAC, etc.)
+
+**Implementation:**
+```rescript
+type hkdfInput = {
+  ikm: array<int>,      // Input Keying Material
+  salt: array<int>,     // Salt (optional)
+  info: array<int>,     // Context information
+  length: int,          // Desired output length
+}
+
+let hkdf = (input: hkdfInput): array<int> => {
+  // 1. Extract: PRK = SHAKE256(salt, IKM)
+  let prk = shake256(Belt.Array.concat(input.salt, input.ikm), 32)
+
+  // 2. Expand: OKM = SHAKE256(PRK, info, length)
+  shake256(Belt.Array.concat(prk, input.info), input.length)
+}
+```
+
+---
+
+### Hybrid Encryption (Post-Quantum + Classical)
+
+**Protocol: Kyber-1024 + X448 (double ratchet style)**
+
+```
+1. Kyber-1024 key exchange → shared_secret_pq
+2. X448 ECDH key exchange → shared_secret_ec
+3. Combine: shared_secret = HKDF(shared_secret_pq || shared_secret_ec)
+4. Derive keys: (enc_key, mac_key) = HKDF(shared_secret)
+5. Encrypt: ChaCha20-Poly1305(enc_key, plaintext)
+```
+
+This provides **"belt-and-suspenders" security**:
+- If Kyber is broken → X448 still protects
+- If X448 is broken (by quantum computer) → Kyber still protects
+
+---
+
+## Security Levels
+
+| Algorithm | Classical | Quantum | Category |
+|-----------|-----------|---------|----------|
+| Ed448 | 224-bit | 112-bit | Signature |
+| SHAKE256 | 256-bit | 128-bit | Hash |
+| BLAKE3 | 256-bit | 128-bit | Hash |
+| Kyber-1024 | 256-bit | 256-bit | KEM (post-quantum) |
+| ChaCha20 | 256-bit | 128-bit | Cipher |
+| Argon2id | Tunable | N/A | Password hash |
+| X448 | 224-bit | 112-bit | Key exchange |
+
+**Target security level:** 256-bit classical, 128-bit quantum-resistant
+
+---
+
+## Implementation Checklist
+
+- [ ] WebCrypto API for CSPRNG
+- [ ] WASM modules for Ed448, SHAKE256, BLAKE3, Kyber-1024, Argon2id
+- [ ] Constant-time operations (no branching on secrets)
+- [ ] Secure memory wiping (zero out keys after use)
+- [ ] Side-channel resistant code
+- [ ] Formal verification of crypto primitives (TLA+)
+- [ ] Fuzz testing of crypto implementations
+- [ ] Test vectors from NIST, RFC specifications
+
+---
+
+## Libraries
+
+### Rust (for WASM compilation)
+- **dalek-cryptography**: Ed448, X448
+- **sha3**: SHAKE256
+- **blake3**: BLAKE3 hash
+- **pqcrypto-kyber**: Kyber-1024
+- **rust-argon2**: Argon2id
+- **chacha20poly1305**: Authenticated encryption
+
+### JavaScript (fallback if WASM unavailable)
+- **@noble/curves**: Ed448, X448
+- **@noble/hashes**: SHAKE256, BLAKE3
+- **@stablelib/chacha20poly1305**: Authenticated encryption
+- **argon2-browser**: Argon2id (WASM-based)
+
+---
+
+## Threat Model
+
+**Protected against:**
+- ✅ Classical computers (256-bit security)
+- ✅ Quantum computers (128-bit security via Kyber)
+- ✅ Side-channel attacks (constant-time algorithms)
+- ✅ Timing attacks (constant-time comparisons)
+- ✅ Cache timing attacks (algorithm choice)
+- ✅ Brute force (strong key sizes)
+- ✅ Rainbow tables (Argon2id for passwords)
+
+**Not protected against:**
+- ❌ Physical access to device (cold boot attacks, etc.)
+- ❌ Malware on user's machine
+- ❌ Rubber-hose cryptanalysis (threats of violence)
+- ❌ Backdoored hardware (compromised TPM, etc.)
+- ❌ Spectre/Meltdown-style attacks (hardware vulnerabilities)
+
+---
+
+## Usage Guidelines
+
+1. **Never reuse nonces** (for ChaCha20-Poly1305)
+2. **Use CSPRNG only** (no `Math.random()`)
+3. **Wipe keys from memory** after use
+4. **Use constant-time comparisons** for MACs, signatures
+5. **Validate all inputs** (no untrusted data in crypto functions)
+6. **Use authenticated encryption** (encrypt-then-MAC or AEAD)
+7. **Prefer post-quantum algorithms** when possible
+8. **Keep crypto libraries updated**
+9. **Don't roll your own crypto**
+10. **Get security audits** for critical systems
+
+---
+
+## Compliance
+
+- ✅ NIST FIPS 202 (SHA-3/SHAKE256)
+- ✅ NIST PQC (Kyber-1024)
+- ✅ RFC 8032 (EdDSA)
+- ✅ RFC 8439 (ChaCha20-Poly1305)
+- ✅ RFC 3526 (Safe primes for DH)
+- ✅ RFC 9116 (security.txt)
+
+---
+
+**Next:** Implement WASM crypto modules in Rust

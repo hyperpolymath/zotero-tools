@@ -1,0 +1,80 @@
+= RSR Badges
+
+SVG badges for displaying Rhodium Standard Repository compliance tier.
+
+== Available Badges
+
+[cols="1,1,1"]
+|===
+| Badge | Tier | Compliance
+
+| image:rhodium.svg[RSR Rhodium] | Rhodium | 200%
+| image:gold.svg[RSR Gold] | Gold | 110%
+| image:silver.svg[RSR Silver] | Silver | 100%
+| image:bronze.svg[RSR Bronze] | Bronze | 25%
+|===
+
+== Usage in AsciiDoc
+
+=== Local Badge (in your repo)
+
+[source,asciidoc]
+----
+link:https://github.com/hyperpolymath/rhodium-standard-repositories[image:badges/rhodium.svg[RSR Rhodium,align=center]]
+----
+
+=== Canonical Badge (from RSR repo)
+
+[source,asciidoc]
+----
+link:https://github.com/hyperpolymath/rhodium-standard-repositories[image:https://raw.githubusercontent.com/hyperpolymath/rhodium-standard-repositories/main/badges/rhodium.svg[RSR Rhodium,align=center]]
+----
+
+== Usage in Markdown
+
+=== Local Badge
+
+[source,markdown]
+----
+[![RSR Rhodium](badges/rhodium.svg)](https://github.com/hyperpolymath/rhodium-standard-repositories)
+----
+
+=== Canonical Badge
+
+[source,markdown]
+----
+[![RSR Rhodium](https://raw.githubusercontent.com/hyperpolymath/rhodium-standard-repositories/main/badges/rhodium.svg)](https://github.com/hyperpolymath/rhodium-standard-repositories)
+----
+
+== Badge Design
+
+Each badge features:
+
+* **Left panel**: "RSR" label with dark background
+* **Center**: Tier name with metallic gradient
+* **Right circle**: Compliance percentage
+* **Accessible**: Includes ARIA labels and title attributes
+* **Clickable**: Links to canonical RSR specification
+
+=== Colors
+
+* **Rhodium**: Platinum/silver with purple accents (#B8B8D0 → #E8E8F0)
+* **Gold**: Gold metallic gradient (#FFD700 → #DAA520)
+* **Silver**: Silver/gray gradient (#C0C0C0 → #E8E8E8)
+* **Bronze**: Bronze/copper gradient (#CD7F32 → #A0522D)
+
+== License
+
+These badges are part of the Rhodium Standard Repository specification and are licensed under CC BY-SA 4.0.
+
+You may:
+
+* ✅ Use badges in your project if you meet the tier requirements
+* ✅ Modify badge design (please contribute improvements!)
+* ✅ Create derivative badges for other standards
+
+You must:
+
+* ✅ Link to https://github.com/hyperpolymath/rhodium-standard-repositories
+* ✅ Share modifications under CC BY-SA 4.0
+* ✅ Actually meet the tier requirements (don't fake it!)

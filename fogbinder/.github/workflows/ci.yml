@@ -1,0 +1,249 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+name: CI
+
+on:
+  push:
+    branches: [ main, claude/* ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        deno-version: ['1.40.x', '1.41.x']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+    - name: Setup Deno
+      uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.3
+      with:
+        deno-version: ${{ matrix.deno-version }}
+
+    - name: Setup just
+      uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
+
+    - name: Setup Rust (for WASM)
+      uses: dtolnay/rust-toolchain@f7ccc83f9ed1e5b9c81d8a67d7ad1a747e22a561 # master 2025-11-30
+      with:
+        toolchain: stable
+        targets: wasm32-unknown-unknown
+
+    - name: Install ReScript
+      run: npm install -g rescript@latest
+
+    - name: Check tools
+      run: just check-tools
+
+    - name: Build
+      run: just build
+
+    - name: Run tests
+      run: just test
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: test-results-deno-${{ matrix.deno-version }}
+        path: coverage/
+
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+    - name: Setup Deno
+      uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.3
+      with:
+        deno-version: '1.x'
+
+    - name: Setup just
+      uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
+
+    - name: Install ReScript
+      run: npm install -g rescript@latest
+
+    - name: Lint
+      run: just lint
+
+    - name: Format check
+      run: just fmt-check
+
+    - name: Type check
+      run: just type-check
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+    - name: Setup Deno
+      uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.3
+      with:
+        deno-version: '1.x'
+
+    - name: Setup just
+      uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
+
+    - name: Security audit
+      run: just security-audit
+
+    - name: Check for hardcoded secrets
+      uses: trufflesecurity/trufflehog@ef6e76c3c4023279497fab4721ffa071a722fd05 # v3.92.4
+      with:
+        path: ./
+        base: ${{ github.event.repository.default_branch }}
+        head: HEAD
+
+    - name: Verify Git SSH configuration
+      run: just git-ssh-verify
+
+  rsr-compliance:
+    name: RSR Rhodium Compliance
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+    - name: Setup Deno
+      uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.3
+      with:
+        deno-version: '1.x'
+
+    - name: Setup just
+      uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
+
+    - name: Verify RSR Rhodium compliance
+      run: just verify-rsr
+
+    - name: Check documentation requirements
+      run: just rsr-docs
+
+    - name: Check build system requirements
+      run: just rsr-build
+
+    - name: Check licensing requirements
+      run: just rsr-license
+
+  accessibility:
+    name: Accessibility Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+    - name: Setup just
+      uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
+
+    - name: Check accessibility
+      run: just a11y
+
+  documentation:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+    - name: Verify required docs exist (AsciiDoc)
+      run: |
+        test -f README.adoc || exit 1
+        test -f SECURITY.md || exit 1
+        test -f CONTRIBUTING.adoc || exit 1
+        test -f CODE_OF_CONDUCT.adoc || exit 1
+        test -f MAINTAINERS.adoc || exit 1
+        test -f CHANGELOG.adoc || exit 1
+        test -f TPCF.adoc || exit 1
+        test -f LICENSE_DUAL.adoc || exit 1
+        test -f .well-known/security.txt || exit 1
+        test -f .well-known/ai.txt || exit 1
+        echo "All required documentation files present"
+
+    - name: Verify NO TypeScript exists
+      run: |
+        if find . -name "*.ts" -not -path "./node_modules/*" -type f | grep -q .; then
+          echo "❌ TypeScript files found (should not exist)"
+          exit 1
+        fi
+        echo "✅ No TypeScript files found"
+
+    - name: Verify NO package.json exists
+      run: |
+        if [ -f package.json ]; then
+          echo "❌ package.json found (should not exist)"
+          exit 1
+        fi
+        echo "✅ No package.json found"
+
+    - name: Check documentation freshness
+      run: |
+        # Ensure CHANGELOG.adoc was updated (if not initial commit)
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          git diff --name-only origin/main | grep -q CHANGELOG.adoc || echo "Consider updating CHANGELOG.adoc"
+        fi
+
+  philosophy:
+    name: Philosophical Integrity
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+    - name: Setup just
+      uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
+
+    - name: Verify philosophical foundations
+      run: just philosophy
+
+  benchmarks:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+    - name: Setup Deno
+      uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.3
+      with:
+        deno-version: '1.x'
+
+    - name: Setup just
+      uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@f7ccc83f9ed1e5b9c81d8a67d7ad1a747e22a561 # master 2025-11-30
+      with:
+        toolchain: stable
+        targets: wasm32-unknown-unknown
+
+    - name: Install ReScript
+      run: npm install -g rescript@latest
+
+    - name: Run benchmarks
+      run: just bench
+
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: benchmark-results
+        path: benchmarks/results/

@@ -1,0 +1,202 @@
+= License TL;DR – Fogbinder
+:toc: left
+:icons: font
+
+== Dual Licensing
+
+Fogbinder is **dual-licensed** - you choose which license applies to your use:
+
+* **MIT License** (permissive)
+* **GNU AGPL-3.0** (network copyleft)
+
+Both include the **Palimpsest License** as a philosophical overlay.
+
+'''
+
+== Option 1: MIT License
+
+=== What you can do
+
+* **Use** - Commercial or non-commercial
+* **Modify** - Change anything
+* **Distribute** - Share freely
+* **Sublicense** - Relicense derivatives
+* **Keep private** - No obligation to share modifications
+
+=== What you must do
+
+* **Include copyright notice** - Preserve attribution
+* **Include license text** - Include MIT license with distributions
+
+=== What you get
+
+* **No warranty** - Software "as-is"
+* **Limitation of liability** - No legal claims against authors
+
+=== Summary
+
+Maximum freedom, minimal obligations. Perfect for:
+
+* Proprietary products
+* Closed-source modifications
+* Integration into non-free software
+
+'''
+
+== Option 2: GNU AGPL-3.0
+
+=== Network Freedom
+
+If someone uses Fogbinder on a server (e.g. a hosted Zotero service), they **must give users access to the source code**—even if they just interact with it remotely.
+
+=== Copyleft
+
+Any modifications, forks, or derivative versions **must also be shared under the AGPL-3.0**, protecting community freedom.
+
+=== Open Access
+
+You can use, modify, and share Fogbinder freely, including in commercial settings—but you **must share your changes** if you distribute or host them.
+
+=== Legal Safety Net
+
+You're protected from liability ("as-is" clause), and contributors agree not to sue others over patents tied to Fogbinder.
+
+=== License Must Travel
+
+Any project that builds on Fogbinder carries the AGPL-3.0 license forward—like storytelling stitched from the same ethical fabric.
+
+=== Summary
+
+Ensures software freedom. Perfect for:
+
+* Open-source projects
+* Community-driven development
+* Network services (web apps, APIs)
+* Preventing proprietary capture
+
+'''
+
+== Palimpsest License (Philosophical Overlay)
+
+Both MIT and AGPL include the **Palimpsest License** as a commitment to:
+
+=== 1. Epistemic Humility
+
+Knowledge is provisional. Code, like thought, is always under revision.
+
+=== 2. Ordinary Language
+
+Meaning emerges from use. Documentation matters as much as implementation.
+
+=== 3. Code as Palimpsest
+
+Software is written in layers. Each contribution adds to, but doesn't erase, what came before.
+
+=== 4. Embrace Contradiction
+
+Multiple truths can coexist. Contradictions invite deeper understanding.
+
+=== 5. Open Inquiry
+
+Question assumptions. Challenge conventional wisdom. Seek nuance.
+
+=== 6. Accessibility
+
+Software should be usable by all, regardless of ability.
+
+=== 7. Privacy & Autonomy
+
+No surveillance. No tracking. Users control their data.
+
+=== 8. Community Over Profit
+
+Software serves people, not shareholders.
+
+'''
+
+== How to Choose
+
+=== Choose MIT if:
+
+* You want maximum flexibility
+* You may create proprietary derivatives
+* You don't want copyleft obligations
+* You're integrating into closed-source software
+
+=== Choose AGPL-3.0 if:
+
+* You want to ensure software freedom
+* You're building network services
+* You want derivatives to remain open-source
+* You value community contributions
+* You want to prevent proprietary capture
+
+=== Both are equally valid
+
+There is **no preferred license**. Choose what aligns with your values and use case.
+
+'''
+
+== Legal Compliance
+
+=== If you choose MIT:
+
+1. Include copyright notice in all copies
+2. Include full MIT license text
+3. No other obligations
+
+=== If you choose AGPL-3.0:
+
+1. Include copyright notice in all copies
+2. Include full AGPL-3.0 license text
+3. Provide source code to all network users
+4. License derivatives under AGPL-3.0
+5. Document all modifications
+6. Preserve author attributions
+
+=== SPDX Headers
+
+Include in all source files:
+
+[source,rescript]
+----
+// SPDX-License-Identifier: MPL-2.0-or-later
+// SPDX-FileCopyrightText: 2025 Jonathan <email@example.com>
+----
+
+'''
+
+== Frequently Asked Questions
+
+=== Can I use both licenses simultaneously?
+
+No. You **choose one** for your use. The dual licensing means different users can make different choices.
+
+=== Can I switch licenses later?
+
+You can switch **to AGPL-3.0** (more restrictive), but not **to MIT** (less restrictive) once you've distributed under AGPL-3.0.
+
+=== What about dependencies?
+
+Fogbinder has **no Node.js/npm dependencies**. ReScript and Rust dependencies are MIT or Apache-2.0 compatible with both licenses.
+
+=== Does the Palimpsest License add legal obligations?
+
+No. It's a **philosophical overlay**, not a legal requirement. It expresses values but doesn't create enforceable obligations beyond MIT or AGPL-3.0.
+
+=== What about contributions?
+
+Contributors grant rights under **both** MIT and AGPL-3.0 via the Contributor License Agreement (CLA).
+
+'''
+
+== Full License Texts
+
+* link:LICENSE_DUAL.adoc[LICENSE_DUAL.adoc] - Complete dual license text
+* link:LICENSE.txt[LICENSE.txt] - Original AGPL-3.0 (for reference)
+
+'''
+
+**Last Updated:** 2025-11-29 +
+**License Options:** MIT OR AGPL-3.0 (with Palimpsest) +
+**Choose:** What aligns with your values

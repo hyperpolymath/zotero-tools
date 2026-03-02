@@ -1,0 +1,489 @@
+# TLS/SSL Configuration & Security Headers
+
+**For deploying Fogbinder or related services with maximum security**
+
+---
+
+## Overview
+
+While Fogbinder is **offline-first** and doesn't require network access, this guide helps users who want to:
+- Host Fogbinder documentation/website
+- Run Fogbinder as a web service (e.g., API endpoint)
+- Deploy related infrastructure securely
+
+---
+
+## TLS/SSL Configuration
+
+### Minimum TLS Version: TLS 1.3
+
+**Why TLS 1.3:**
+- ✅ Forward secrecy (all cipher suites)
+- ✅ Removed weak ciphers (RC4, 3DES, CBC-mode)
+- ✅ Faster handshake (1-RTT, 0-RTT)
+- ✅ Encrypted handshake (privacy)
+- ✅ Simplified configuration (no negotiation pitfalls)
+
+**Disable:**
+- ❌ TLS 1.2 and earlier (if possible)
+- ❌ SSL 3.0, SSL 2.0 (ancient, broken)
+
+---
+
+### TLS 1.3 Cipher Suites (Recommended Order)
+
+```
+# Nginx configuration
+ssl_protocols TLSv1.3;
+ssl_ciphers 'TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256';
+ssl_prefer_server_ciphers off;  # TLS 1.3 ignores this anyway
+```
+
+**Cipher Suite Preference:**
+1. **TLS_AES_256_GCM_SHA384** - AES-256 in GCM mode (hardware-accelerated on modern CPUs)
+2. **TLS_CHACHA20_POLY1305_SHA256** - ChaCha20-Poly1305 (fast in software, mobile-friendly)
+3. **TLS_AES_128_GCM_SHA256** - AES-128 in GCM mode (faster, still secure)
+
+---
+
+### TLS 1.2 Fallback (If TLS 1.3 Not Supported)
+
+```
+# Nginx configuration (with TLS 1.2 fallback)
+ssl_protocols TLSv1.3 TLSv1.2;
+
+ssl_ciphers 'TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256';
+
+ssl_prefer_server_ciphers on;
+
+# Disable weak ciphers
+ssl_ciphers !aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA;
+```
+
+**TLS 1.2 Cipher Suite Requirements:**
+- ✅ ECDHE (Elliptic Curve Diffie-Hellman Ephemeral) - forward secrecy
+- ✅ ECDSA or RSA - authentication
+- ✅ AES-GCM or ChaCha20-Poly1305 - authenticated encryption
+- ✅ SHA-256 or SHA-384 - strong hash
+
+---
+
+### Certificate Configuration
+
+#### Ed25519 Certificates (Recommended)
+
+```bash
+# Generate Ed25519 private key
+openssl genpkey -algorithm ED25519 -out server.key
+
+# Generate Certificate Signing Request (CSR)
+openssl req -new -key server.key -out server.csr -subj "/CN=fogbinder.example.com"
+
+# Self-signed certificate (for testing)
+openssl req -x509 -key server.key -out server.crt -days 365 -subj "/CN=fogbinder.example.com"
+
+# For production: Use Let's Encrypt with Ed25519
+certbot certonly --standalone -d fogbinder.example.com --key-type ecdsa --elliptic-curve secp384r1
+```
+
+**Why Ed25519:**
+- Smallest certificates (256-bit)
+- Fastest signature verification
+- Side-channel resistant
+- Future-proof
+
+**Fallback: RSA 4096 or ECDSA P-384**
+
+```bash
+# RSA 4096 (widely compatible)
+openssl genrsa -out server.key 4096
+
+# ECDSA P-384 (faster than RSA, compatible)
+openssl ecparam -genkey -name secp384r1 -out server.key
+```
+
+---
+
+### OCSP Stapling (Must-Staple)
+
+```
+# Nginx
+ssl_stapling on;
+ssl_stapling_verify on;
+ssl_trusted_certificate /path/to/chain.pem;
+resolver 1.1.1.1 1.0.0.1 valid=300s;
+resolver_timeout 5s;
+
+# Add must-staple to certificate (CSR generation)
+openssl req -new -key server.key -out server.csr -addext "tlsfeature = status_request"
+```
+
+**Why OCSP Stapling:**
+- ✅ Privacy (client doesn't contact CA)
+- ✅ Performance (server caches OCSP response)
+- ✅ Reliability (no OCSP server downtime)
+
+---
+
+### HSTS (HTTP Strict Transport Security)
+
+```
+# Nginx
+add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+```
+
+**Parameters:**
+- `max-age=63072000` - 2 years (required for preload list)
+- `includeSubDomains` - Apply to all subdomains
+- `preload` - Eligible for HSTS preload list
+
+**Submit to HSTS Preload List:**
+https://hstspreload.org/
+
+---
+
+### Complete Nginx Configuration
+
+**`/etc/nginx/sites-available/fogbinder`**
+
+```nginx
+# Redirect HTTP to HTTPS
+server {
+    listen 80;
+    listen [::]:80;
+    server_name fogbinder.example.com;
+
+    location / {
+        return 301 https://$server_name$request_uri;
+    }
+}
+
+# HTTPS server
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name fogbinder.example.com;
+
+    # TLS configuration
+    ssl_certificate /etc/letsencrypt/live/fogbinder.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/fogbinder.example.com/privkey.pem;
+
+    ssl_protocols TLSv1.3 TLSv1.2;
+    ssl_ciphers 'TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305';
+    ssl_prefer_server_ciphers on;
+
+    # OCSP stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    ssl_trusted_certificate /etc/letsencrypt/live/fogbinder.example.com/chain.pem;
+    resolver 1.1.1.1 1.0.0.1 valid=300s;
+    resolver_timeout 5s;
+
+    # DH parameters (for TLS 1.2 DHE)
+    ssl_dhparam /etc/nginx/dhparam.pem;  # openssl dhparam -out /etc/nginx/dhparam.pem 4096
+
+    # Session cache
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    ssl_session_tickets off;  # Disable for perfect forward secrecy
+
+    # Security headers (see below)
+    include /etc/nginx/security-headers.conf;
+
+    # Serve Fogbinder
+    location / {
+        proxy_pass http://127.0.0.1:8000;  # Deno server
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+
+        # Security headers for proxied requests
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Static files (if any)
+    location /static/ {
+        alias /var/www/fogbinder/static/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+---
+
+## Security Headers
+
+**`/etc/nginx/security-headers.conf`**
+
+```nginx
+# HSTS (HTTP Strict Transport Security)
+add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+
+# CSP (Content Security Policy) - STRICT
+add_header Content-Security-Policy "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" always;
+
+# CSP Report-Only (for testing before enforcing)
+# add_header Content-Security-Policy-Report-Only "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; report-uri /csp-report" always;
+
+# X-Frame-Options (prevent clickjacking)
+add_header X-Frame-Options "DENY" always;
+
+# X-Content-Type-Options (prevent MIME sniffing)
+add_header X-Content-Type-Options "nosniff" always;
+
+# Referrer-Policy (privacy)
+add_header Referrer-Policy "no-referrer" always;
+
+# Permissions-Policy (formerly Feature-Policy)
+add_header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=()" always;
+
+# X-XSS-Protection (legacy, but doesn't hurt)
+add_header X-XSS-Protection "1; mode=block" always;
+
+# Cross-Origin-Embedder-Policy (COEP)
+add_header Cross-Origin-Embedder-Policy "require-corp" always;
+
+# Cross-Origin-Opener-Policy (COOP)
+add_header Cross-Origin-Opener-Policy "same-origin" always;
+
+# Cross-Origin-Resource-Policy (CORP)
+add_header Cross-Origin-Resource-Policy "same-origin" always;
+
+# Expect-CT (Certificate Transparency)
+add_header Expect-CT "enforce, max-age=86400" always;
+
+# Clear-Site-Data (on logout)
+# add_header Clear-Site-Data "\"cache\", \"cookies\", \"storage\"" always;
+```
+
+---
+
+### Content Security Policy (CSP) Breakdown
+
+```
+default-src 'none'
+```
+- Deny everything by default
+
+```
+script-src 'self'
+```
+- JavaScript only from same origin
+- **NO** inline scripts (`<script>alert()</script>`)
+- **NO** `eval()`, `Function()`, `setTimeout(string)`
+- **NO** external scripts
+
+```
+connect-src 'self'
+```
+- Fetch/XHR only to same origin
+- **NO** external API calls
+
+```
+img-src 'self' data:
+```
+- Images from same origin + data URIs
+- SVG data URIs allowed
+
+```
+style-src 'self' 'unsafe-inline'
+```
+- CSS from same origin
+- Inline styles allowed (for now)
+- **TODO**: Remove 'unsafe-inline' with nonce/hash
+
+```
+font-src 'self'
+```
+- Fonts from same origin only
+
+```
+frame-ancestors 'none'
+```
+- Cannot be embedded in iframes
+- Stronger than `X-Frame-Options: DENY`
+
+```
+base-uri 'self'
+```
+- `<base>` tag only to same origin
+
+```
+form-action 'self'
+```
+- Forms only submit to same origin
+```
+
+---
+
+### CSP Reporting
+
+**Endpoint for CSP violation reports:**
+
+```nginx
+# Nginx location for CSP reports
+location /csp-report {
+    access_log /var/log/nginx/csp-reports.log;
+
+    # Parse JSON body
+    client_body_buffer_size 10K;
+    client_max_body_size 10K;
+
+    # Return 204 No Content
+    return 204;
+}
+```
+
+**Log format for CSP reports:**
+
+```nginx
+http {
+    log_format csp_report '$remote_addr - $remote_user [$time_local] '
+                          '"$request" $status $body_bytes_sent '
+                          '"$http_referer" "$http_user_agent" '
+                          '"$request_body"';
+}
+```
+
+---
+
+## DNS Security (DNSSEC)
+
+```bind
+; Zone file for fogbinder.example.com
+$ORIGIN example.com.
+$TTL 3600
+
+; DNSSEC records
+@ IN DS 12345 13 2 1234567890ABCDEF... ; (Delegation Signer)
+@ IN DNSKEY 256 3 13 ... ; (Zone Signing Key)
+@ IN DNSKEY 257 3 13 ... ; (Key Signing Key)
+@ IN RRSIG DNSKEY 13 2 3600 ... ; (Signature)
+
+; A record with DNSSEC
+fogbinder IN A 192.0.2.1
+fogbinder IN RRSIG A 13 3 3600 ... ; (Signature)
+
+; AAAA record (IPv6)
+fogbinder IN AAAA 2001:db8::1
+fogbinder IN RRSIG AAAA 13 3 3600 ... ; (Signature)
+
+; CAA records (Certificate Authority Authorization)
+@ IN CAA 0 issue "letsencrypt.org"
+@ IN CAA 0 issuewild ";"  ; Prevent wildcard certificates
+@ IN CAA 0 iodef "mailto:security@example.com"
+@ IN RRSIG CAA 13 2 3600 ... ; (Signature)
+
+; TLSA records (DANE - DNS-Based Authentication of Named Entities)
+_443._tcp.fogbinder IN TLSA 3 1 1 ABCDEF... ; (Certificate hash)
+_443._tcp.fogbinder IN RRSIG TLSA 13 4 3600 ... ; (Signature)
+```
+
+---
+
+## CAA (Certificate Authority Authorization)
+
+```dns
+; Allow only Let's Encrypt
+example.com. IN CAA 0 issue "letsencrypt.org"
+
+; Disallow wildcard certificates
+example.com. IN CAA 0 issuewild ";"
+
+; Incident reporting
+example.com. IN CAA 0 iodef "mailto:security@example.com"
+```
+
+**Verify CAA:**
+```bash
+dig CAA example.com +short
+```
+
+---
+
+## DANE/TLSA (DNS-Based Authentication)
+
+```bash
+# Generate TLSA record (certificate hash)
+openssl x509 -in /etc/letsencrypt/live/fogbinder.example.com/cert.pem -noout -pubkey | \
+openssl pkey -pubin -outform DER | \
+openssl dgst -sha256 -binary | \
+xxd -p -c 256
+
+# Add to DNS (example)
+_443._tcp.fogbinder.example.com. IN TLSA 3 1 1 ABCDEF1234567890...
+```
+
+**TLSA Record Parameters:**
+- `3` = DANE-EE (match End-Entity certificate)
+- `1` = SubjectPublicKeyInfo (public key)
+- `1` = SHA-256 hash
+
+---
+
+## Security Headers Testing
+
+### Online Tools
+
+- https://securityheaders.com/ - Grade your headers (A+ target)
+- https://observatory.mozilla.org/ - Mozilla Observatory
+- https://csp-evaluator.withgoogle.com/ - CSP validator
+- https://www.ssllabs.com/ssltest/ - SSL/TLS scanner (A+ target)
+
+### Command-Line Testing
+
+```bash
+# Test headers
+curl -I https://fogbinder.example.com
+
+# Test TLS
+nmap --script ssl-enum-ciphers -p 443 fogbinder.example.com
+
+# Test certificate
+openssl s_client -connect fogbinder.example.com:443 -servername fogbinder.example.com
+
+# Test HSTS preload eligibility
+curl -s https://hstspreload.org/api/v2/status?domain=fogbinder.example.com | jq
+```
+
+---
+
+## Checklist
+
+- [ ] TLS 1.3 enabled (TLS 1.2 fallback)
+- [ ] Strong cipher suites configured
+- [ ] Ed25519 or ECDSA P-384 certificate
+- [ ] OCSP stapling enabled
+- [ ] HSTS header with preload
+- [ ] CSP header (strict policy)
+- [ ] All security headers added
+- [ ] DNSSEC enabled
+- [ ] CAA records configured
+- [ ] DANE/TLSA records (optional)
+- [ ] A+ rating on SSL Labs
+- [ ] A+ rating on Security Headers
+- [ ] HSTS preload list submission
+
+---
+
+## Export Configuration Files
+
+All configuration files are available in:
+```
+security/configs/
+├── nginx-fogbinder.conf
+├── security-headers.conf
+├── csp-policy.txt
+├── dns-records.zone
+├── caa-records.txt
+└── tlsa-dane.sh
+```
+
+---
+
+**Security is an ongoing process, not a one-time setup.** 🔒

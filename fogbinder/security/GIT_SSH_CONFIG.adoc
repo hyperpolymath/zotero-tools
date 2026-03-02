@@ -1,0 +1,386 @@
+# Git SSH-Only Configuration
+
+**Secure Git operations via SSH only (no HTTPS)**
+
+---
+
+## Why SSH-Only?
+
+**SSH advantages over HTTPS:**
+- ✅ **No credentials in URLs** (no tokens, passwords)
+- ✅ **Public key authentication** (phishing-resistant)
+- ✅ **Agent forwarding** (convenient, secure)
+- ✅ **Per-repository keys** (granular access control)
+- ✅ **Host key verification** (MITM protection)
+
+**HTTPS disadvantages:**
+- ❌ **Tokens in URLs** (can leak in logs)
+- ❌ **Credential caching** (security risk)
+- ❌ **Password auth** (phishing vulnerability)
+- ❌ **No forward secrecy** (TLS 1.2)
+
+---
+
+## SSH Key Generation
+
+### Ed25519 (Recommended)
+
+```bash
+# Generate Ed25519 key (fastest, most secure)
+ssh-keygen -t ed25519 -C "your_email@example.com" -f ~/.ssh/id_ed25519_fogbinder
+
+# Enter a strong passphrase (use password manager)
+# Passphrase requirements:
+# - At least 20 characters
+# - Mix of upper, lower, numbers, symbols
+# - Not a dictionary word
+# - Unique to this key
+```
+
+**Why Ed25519:**
+- Fastest signature algorithm
+- Smallest key size (256-bit)
+- Side-channel resistant
+- Widely supported (GitHub, GitLab, Gitea)
+
+### Ed448 (Maximum Security)
+
+```bash
+# Generate Ed448 key (maximum security, if supported)
+ssh-keygen -t ed448 -C "your_email@example.com" -f ~/.ssh/id_ed448_fogbinder
+
+# Note: Not yet widely supported (OpenSSH 8.2+)
+```
+
+### RSA 4096 (Fallback)
+
+```bash
+# Generate RSA 4096-bit key (if Ed25519 not supported)
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com" -f ~/.ssh/id_rsa_fogbinder
+
+# RSA is slower and larger, but universally supported
+```
+
+---
+
+## SSH Agent Configuration
+
+### Start SSH Agent
+
+```bash
+# Start agent (if not already running)
+eval "$(ssh-agent -s)"
+
+# Add key to agent (will prompt for passphrase once)
+ssh-add ~/.ssh/id_ed25519_fogbinder
+
+# Verify key is loaded
+ssh-add -l
+```
+
+### Agent Forwarding (Optional, for remote servers)
+
+```bash
+# ~/.ssh/config
+Host github.com
+  ForwardAgent yes
+  IdentityFile ~/.ssh/id_ed25519_fogbinder
+  IdentitiesOnly yes
+```
+
+**Warning:** Only forward to trusted hosts!
+
+---
+
+## Git Configuration
+
+### Global Config
+
+```bash
+# Set name and email
+git config --global user.name "Your Name"
+git config --global user.email "your_email@example.com"
+
+# Use SSH for GitHub (not HTTPS)
+git config --global url."git@github.com:".insteadOf "https://github.com/"
+
+# Sign commits with SSH key (OpenSSH 8.2+)
+git config --global gpg.format ssh
+git config --global user.signingkey ~/.ssh/id_ed25519_fogbinder.pub
+git config --global commit.gpgsign true
+git config --global tag.gpgsign true
+
+# Enforce SSH (reject HTTPS)
+git config --global protocol.allow never
+git config --global protocol.file.allow always
+git config --global protocol.ssh.allow always
+```
+
+### Repository-Specific Config
+
+```bash
+# In fogbinder repo
+cd /home/user/fogbinder
+
+# Set SSH URL (if not already)
+git remote set-url origin git@github.com:Hyperpolymath/fogbinder.git
+
+# Verify
+git remote -v
+# Should show: git@github.com:Hyperpolymath/fogbinder.git
+```
+
+---
+
+## SSH Config File
+
+**~/.ssh/config**
+
+```sshconfig
+# GitHub - Fogbinder
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_fogbinder
+  IdentitiesOnly yes
+
+  # Security hardening
+  PubkeyAuthentication yes
+  PasswordAuthentication no
+  ChallengeResponseAuthentication no
+
+  # Host key verification (TOFU - Trust On First Use)
+  StrictHostKeyChecking yes
+  UserKnownHostsFile ~/.ssh/known_hosts
+
+  # Ciphers (prefer ChaCha20-Poly1305, fallback to AES-GCM)
+  Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+
+  # KEX algorithms (prefer Curve25519, fallback to strong DH)
+  KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group18-sha512,diffie-hellman-group16-sha512
+
+  # MAC algorithms (prefer ETM - Encrypt-Then-MAC)
+  MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
+
+  # Host key algorithms (prefer Ed25519)
+  HostKeyAlgorithms ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+
+  # Compression (off for security, on for slow connections)
+  Compression no
+
+  # Connection keep-alive
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+
+  # Logging (for debugging)
+  LogLevel VERBOSE
+
+# GitLab (if used)
+Host gitlab.com
+  HostName gitlab.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_fogbinder
+  IdentitiesOnly yes
+  # (same security settings as GitHub)
+
+# Self-hosted Git server (example)
+Host git.example.com
+  HostName git.example.com
+  User git
+  Port 22
+  IdentityFile ~/.ssh/id_ed25519_fogbinder
+  IdentitiesOnly yes
+  # (same security settings)
+```
+
+---
+
+## GitHub/GitLab Setup
+
+### Add SSH Key to GitHub
+
+```bash
+# Copy public key to clipboard
+cat ~/.ssh/id_ed25519_fogbinder.pub
+
+# Then:
+# 1. Go to GitHub Settings > SSH and GPG keys
+# 2. Click "New SSH key"
+# 3. Paste public key
+# 4. Save
+```
+
+### Test Connection
+
+```bash
+# Test GitHub SSH connection
+ssh -T git@github.com
+
+# Expected output:
+# Hi Hyperpolymath! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+---
+
+## Commit Signing
+
+### Sign Commits with SSH Key
+
+```bash
+# One-time setup (already done in global config above)
+git config --global gpg.format ssh
+git config --global user.signingkey ~/.ssh/id_ed25519_fogbinder.pub
+
+# Sign a commit
+git commit -S -m "Signed commit"
+
+# Verify signature
+git log --show-signature
+
+# Auto-sign all commits
+git config --global commit.gpgsign true
+```
+
+### Add Signing Key to GitHub
+
+```bash
+# Copy public key
+cat ~/.ssh/id_ed25519_fogbinder.pub
+
+# Then:
+# 1. Go to GitHub Settings > SSH and GPG keys
+# 2. Click "New SSH key" again
+# 3. Select "Signing key" as type
+# 4. Paste public key
+# 5. Save
+```
+
+---
+
+## Host Key Verification
+
+### Verify GitHub Host Keys
+
+**GitHub's official SSH host keys (as of 2024):**
+
+```
+github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+```
+
+**Verify and add:**
+
+```bash
+# Add GitHub host keys to known_hosts
+ssh-keyscan -t ed25519,ecdsa,rsa github.com >> ~/.ssh/known_hosts
+
+# Verify fingerprints manually
+ssh-keygen -lf ~/.ssh/known_hosts | grep github.com
+
+# Expected fingerprints:
+# SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU (ED25519)
+# SHA256:p2QAMXNIC1TJYWeIOttrVc98/R1BUFWu3/LiyKgUfQM (ECDSA)
+# SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 (RSA)
+```
+
+---
+
+## Security Checklist
+
+- [ ] SSH key generated with Ed25519 (or Ed448)
+- [ ] Strong passphrase (20+ characters)
+- [ ] Passphrase stored in password manager
+- [ ] SSH agent configured
+- [ ] Git configured for SSH-only
+- [ ] HTTPS URLs replaced with SSH
+- [ ] SSH key added to GitHub/GitLab
+- [ ] Commit signing configured
+- [ ] Signing key added to GitHub
+- [ ] Host keys verified
+- [ ] `~/.ssh/config` hardened
+- [ ] `StrictHostKeyChecking yes` enabled
+- [ ] Strong ciphers configured
+- [ ] Test connection successful
+
+---
+
+## Troubleshooting
+
+### Permission Denied (publickey)
+
+```bash
+# Check SSH agent has key
+ssh-add -l
+
+# If not, add key
+ssh-add ~/.ssh/id_ed25519_fogbinder
+
+# Test with verbose output
+ssh -vT git@github.com
+```
+
+### Wrong Host Key
+
+```bash
+# Remove old host key
+ssh-keygen -R github.com
+
+# Re-add correct host key
+ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
+```
+
+### Passphrase Prompt Every Time
+
+```bash
+# Add to agent (will cache for session)
+ssh-add ~/.ssh/id_ed25519_fogbinder
+
+# Or configure persistent agent (macOS)
+# Add to ~/.ssh/config:
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes  # macOS only
+```
+
+---
+
+## Advanced: Multiple Keys
+
+```bash
+# Different keys for different repos
+# ~/.ssh/config
+
+Host github.com-fogbinder
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_fogbinder
+  IdentitiesOnly yes
+
+Host github.com-work
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_work
+  IdentitiesOnly yes
+
+# Then use:
+# git@github.com-fogbinder:Hyperpolymath/fogbinder.git
+# git@github.com-work:Company/project.git
+```
+
+---
+
+## Compliance
+
+- ✅ SSH protocol version 2 only
+- ✅ Strong key exchange algorithms (Curve25519)
+- ✅ Strong ciphers (ChaCha20-Poly1305, AES-GCM)
+- ✅ Strong MAC algorithms (HMAC-SHA2-512-ETM)
+- ✅ Host key verification (TOFU)
+- ✅ Ed25519 signatures (or Ed448)
+- ✅ No password authentication
+- ✅ Commit signing
+
+---
+
+**Security is not a feature, it's a foundation.** 🔒

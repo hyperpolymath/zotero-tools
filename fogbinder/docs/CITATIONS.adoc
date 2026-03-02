@@ -1,0 +1,36 @@
+= fogbinder - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{fogbinder_2025,
+  author = {Polymath, Hyper},
+  title = {fogbinder},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/fogbinder},
+  license = {AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _fogbinder_ [Computer software]. Available at: https://github.com/hyperpolymath/fogbinder
+
+== OSCOLA
+
+Hyper Polymath, 'fogbinder' (2025) <https://github.com/hyperpolymath/fogbinder>
+
+== MLA
+
+Polymath, Hyper. "fogbinder." 2025, github.com/hyperpolymath/fogbinder.
+
+== APA 7
+
+Polymath, H. (2025). _fogbinder_ [Computer software]. GitHub. https://github.com/hyperpolymath/fogbinder
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]
