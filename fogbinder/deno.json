@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "lib": ["deno.window"],
+    "lib": [
+      "deno.window"
+    ],
     "strict": true,
     "checkJs": false
   },
@@ -18,11 +20,14 @@
     "@/": "./src/",
     "@core/": "./src/core/",
     "@engine/": "./src/engine/",
-    "@zotero/": "./src/zotero/"
+    "@zotero/": "./src/zotero/",
+    "rescript": "^12.0.0"
   },
   "lint": {
     "rules": {
-      "tags": ["recommended"]
+      "tags": [
+        "recommended"
+      ]
     }
   },
   "fmt": {
