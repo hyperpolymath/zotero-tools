@@ -257,8 +257,8 @@ log "PHASE 7: Running security checks..."
 
 # Check for potential secrets
 log "Scanning for potential secrets..."
-if grep -r "API_KEY\|SECRET\|PASSWORD\|TOKEN" --include="*.res" --include="*.js" . 2>/dev/null | grep -v "example\|test" > /tmp/salt-robot-secrets.txt; then
-    warn "Potential secrets found - review /tmp/salt-robot-secrets.txt"
+if grep -r "API_KEY\|SECRET\|PASSWORD\|TOKEN" --include="*.res" --include="*.js" . 2>/dev/null | grep -v "example\|test" > "$HYPATIA_TMPDIR/salt-robot-secrets.txt"; then
+    warn "Potential secrets found - review "$HYPATIA_TMPDIR/salt-robot-secrets.txt""
 else
     success "No potential secrets found"
 fi

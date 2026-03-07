@@ -132,15 +132,15 @@ echo ""
 
 # Verify tar.gz signature
 log_info "Verifying tar.gz signature..."
-if gpg --verify "${PREFIX}.tar.gz.asc" "${PREFIX}.tar.gz" 2>&1 | tee /tmp/gpg-verify-tar.log | grep -q "Good signature"; then
+if gpg --verify "${PREFIX}.tar.gz.asc" "${PREFIX}.tar.gz" 2>&1 | tee "$HYPATIA_TMPDIR/gpg-verify-"tar.log | grep -q "Good signature"; then
     log_success "tar.gz signature is valid"
 
     # Extract and display signer info
-    SIGNER=$(grep "using" /tmp/gpg-verify-tar.log | head -1 || echo "Unknown")
+    SIGNER=$(grep "using" "$HYPATIA_TMPDIR/gpg-verify-"tar.log | head -1 || echo "Unknown")
     echo "  Signed by: $SIGNER"
 
     # Check if key is trusted
-    if grep -q "WARNING" /tmp/gpg-verify-tar.log; then
+    if grep -q "WARNING" "$HYPATIA_TMPDIR/gpg-verify-"tar.log; then
         log_warning "Key is not marked as trusted in your keyring"
         echo "  To trust this key, verify the fingerprint in MAINTAINERS.md"
         echo "  Then run: gpg --edit-key <KEY_ID>"
@@ -150,7 +150,7 @@ if gpg --verify "${PREFIX}.tar.gz.asc" "${PREFIX}.tar.gz" 2>&1 | tee /tmp/gpg-ve
     fi
 else
     log_error "tar.gz signature verification FAILED"
-    cat /tmp/gpg-verify-tar.log
+    cat "$HYPATIA_TMPDIR/gpg-verify-"tar.log
     echo ""
     log_error "DO NOT USE THIS RELEASE - signature is invalid!"
     exit 1
@@ -159,18 +159,18 @@ echo ""
 
 # Verify ZIP signature
 log_info "Verifying ZIP signature..."
-if gpg --verify "${PREFIX}.zip.asc" "${PREFIX}.zip" 2>&1 | tee /tmp/gpg-verify-zip.log | grep -q "Good signature"; then
+if gpg --verify "${PREFIX}.zip.asc" "${PREFIX}.zip" 2>&1 | tee "$HYPATIA_TMPDIR/gpg-verify-"zip.log | grep -q "Good signature"; then
     log_success "ZIP signature is valid"
 
-    SIGNER=$(grep "using" /tmp/gpg-verify-zip.log | head -1 || echo "Unknown")
+    SIGNER=$(grep "using" "$HYPATIA_TMPDIR/gpg-verify-"zip.log | head -1 || echo "Unknown")
     echo "  Signed by: $SIGNER"
 
-    if grep -q "WARNING" /tmp/gpg-verify-zip.log; then
+    if grep -q "WARNING" "$HYPATIA_TMPDIR/gpg-verify-"zip.log; then
         log_warning "Key is not marked as trusted in your keyring"
     fi
 else
     log_error "ZIP signature verification FAILED"
-    cat /tmp/gpg-verify-zip.log
+    cat "$HYPATIA_TMPDIR/gpg-verify-"zip.log
     echo ""
     log_error "DO NOT USE THIS RELEASE - signature is invalid!"
     exit 1
@@ -179,18 +179,18 @@ echo ""
 
 # Verify checksums signature and extract
 log_info "Verifying checksums signature..."
-if gpg --verify SHA256SUMS.asc 2>&1 | tee /tmp/gpg-verify-sums.log | grep -q "Good signature"; then
+if gpg --verify SHA256SUMS.asc 2>&1 | tee "$HYPATIA_TMPDIR/gpg-verify-"sums.log | grep -q "Good signature"; then
     log_success "Checksums signature is valid"
 
-    SIGNER=$(grep "using" /tmp/gpg-verify-sums.log | head -1 || echo "Unknown")
+    SIGNER=$(grep "using" "$HYPATIA_TMPDIR/gpg-verify-"sums.log | head -1 || echo "Unknown")
     echo "  Signed by: $SIGNER"
 
-    if grep -q "WARNING" /tmp/gpg-verify-sums.log; then
+    if grep -q "WARNING" "$HYPATIA_TMPDIR/gpg-verify-"sums.log; then
         log_warning "Key is not marked as trusted in your keyring"
     fi
 else
     log_error "Checksums signature verification FAILED"
-    cat /tmp/gpg-verify-sums.log
+    cat "$HYPATIA_TMPDIR/gpg-verify-"sums.log
     echo ""
     log_error "DO NOT USE THIS RELEASE - signature is invalid!"
     exit 1
@@ -199,7 +199,7 @@ echo ""
 
 # Extract verified checksums
 log_info "Extracting verified checksums..."
-if gpg --decrypt SHA256SUMS.asc > /tmp/SHA256SUMS.verified 2>/dev/null; then
+if gpg --decrypt SHA256SUMS.asc > "$HYPATIA_TMPDIR/SHA256SUMS.verified" 2>/dev/null; then
     log_success "Checksums extracted"
 else
     log_error "Failed to decrypt checksums file"
@@ -210,7 +210,7 @@ fi
 log_info "Verifying file integrity against checksums..."
 echo ""
 
-if cd "$(dirname "$0")/.." && $shacmd /tmp/SHA256SUMS.verified 2>&1; then
+if cd "$(dirname "$0")/.." && $shacmd "$HYPATIA_TMPDIR/SHA256SUMS.verified" 2>&1; then
     echo ""
     log_success "All files match checksums"
 else
@@ -251,6 +251,6 @@ echo "📖 Safe to use this release!"
 echo ""
 
 # Cleanup temp files
-rm -f /tmp/gpg-verify-*.log /tmp/SHA256SUMS.verified
+rm -f "$HYPATIA_TMPDIR/gpg-verify-"*.log "$HYPATIA_TMPDIR/SHA256SUMS.verified"
 
 log_success "Verification complete"
