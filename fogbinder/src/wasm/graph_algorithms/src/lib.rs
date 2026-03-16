@@ -2,6 +2,7 @@
 // License: MIT OR AGPL-3.0 (with Palimpsest)
 // FogTrail network visualization algorithms
 
+#![forbid(unsafe_code)]
 use wasm_bindgen::prelude::*;
 use serde::{Deserialize, Serialize};
 

@@ -2,6 +2,7 @@
 // License: MIT OR AGPL-3.0 (with Palimpsest)
 // Post-quantum cryptography implementation
 
+#![forbid(unsafe_code)]
 use wasm_bindgen::prelude::*;
 
 // ============================================================================

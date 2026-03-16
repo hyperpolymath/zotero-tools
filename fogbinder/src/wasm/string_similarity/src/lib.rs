@@ -2,6 +2,7 @@
 // License: MIT OR AGPL-3.0 (with Palimpsest)
 // High-performance string similarity algorithms
 
+#![forbid(unsafe_code)]
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]

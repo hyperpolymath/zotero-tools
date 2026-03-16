@@ -2,6 +2,7 @@
 // License: MIT OR AGPL-3.0 (with Palimpsest)
 // Language game conflict detection (NOT logical contradiction)
 
+#![forbid(unsafe_code)]
 use wasm_bindgen::prelude::*;
 use serde::{Deserialize, Serialize};
 
