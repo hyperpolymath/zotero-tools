@@ -10,8 +10,8 @@
     "zotero": {
       "id": "nsai@hyperpolymath",
       "update_url": "https://github.com/Hyperpolymath/zotero-nsai/releases/latest/download/update.json",
-      "strict_min_version": "6.0",
-      "strict_max_version": "7.0.*"
+      "strict_min_version": "7.0",
+      "strict_max_version": "8.99"
     }
   },
 

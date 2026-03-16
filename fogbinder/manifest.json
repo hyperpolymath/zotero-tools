@@ -1,7 +1,19 @@
 {
+  "manifest_version": 2,
   "name": "Fogbinder",
   "version": "0.1.0",
-  "description": "Explore epistemic ambiguity and emotional tone in research",
-  "author": "Jonathan",
-  "manifest_version": 2
+  "description": "Epistemic ambiguity analysis for Zotero — contradiction detection, mood scoring, mystery clustering",
+  "author": "Jonathan D.A. Jewell",
+  "applications": {
+    "zotero": {
+      "id": "fogbinder@hyperpolymath",
+      "update_url": "https://raw.githubusercontent.com/hyperpolymath/zotero-tools/main/fogbinder/update.json",
+      "strict_min_version": "7.0",
+      "strict_max_version": "8.99"
+    }
+  },
+  "icons": {
+    "48": "icons/fogbinder-48.png",
+    "96": "icons/fogbinder-96.png"
+  }
 }

@@ -102,7 +102,7 @@ let getResults = (): array<lintResult> => {
 }
 
 let addResult = (result: lintResult): unit => {
-  results = Js.Array2.concat(results, [result])
+  results = Array.concat(results, [result])
 }
 
 // --- Severity Helpers ---
@@ -153,23 +153,23 @@ let lintProject = (): array<lintResult> => {
 // --- Validation Helpers ---
 
 let isTypeScriptFile = (path: string): bool => {
-  Js.String2.endsWith(path, ".ts") || Js.String2.endsWith(path, ".tsx")
+  String.endsWith(path, ".ts") || String.endsWith(path, ".tsx")
 }
 
 let isMakefile = (path: string): bool => {
-  let name = Js.String2.toLowerCase(path)
-  name == "makefile" || name == "gnumakefile" || Js.String2.endsWith(name, ".mk")
+  let name = String.toLowerCase(path)
+  name == "makefile" || name == "gnumakefile" || String.endsWith(name, ".mk")
 }
 
 let hasHttpUrl = (content: string): bool => {
   // Simple check - real implementation would use regex
-  Js.String2.includes(content, "http://") &&
-    !Js.String2.includes(content, "http://localhost") &&
-    !Js.String2.includes(content, "http://127.0.0.1")
+  String.includes(content, "http://") &&
+    !String.includes(content, "http://localhost") &&
+    !String.includes(content, "http://127.0.0.1")
 }
 
 let hasSpdxHeader = (content: string): bool => {
-  Js.String2.includes(content, "SPDX-License-Identifier")
+  String.includes(content, "SPDX-License-Identifier")
 }
 
 // --- Exports for JavaScript interop ---

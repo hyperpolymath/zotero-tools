@@ -12,7 +12,7 @@ type performanceMetrics = {
 // Create new performance tracker
 let createMetrics = (): performanceMetrics => {
   {
-    startTime: Js.Date.now(),
+    startTime: Date.now(),
     endTime: None,
     itemsProcessed: 0,
     itemsFailed: 0,
@@ -22,7 +22,7 @@ let createMetrics = (): performanceMetrics => {
 
 // Update metrics with completion time
 let complete = (metrics: performanceMetrics): performanceMetrics => {
-  {...metrics, endTime: Some(Js.Date.now())}
+  {...metrics, endTime: Some(Date.now())}
 }
 
 // Calculate duration in seconds
@@ -39,7 +39,7 @@ let getItemsPerSecond = (metrics: performanceMetrics): option<float> => {
   | None => None
   | Some(duration) =>
     if duration > 0.0 {
-      Some(Belt.Int.toFloat(metrics.itemsProcessed) /. duration)
+      Some(Int.toFloat(metrics.itemsProcessed) /. duration)
     } else {
       None
     }
@@ -50,20 +50,20 @@ let getItemsPerSecond = (metrics: performanceMetrics): option<float> => {
 let formatSummary = (metrics: performanceMetrics): string => {
   let total = metrics.itemsProcessed + metrics.itemsFailed
   let successRate = if total > 0 {
-    Belt.Int.toFloat(metrics.itemsProcessed) /. Belt.Int.toFloat(total) *. 100.0
+    Int.toFloat(metrics.itemsProcessed) /. Int.toFloat(total) *. 100.0
   } else {
     0.0
   }
 
   switch getDuration(metrics) {
-  | None => `Processing: ${Belt.Int.toString(metrics.itemsProcessed)}/${Belt.Int.toString(total)} items`
+  | None => `Processing: ${Int.toString(metrics.itemsProcessed)}/${Int.toString(total)} items`
   | Some(duration) => {
       let rate = switch getItemsPerSecond(metrics) {
       | None => ""
-      | Some(ips) => ` (${Belt.Float.toString(ips)} items/sec)`
+      | Some(ips) => ` (${Float.toString(ips)} items/sec)`
       }
 
-      `Complete: ${Belt.Int.toString(metrics.itemsProcessed)}/${Belt.Int.toString(total)} items in ${Belt.Float.toString(duration)}s${rate}, ${Belt.Float.toString(successRate)}% success`
+      `Complete: ${Int.toString(metrics.itemsProcessed)}/${Int.toString(total)} items in ${Float.toString(duration)}s${rate}, ${Float.toString(successRate)}% success`
     }
   }
 }
@@ -73,8 +73,8 @@ let throttle = (fn: unit => unit, delayMs: int): (unit => unit) => {
   let lastCall = ref(0.0)
 
   () => {
-    let now = Js.Date.now()
-    if now -. lastCall.contents >= Belt.Int.toFloat(delayMs) {
+    let now = Date.now()
+    if now -. lastCall.contents >= Int.toFloat(delayMs) {
       lastCall := now
       fn()
     }
@@ -134,7 +134,7 @@ let suggestGC = (): unit => {
 // Optimize for large dataset processing
 let optimizeForLargeDataset = (itemCount: int): unit => {
   if itemCount > 100 {
-    Zotero.debug(`[Performance] Large dataset detected (${Belt.Int.toString(itemCount)} items)`)
+    Zotero.debug(`[Performance] Large dataset detected (${Int.toString(itemCount)} items)`)
     Zotero.debug("[Performance] Enabling optimizations: batch processing, periodic GC hints")
     suggestGC()
   }

@@ -60,7 +60,7 @@ let make = (~title, ()): t => {
     edges: [],
     metadata: {
       title,
-      created: Js.Date.now(),
+      created: Date.now(),
       totalOpacity: 0.0,
       fogDensity: 0.0,
     },
@@ -71,7 +71,7 @@ let make = (~title, ()): t => {
 let addNode = (trail: t, node: node): t => {
   {
     ...trail,
-    nodes: Js.Array2.concat(trail.nodes, [node]),
+    nodes: Array.concat(trail.nodes, [node]),
   }
 }
 
@@ -79,20 +79,20 @@ let addNode = (trail: t, node: node): t => {
 let addEdge = (trail: t, edge: edge): t => {
   {
     ...trail,
-    edges: Js.Array2.concat(trail.edges, [edge]),
+    edges: Array.concat(trail.edges, [edge]),
   }
 }
 
 // Calculate fog density (0.0-1.0)
 let calculateFogDensity = (trail: t): float => {
-  let mysteryCount = Js.Array2.filter(trail.nodes, n =>
+  let mysteryCount = Array.filter(trail.nodes, n =>
     switch n.nodeType {
     | Mystery => true
     | _ => false
     }
-  )->Js.Array2.length->Belt.Int.toFloat
+  )->Array.length->Int.toFloat
 
-  let totalNodes = Js.Array2.length(trail.nodes)->Belt.Int.toFloat
+  let totalNodes = Array.length(trail.nodes)->Int.toFloat
 
   if totalNodes > 0.0 {
     mysteryCount /. totalNodes
@@ -112,7 +112,7 @@ let buildFromAnalysis = (
   let trail = make(~title, ())
 
   // Add source nodes
-  let withSources = Js.Array2.reduce(sources, trail, (acc, source) => {
+  let withSources = Array.reduce(sources, trail, (acc, source) => {
     addNode(
       acc,
       {
@@ -127,7 +127,7 @@ let buildFromAnalysis = (
   })
 
   // Add contradiction edges
-  let withContradictions = Js.Array2.reduce(
+  let withContradictions = Array.reduce(
     contradictions,
     withSources,
     (acc, contradiction) => {
@@ -145,7 +145,7 @@ let buildFromAnalysis = (
   )
 
   // Add mystery nodes
-  let withMysteries = Js.Array2.reduce(mysteries, withContradictions, (acc, mystery) => {
+  let withMysteries = Array.reduce(mysteries, withContradictions, (acc, mystery) => {
     addNode(
       acc,
       {
@@ -176,7 +176,7 @@ let buildFromAnalysis = (
 let toJson = (trail: t): Js.Json.t => {
   open Js.Dict
 
-  let nodesJson = Js.Array2.map(trail.nodes, node => {
+  let nodesJson = Array.map(trail.nodes, node => {
     let nodeDict = empty()
     set(nodeDict, "id", Js.Json.string(node.id))
     set(nodeDict, "label", Js.Json.string(node.label))
@@ -185,7 +185,7 @@ let toJson = (trail: t): Js.Json.t => {
     Js.Json.object_(nodeDict)
   })
 
-  let edgesJson = Js.Array2.map(trail.edges, edge => {
+  let edgesJson = Array.map(trail.edges, edge => {
     let edgeDict = empty()
     set(edgeDict, "source", Js.Json.string(edge.source))
     set(edgeDict, "target", Js.Json.string(edge.target))
@@ -207,7 +207,7 @@ let toJson = (trail: t): Js.Json.t => {
 
 // Generate SVG visualization (basic)
 let toSvg = (trail: t, ~width=1000.0, ~height=800.0, ()): string => {
-  let nodesSvg = Js.Array2.map(trail.nodes, node => {
+  let nodesSvg = Array.map(trail.nodes, node => {
     let color = switch node.nodeType {
     | Source => "#4A90E2"
     | Concept => "#7B68EE"
@@ -215,31 +215,31 @@ let toSvg = (trail: t, ~width=1000.0, ~height=800.0, ()): string => {
     | Contradiction => "#E74C3C"
     }
 
-    `<circle cx="${Belt.Float.toString(node.x)}" cy="${Belt.Float.toString(
+    `<circle cx="${Float.toString(node.x)}" cy="${Float.toString(
         node.y,
       )}" r="10" fill="${color}" />
-      <text x="${Belt.Float.toString(node.x)}" y="${Belt.Float.toString(
+      <text x="${Float.toString(node.x)}" y="${Float.toString(
         node.y -. 15.0,
       )}" text-anchor="middle" font-size="10">${node.label}</text>`
-  })->Js.Array2.joinWith("\n")
+  })->Array.join("\n")
 
-  let edgesSvg = Js.Array2.map(trail.edges, edge => {
+  let edgesSvg = Array.map(trail.edges, edge => {
     // Find source and target nodes
-    let sourceNode = Js.Array2.find(trail.nodes, n => n.id == edge.source)
-    let targetNode = Js.Array2.find(trail.nodes, n => n.id == edge.target)
+    let sourceNode = Array.find(trail.nodes, n => n.id == edge.source)
+    let targetNode = Array.find(trail.nodes, n => n.id == edge.target)
 
     switch (sourceNode, targetNode) {
     | (Some(s), Some(t)) =>
-      `<line x1="${Belt.Float.toString(s.x)}" y1="${Belt.Float.toString(
+      `<line x1="${Float.toString(s.x)}" y1="${Float.toString(
           s.y,
-        )}" x2="${Belt.Float.toString(t.x)}" y2="${Belt.Float.toString(
+        )}" x2="${Float.toString(t.x)}" y2="${Float.toString(
           t.y,
-        )}" stroke="#95A5A6" stroke-width="${Belt.Float.toString(edge.weight)}" />`
+        )}" stroke="#95A5A6" stroke-width="${Float.toString(edge.weight)}" />`
     | _ => ""
     }
-  })->Js.Array2.joinWith("\n")
+  })->Array.join("\n")
 
-  `<svg width="${Belt.Float.toString(width)}" height="${Belt.Float.toString(height)}" xmlns="http://www.w3.org/2000/svg">
+  `<svg width="${Float.toString(width)}" height="${Float.toString(height)}" xmlns="http://www.w3.org/2000/svg">
     <g id="edges">
       ${edgesSvg}
     </g>

@@ -35,11 +35,11 @@ let make = (~label, ~features, ~members, ()): t => {
 // An item belongs if it shares "enough" features with other members
 let belongsToFamily = (item: string, features: array<string>, family: t): bool => {
   // Count overlapping features
-  let itemFeatures = Js.Array2.filter(family.features, f =>
-    Js.Array2.includes(f.exemplars, item)
+  let itemFeatures = Array.filter(family.features, f =>
+    Array.includes(f.exemplars, item)
   )
 
-  let overlapScore = Js.Array2.reduce(itemFeatures, 0.0, (acc, f) => acc +. f.weight)
+  let overlapScore = Array.reduce(itemFeatures, 0.0, (acc, f) => acc +. f.weight)
 
   // Threshold is deliberately vague - that's the point!
   overlapScore > 0.5
@@ -47,9 +47,9 @@ let belongsToFamily = (item: string, features: array<string>, family: t): bool =
 
 // Find prototypical member (most features)
 let findPrototype = (family: t): option<string> => {
-  let scores = Js.Array2.map(family.members, member => {
-    let score = Js.Array2.reduce(family.features, 0.0, (acc, f) => {
-      if Js.Array2.includes(f.exemplars, member) {
+  let scores = Array.map(family.members, member => {
+    let score = Array.reduce(family.features, 0.0, (acc, f) => {
+      if Array.includes(f.exemplars, member) {
         acc +. f.weight
       } else {
         acc
@@ -58,11 +58,11 @@ let findPrototype = (family: t): option<string> => {
     (member, score)
   })
 
-  let sorted = Js.Array2.sortInPlaceWith(scores, ((_, s1), (_, s2)) =>
+  let sorted = Array.toSorted(scores, ((_, s1), (_, s2)) =>
     if s1 > s2 { -1 } else if s1 < s2 { 1 } else { 0 }
   )
 
-  switch Js.Array2.unsafe_get(sorted, 0) {
+  switch Array.getUnsafe(sorted, 0) {
   | (member, _) => Some(member)
   | _ => None
   }
@@ -73,8 +73,8 @@ let findPrototype = (family: t): option<string> => {
 let merge = (f1: t, f2: t): t => {
   {
     label: `${f1.label} + ${f2.label}`,
-    features: Js.Array2.concat(f1.features, f2.features),
-    members: Js.Array2.concat(f1.members, f2.members),
+    features: Array.concat(f1.features, f2.features),
+    members: Array.concat(f1.members, f2.members),
     centerOfGravity: None,
     boundaries: "contested", // Merged clusters are usually contested
   }
@@ -82,19 +82,19 @@ let merge = (f1: t, f2: t): t => {
 
 // Calculate resemblance strength between two items
 let resemblanceStrength = (item1: string, item2: string, family: t): float => {
-  let features1 = Js.Array2.filter(family.features, f =>
-    Js.Array2.includes(f.exemplars, item1)
+  let features1 = Array.filter(family.features, f =>
+    Array.includes(f.exemplars, item1)
   )
-  let features2 = Js.Array2.filter(family.features, f =>
-    Js.Array2.includes(f.exemplars, item2)
+  let features2 = Array.filter(family.features, f =>
+    Array.includes(f.exemplars, item2)
   )
 
   // Count overlapping features
-  let overlap = Js.Array2.filter(features1, f1 =>
-    Js.Array2.some(features2, f2 => f1.name == f2.name)
+  let overlap = Array.filter(features1, f1 =>
+    Array.some(features2, f2 => f1.name == f2.name)
   )
 
-  let overlapWeight = Js.Array2.reduce(overlap, 0.0, (acc, f) => acc +. f.weight)
+  let overlapWeight = Array.reduce(overlap, 0.0, (acc, f) => acc +. f.weight)
   overlapWeight
 }
 
@@ -102,12 +102,12 @@ let resemblanceStrength = (item1: string, item2: string, family: t): float => {
 let toNetwork = (family: t): array<(string, string, float)> => {
   // Create edges between members based on resemblance strength
   let edges = []
-  Js.Array2.forEach(family.members, m1 => {
-    Js.Array2.forEach(family.members, m2 => {
+  Array.forEach(family.members, m1 => {
+    Array.forEach(family.members, m2 => {
       if m1 != m2 {
         let strength = resemblanceStrength(m1, m2, family)
         if strength > 0.0 {
-          Js.Array2.push(edges, (m1, m2, strength))->ignore
+          Array.push(edges, (m1, m2, strength))->ignore
         }
       }
     })

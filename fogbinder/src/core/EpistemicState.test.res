@@ -7,19 +7,19 @@ open EpistemicState
 // Test helpers
 let assertEqual = (actual, expected, message) => {
   if actual != expected {
-    Js.Console.error2("FAIL:", message)
-    Js.Console.error2("Expected:", expected)
-    Js.Console.error2("Actual:", actual)
+    Console.error2("FAIL:", message)
+    Console.error2("Expected:", expected)
+    Console.error2("Actual:", actual)
   } else {
-    Js.Console.log2("✅ PASS:", message)
+    Console.log2("✅ PASS:", message)
   }
 }
 
 let assertTrue = (condition, message) => {
   if !condition {
-    Js.Console.error2("FAIL:", message)
+    Console.error2("FAIL:", message)
   } else {
-    Js.Console.log2("✅ PASS:", message)
+    Console.log2("✅ PASS:", message)
   }
 }
 
@@ -101,7 +101,7 @@ let testToString = () => {
   let state = make(Contradictory, "Context", [], None)
   let str = toString(state)
   assertTrue(
-    Js.String2.includes(str, "Contradictory"),
+    String.includes(str, "Contradictory"),
     "toString should include certainty level",
   )
 }
@@ -143,9 +143,9 @@ let testUncertaintyConsistency = () => {
 
 // Run all tests
 let runTests = () => {
-  Js.Console.log("================================")
-  Js.Console.log("Running EpistemicState Tests")
-  Js.Console.log("================================")
+  Console.log("================================")
+  Console.log("Running EpistemicState Tests")
+  Console.log("================================")
 
   testKnownState()
   testKnownIsNotUncertain()
@@ -160,9 +160,9 @@ let runTests = () => {
   testOpacityRange()
   testUncertaintyConsistency()
 
-  Js.Console.log("================================")
-  Js.Console.log("✅ All EpistemicState tests passed")
-  Js.Console.log("================================")
+  Console.log("================================")
+  Console.log("✅ All EpistemicState tests passed")
+  Console.log("================================")
 }
 
 // Auto-run tests when loaded

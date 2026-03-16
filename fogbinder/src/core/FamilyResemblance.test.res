@@ -52,7 +52,7 @@ describe("FamilyResemblance", () => {
       )
 
       Assert.equal(games.label, "Games")
-      Assert.equal(Js.Array2.length(games.members), 6)
+      Assert.equal(Array.length(games.members), 6)
       Assert.equal(games.boundaries, "vague")
     })
 
@@ -177,15 +177,15 @@ describe("FamilyResemblance", () => {
     it("combines features from both families", () => {
       let merged = FamilyResemblance.merge(indoor, outdoor)
 
-      Assert.equal(Js.Array2.length(merged.features), 2)
+      Assert.equal(Array.length(merged.features), 2)
     })
 
     it("combines members from both families", () => {
       let merged = FamilyResemblance.merge(indoor, outdoor)
 
-      Assert.equal(Js.Array2.length(merged.members), 4)
-      Assert.ok(Js.Array2.includes(merged.members, "chess"))
-      Assert.ok(Js.Array2.includes(merged.members, "football"))
+      Assert.equal(Array.length(merged.members), 4)
+      Assert.ok(Array.includes(merged.members, "chess"))
+      Assert.ok(Array.includes(merged.members, "football"))
     })
 
     it("creates contested boundaries", () => {
@@ -259,13 +259,13 @@ describe("FamilyResemblance", () => {
     it("creates network edges between members", () => {
       let network = FamilyResemblance.toNetwork(games)
 
-      Assert.ok(Js.Array2.length(network) > 0)
+      Assert.ok(Array.length(network) > 0)
     })
 
     it("only includes edges with positive strength", () => {
       let network = FamilyResemblance.toNetwork(games)
 
-      Js.Array2.forEach(network, ((_, _, strength)) => {
+      Array.forEach(network, ((_, _, strength)) => {
         Assert.ok(strength > 0.0)
       })
     })
@@ -273,7 +273,7 @@ describe("FamilyResemblance", () => {
     it("does not create self-edges", () => {
       let network = FamilyResemblance.toNetwork(games)
 
-      Js.Array2.forEach(network, ((from, to, _)) => {
+      Array.forEach(network, ((from, to, _)) => {
         Assert.ok(from != to)
       })
     })
@@ -282,7 +282,7 @@ describe("FamilyResemblance", () => {
       let network = FamilyResemblance.toNetwork(games)
 
       // Chess and tennis should be connected (both have competition + skill)
-      let chessToTennis = Js.Array2.some(network, ((from, to, _)) =>
+      let chessToTennis = Array.some(network, ((from, to, _)) =>
         (from == "chess" && to == "tennis") || (from == "tennis" && to == "chess")
       )
 
@@ -302,7 +302,7 @@ describe("FamilyResemblance", () => {
 
       let network = FamilyResemblance.toNetwork(isolated)
 
-      Assert.equal(Js.Array2.length(network), 0)
+      Assert.equal(Array.length(network), 0)
     })
   })
 

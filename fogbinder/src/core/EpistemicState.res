@@ -33,7 +33,7 @@ let make = (~certainty, ~context, ~evidence, ()): t => {
     certainty,
     context,
     evidence,
-    timestamp: Js.Date.now(),
+    timestamp: Date.now(),
   }
 }
 
@@ -61,8 +61,8 @@ let merge = (s1: t, s2: t): t => {
   let newCertainty = switch (s1.certainty, s2.certainty) {
   | (Known, Known) => Known
   | (Probable(p1), Probable(p2)) => Probable((p1 +. p2) /. 2.0)
-  | (Ambiguous(a1), Ambiguous(a2)) => Ambiguous(Js.Array2.concat(a1, a2))
-  | (Contradictory(c1), Contradictory(c2)) => Contradictory(Js.Array2.concat(c1, c2))
+  | (Ambiguous(a1), Ambiguous(a2)) => Ambiguous(Array.concat(a1, a2))
+  | (Contradictory(c1), Contradictory(c2)) => Contradictory(Array.concat(c1, c2))
   | (_, Mysterious) | (Mysterious, _) => Mysterious
   | _ => Ambiguous([
       "Multiple interpretations from different contexts",
@@ -72,8 +72,8 @@ let merge = (s1: t, s2: t): t => {
   {
     certainty: newCertainty,
     context: s1.context, // Preserve primary context
-    evidence: Js.Array2.concat(s1.evidence, s2.evidence),
-    timestamp: Js.Date.now(),
+    evidence: Array.concat(s1.evidence, s2.evidence),
+    timestamp: Date.now(),
   }
 }
 
@@ -84,7 +84,7 @@ let toJson = (state: t): Js.Json.t => {
 
   let certaintyStr = switch state.certainty {
   | Known => "known"
-  | Probable(p) => `probable:${Belt.Float.toString(p)}`
+  | Probable(p) => `probable:${Float.toString(p)}`
   | Vague => "vague"
   | Ambiguous(_) => "ambiguous"
   | Mysterious => "mysterious"

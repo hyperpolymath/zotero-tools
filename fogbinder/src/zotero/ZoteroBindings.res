@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+//
 // ZoteroBindings.res
 // ReScript bindings to Zotero API
 // Minimal JS interop for Zotero plugin functionality
@@ -44,7 +47,7 @@ let itemToText = (item: zoteroItem): string => {
 
 // Extract citations from collection
 let extractCitations = (collection: zoteroCollection): array<string> => {
-  Js.Array2.map(collection.items, item => itemToText(item))
+  Array.map(collection.items, item => itemToText(item))
 }
 
 // Tag item with Fogbinder analysis
@@ -63,15 +66,54 @@ let createFogTrailNote = (itemId: string, svgContent: string): promise<unit> => 
 let analyzeCollection = async (collectionId: string): unit => {
   let collections = await getCollections()
 
-  let targetCollection = Js.Array2.find(collections, c => c.id == collectionId)
+  let targetCollection = Array.find(collections, c => c.id == collectionId)
 
   switch targetCollection {
   | Some(coll) => {
       let citations = extractCitations(coll)
 
       // Would integrate with analysis engines here
-      Js.log(`Analyzing ${Belt.Int.toString(Js.Array2.length(citations))} citations...`)
+      Console.log(`Analyzing ${Int.toString(Array.length(citations))} citations...`)
     }
-  | None => Js.log("Collection not found")
+  | None => Console.log("Collection not found")
   }
 }
+
+// ---------------------------------------------------------------------------
+// Orphan Adoption — bindings for finding and parenting orphan attachments
+// ---------------------------------------------------------------------------
+
+// An attachment that has no parent item.
+type orphanAttachment = {
+  id: int,
+  title: string,
+  filename: string,
+  itemType: string,
+}
+
+// Result of an adoption operation.
+type adoptionError = {
+  id: int,
+  error: string,
+}
+
+type adoptionResult = {
+  total: int,
+  adopted: int,
+  failed: int,
+  skipped: int,
+  errors: array<adoptionError>,
+}
+
+// Get all orphan attachments (no parent item), skipping known problem types.
+@module("./zotero_api.js")
+external getOrphanAttachments: array<string> => promise<array<orphanAttachment>> =
+  "getOrphanAttachments"
+
+// Create parent items for a list of orphan attachment IDs.
+@module("./zotero_api.js")
+external adoptOrphans: array<int> => promise<adoptionResult> = "adoptOrphans"
+
+// One-shot: find all orphans and create parent items for all of them.
+@module("./zotero_api.js")
+external adoptAllOrphans: array<string> => promise<adoptionResult> = "adoptAllOrphans"

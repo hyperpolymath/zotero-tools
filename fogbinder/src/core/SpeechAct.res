@@ -57,7 +57,7 @@ let make = (~utterance, ~force, ~context, ()): t => {
       context,
       performative,
     },
-    timestamp: Js.Date.now(),
+    timestamp: Date.now(),
   }
 }
 

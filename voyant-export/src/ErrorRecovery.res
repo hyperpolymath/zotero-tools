@@ -32,18 +32,18 @@ let rec retryWithBackoff = async (
   } catch {
   | exn => {
       let error = exn->Obj.magic
-      Zotero.debug(`Attempt ${Belt.Int.toString(attempt)} failed: ${error}`)
+      Zotero.debug(`Attempt ${Int.toString(attempt)} failed: ${error}`)
 
       if attempt >= config.maxAttempts {
-        Error(`Failed after ${Belt.Int.toString(config.maxAttempts)} attempts: ${error}`)
+        Error(`Failed after ${Int.toString(config.maxAttempts)} attempts: ${error}`)
       } else {
         // Calculate delay with exponential backoff
-        let delayTime = Belt.Float.toInt(
-          Belt.Int.toFloat(config.delayMs) *.
-          Math.pow(config.backoffMultiplier, Belt.Int.toFloat(attempt - 1))
+        let delayTime = Float.toInt(
+          Int.toFloat(config.delayMs) *.
+          Math.pow(config.backoffMultiplier, Int.toFloat(attempt - 1))
         )
 
-        Zotero.debug(`Retrying in ${Belt.Int.toString(delayTime)}ms...`)
+        Zotero.debug(`Retrying in ${Int.toString(delayTime)}ms...`)
         await delay(delayTime)
         await retryWithBackoff(operation, config, attempt + 1)
       }
@@ -121,7 +121,7 @@ let ensureDirectory = (dir: Firefox.nsIFile): result<unit, string> => {
 
 // Graceful degradation for missing attachments
 let handleMissingAttachment = (itemId: int): unit => {
-  Zotero.debug(`[Graceful Degradation] Item ${Belt.Int.toString(itemId)} has no attachment, creating placeholder`)
+  Zotero.debug(`[Graceful Degradation] Item ${Int.toString(itemId)} has no attachment, creating placeholder`)
   // Extension could create a metadata-only entry instead of failing
 }
 

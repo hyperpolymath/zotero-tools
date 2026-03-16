@@ -61,7 +61,7 @@ let copyFileTo = (sourceFile: Firefox.nsIFile, targetDir: Firefox.nsIFile, newNa
 
 // Process a single item with retry logic and error recovery
 let processItem = async (item: Zotero.item, dataDir: Firefox.nsIFile): promise<bool> => {
-  Zotero.debug(`Processing item ${Belt.Int.toString(item.id)}`)
+  Zotero.debug(`Processing item ${Int.toString(item.id)}`)
 
   let operation = async () => {
     let attResult = await item.getBestAttachment()
@@ -76,12 +76,12 @@ let processItem = async (item: Zotero.item, dataDir: Firefox.nsIFile): promise<b
 
         switch pathResult->Js.Nullable.toOption {
         | None => {
-            Zotero.debug(`No file path for attachment on item ${Belt.Int.toString(item.id)}`)
+            Zotero.debug(`No file path for attachment on item ${Int.toString(item.id)}`)
             Error("No file path")
           }
         | Some(attPath) => {
             let attFile = Zotero.File.pathToFile(attPath)
-            let itemID = Belt.Int.toString(item.id)
+            let itemID = Int.toString(item.id)
 
             Zotero.debug(`Saving item ${itemID}`)
 
@@ -117,11 +117,11 @@ let processItem = async (item: Zotero.item, dataDir: Firefox.nsIFile): promise<b
 
   switch result {
   | Ok(_) => {
-      Zotero.debug(`Successfully processed item ${Belt.Int.toString(item.id)}`)
+      Zotero.debug(`Successfully processed item ${Int.toString(item.id)}`)
       true
     }
   | Error(msg) => {
-      Zotero.debug(`Failed to process item ${Belt.Int.toString(item.id)}: ${msg}`)
+      Zotero.debug(`Failed to process item ${Int.toString(item.id)}: ${msg}`)
       false
     }
   }
@@ -129,7 +129,7 @@ let processItem = async (item: Zotero.item, dataDir: Firefox.nsIFile): promise<b
 
 // Export collection to Voyant format with performance tracking and error recovery
 let doExport = async (): unit => {
-  let startTime = Js.Date.now()
+  let startTime = Date.now()
   Zotero.debug("[Voyant Export] Starting export")
 
   switch Zotero.getZoteroPane() {
@@ -144,11 +144,11 @@ let doExport = async (): unit => {
           let items = collection.getChildItems()
           let itemCount = items->Array.length
 
-          Zotero.debug(`[Voyant Export] Collection: ${name}, ${Belt.Int.toString(itemCount)} items`)
+          Zotero.debug(`[Voyant Export] Collection: ${name}, ${Int.toString(itemCount)} items`)
 
           // Performance warning for large collections
           if itemCount > 100 {
-            Zotero.debug(`[Voyant Export] Warning: Large collection (${Belt.Int.toString(itemCount)} items) - this may take a while`)
+            Zotero.debug(`[Voyant Export] Warning: Large collection (${Int.toString(itemCount)} items) - this may take a while`)
           }
 
           // Show file picker
@@ -191,12 +191,12 @@ let doExport = async (): unit => {
 
                         // Log progress every 10 items
                         if mod(i + 1, 10) == 0 {
-                          Zotero.debug(`[Voyant Export] Progress: ${Belt.Int.toString(i + 1)}/${Belt.Int.toString(itemCount)} items`)
+                          Zotero.debug(`[Voyant Export] Progress: ${Int.toString(i + 1)}/${Int.toString(itemCount)} items`)
                         }
                       }
 
                       Zotero.debug(
-                        `[Voyant Export] Processing complete: ${Belt.Int.toString(successCount.contents)} succeeded, ${Belt.Int.toString(failureCount.contents)} failed`
+                        `[Voyant Export] Processing complete: ${Int.toString(successCount.contents)} succeeded, ${Int.toString(failureCount.contents)} failed`
                       )
 
                       // Zip the directory with retry logic
@@ -209,10 +209,10 @@ let doExport = async (): unit => {
 
                       switch zipResult {
                       | Ok(_) => {
-                          let endTime = Js.Date.now()
+                          let endTime = Date.now()
                           let duration = (endTime -. startTime) /. 1000.0
                           Zotero.debug(
-                            `[Voyant Export] Export complete: ${file.path} (${Belt.Float.toString(duration)}s, ${Belt.Int.toString(successCount.contents)}/${Belt.Int.toString(itemCount)} items)`
+                            `[Voyant Export] Export complete: ${file.path} (${Float.toString(duration)}s, ${Int.toString(successCount.contents)}/${Int.toString(itemCount)} items)`
                           )
                         }
                       | Error(msg) => Zotero.debug(`[Voyant Export] Failed to create zip file: ${msg}`)

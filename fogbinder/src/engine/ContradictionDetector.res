@@ -62,12 +62,12 @@ let detectContradiction = (act1: SpeechAct.t, act2: SpeechAct.t): option<contrad
 let detectMultiple = (acts: array<SpeechAct.t>): array<contradiction> => {
   let contradictions = []
 
-  Js.Array2.forEach(acts, act1 => {
-    Js.Array2.forEach(acts, act2 => {
+  Array.forEach(acts, act1 => {
+    Array.forEach(acts, act2 => {
       if act1.timestamp < act2.timestamp {
         // Avoid duplicate pairs
         switch detectContradiction(act1, act2) {
-        | Some(c) => Js.Array2.push(contradictions, c)->ignore
+        | Some(c) => Array.push(contradictions, c)->ignore
         | None => ()
         }
       }

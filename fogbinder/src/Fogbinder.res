@@ -18,6 +18,7 @@ open MoodScorer
 open MysteryClustering
 open FogTrailVisualizer
 open ZoteroBindings
+open OrphanAdoption
 
 // SCHEMA: The consolidated report from an analysis run.
 type analysisResult = {
@@ -40,10 +41,10 @@ let analyze = (~sources: array<string>, ~context: EpistemicState.languageGame, (
     mysteries: mysteryClusters,
     fogTrail,
     metadata: {
-      analyzed: Js.Date.now(),
-      totalSources: Js.Array2.length(sources),
-      totalContradictions: Js.Array2.length(contradictions),
-      totalMysteries: Js.Array2.length(mysteries),
+      analyzed: Date.now(),
+      totalSources: Array.length(sources),
+      totalContradictions: Array.length(contradictions),
+      totalMysteries: Array.length(mysteries),
       overallOpacity: fogTrail.metadata.fogDensity,
     },
   }
@@ -58,3 +59,18 @@ let analyze = (~sources: array<string>, ~context: EpistemicState.languageGame, (
 let analyzeZoteroCollection = async (collectionId: string): analysisResult => {
   // ... [Asynchronous collection retrieval and tagging logic]
 }
+
+// ---------------------------------------------------------------------------
+// Orphan Adoption — convenience re-exports for the Fogbinder menu
+// ---------------------------------------------------------------------------
+
+/// Adopt all orphan attachments (create parent items). One-click fix for the
+/// "some files have no parent item" frustration after bulk imports.
+let adoptOrphanAttachments = OrphanAdoption.adoptAll
+
+/// Preview orphan attachments without adopting them.
+let previewOrphanAttachments = OrphanAdoption.previewOrphans
+
+/// Adopt with extra skip patterns (e.g. for plugin-specific attachment types
+/// beyond the built-in BetterNotes filter).
+let adoptOrphanAttachmentsWithSkips = OrphanAdoption.adoptAllWithSkips

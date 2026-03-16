@@ -38,7 +38,7 @@ let isMystery = (state: EpistemicState.t): bool => {
   switch state.certainty {
   | Mysterious => true
   | Vague => true
-  | Ambiguous(_) when Js.Array2.length(
+  | Ambiguous(_) when Array.length(
       switch state.certainty {
       | Ambiguous(a) => a
       | _ => []
@@ -54,7 +54,7 @@ let make = (~content, ~state, ()): mystery => {
   let opacityLevel = switch state.certainty {
   | Mysterious => Opaque
   | Vague => Translucent(0.5)
-  | Ambiguous(interps) when Js.Array2.length(interps) > 5 => Paradoxical
+  | Ambiguous(interps) when Array.length(interps) > 5 => Paradoxical
   | Contradictory(_) => Paradoxical
   | _ => Translucent(0.3)
   }
@@ -86,7 +86,7 @@ let cluster = (mysteries: array<mystery>): array<mysteryCluster> => {
   // Group mysteries with similar resistance types
   let grouped = Js.Dict.empty()
 
-  Js.Array2.forEach(mysteries, m => {
+  Array.forEach(mysteries, m => {
     let key = switch m.resistanceType {
     | ConceptualResistance => "conceptual"
     | EvidentialResistance => "evidential"
@@ -95,26 +95,26 @@ let cluster = (mysteries: array<mystery>): array<mysteryCluster> => {
     }
 
     switch Js.Dict.get(grouped, key) {
-    | Some(arr) => Js.Array2.push(arr, m)->ignore
+    | Some(arr) => Array.push(arr, m)->ignore
     | None => Js.Dict.set(grouped, key, [m])
     }
   })
 
   // Convert to mystery clusters
-  Js.Dict.entries(grouped)->Js.Array2.map(((label, mysts)) => {
+  Js.Dict.entries(grouped)->Array.map(((label, mysts)) => {
     // Create family resemblance features
     let features = [
       {
         FamilyResemblance.name: "opacity",
         weight: 1.0,
-        exemplars: Js.Array2.map(mysts, m => m.content),
+        exemplars: Array.map(mysts, m => m.content),
       },
     ]
 
     let family = FamilyResemblance.make(
       ~label,
       ~features,
-      ~members=Js.Array2.map(mysts, m => m.content),
+      ~members=Array.map(mysts, m => m.content),
       (),
     )
 
@@ -122,7 +122,7 @@ let cluster = (mysteries: array<mystery>): array<mysteryCluster> => {
       label,
       mysteries: mysts,
       familyResemblance: family,
-      centralMystery: Js.Array2.unsafe_get(mysts, 0)->Some,
+      centralMystery: Array.getUnsafe(mysts, 0)->Some,
     }
   })
 }
@@ -130,7 +130,7 @@ let cluster = (mysteries: array<mystery>): array<mysteryCluster> => {
 // Get opacity descriptor
 let getOpacityDescriptor = (m: mystery): string => {
   switch m.opacityLevel {
-  | Translucent(level) => `Translucent (${Belt.Float.toString(level)})`
+  | Translucent(level) => `Translucent (${Float.toString(level)})`
   | Opaque => "Opaque"
   | Paradoxical => "Paradoxical"
   | Ineffable => "Ineffable"
