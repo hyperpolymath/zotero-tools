@@ -31,7 +31,7 @@
     "rsr-compliant"
   ],
   "author": "Hyperpolymath",
-  "license": "AGPL-3.0-or-later",
+  "license": "PMPL-1.0-or-later",
   "repository": {
     "type": "git",
     "url": "https://github.com/Hyperpolymath/zotero-nsai.git"
