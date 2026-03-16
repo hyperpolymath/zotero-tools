@@ -5,7 +5,7 @@
  * Test your Zotero API connection without WordPress.
  * Run: php demo/test-api.php YOUR_USER_ID [YOUR_API_KEY]
  *
- * SPDX-License-Identifier: AGPL-3.0-or-later
+ * SPDX-License-Identifier: PMPL-1.0-or-later
  */
 
 if (php_sapi_name() !== 'cli') {

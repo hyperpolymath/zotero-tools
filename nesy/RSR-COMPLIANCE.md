@@ -21,7 +21,7 @@ The RSR framework defines standards for:
 
 **Documentation**:
 - ✅ README.md - Comprehensive project documentation
-- ✅ LICENSE - GNU AGPL-3.0-or-later
+- ✅ LICENSE - GNU PMPL-1.0-or-later
 - ✅ SECURITY.md - Vulnerability reporting and security policy
 - ✅ CONTRIBUTING.md - Contribution guidelines
 - ✅ CODE_OF_CONDUCT.md - Community standards (Contributor Covenant 2.1)

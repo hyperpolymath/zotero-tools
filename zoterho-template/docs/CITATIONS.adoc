@@ -10,7 +10,7 @@
   title = {ZoteRho-template},
   year = {2025},
   url = {https://github.com/hyperpolymath/ZoteRho-template},
-  license = {AGPL-3.0-or-later}
+  license = {PMPL-1.0-or-later}
 }
 ----
 

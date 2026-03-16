@@ -10,7 +10,7 @@
   title = {zotero-rescript-templater},
   year = {2025},
   url = {https://github.com/hyperpolymath/zotero-rescript-templater},
-  license = {AGPL-3.0-or-later}
+  license = {PMPL-1.0-or-later}
 }
 ----
 
