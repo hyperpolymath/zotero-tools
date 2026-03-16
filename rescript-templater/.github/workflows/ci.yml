@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Setup PowerShell
         shell: pwsh
@@ -171,7 +171,7 @@ jobs:
 
       - name: Upload test artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6db9a8b71b5c2d1a090c0daf9c8bb # v4
         with:
           name: test-projects-${{ matrix.os }}
           path: |
@@ -192,7 +192,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Setup Racket
         uses: Bogdanp/setup-racket@v1.10
@@ -234,7 +234,7 @@ jobs:
 
       - name: Upload Racket test artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6db9a8b71b5c2d1a090c0daf9c8bb # v4
         with:
           name: test-racket-projects-${{ matrix.os }}-${{ matrix.racket-version }}
           path: |
@@ -252,7 +252,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Run Bash tests
         run: |
@@ -273,7 +273,7 @@ jobs:
 
       - name: Upload Bash test artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6db9a8b71b5c2d1a090c0daf9c8bb # v4
         with:
           name: test-bash-projects-${{ matrix.os }}
           path: BashTestProject/
@@ -285,7 +285,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install PSScriptAnalyzer
         shell: pwsh
@@ -312,7 +312,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Setup Racket
         uses: Bogdanp/setup-racket@v1.10
@@ -331,7 +331,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Check for broken links in README
         uses: gaurav-nelson/github-action-markdown-link-check@v1
@@ -360,7 +360,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Run Trivy security scanner
         uses: aquasecurity/trivy-action@master
@@ -371,7 +371,7 @@ jobs:
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@6624720a57d4c312633c7b953db2f2da5bcb4c3a # v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
@@ -385,7 +385,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Test file path handling
         shell: pwsh
@@ -411,10 +411,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642195f2b846b8bbe245a93 # v4
         with:
           node-version: '20'
 

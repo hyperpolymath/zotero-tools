@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Setup PowerShell
         uses: actions/setup-dotnet@v4
@@ -102,7 +102,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.publish_psgallery)
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Setup PowerShell
         uses: actions/setup-dotnet@v4
@@ -156,7 +156,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.publish_container)
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -203,7 +203,7 @@ jobs:
           output-file: sbom.spdx.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6db9a8b71b5c2d1a090c0daf9c8bb # v4
         with:
           name: container-sbom
           path: sbom.spdx.json
