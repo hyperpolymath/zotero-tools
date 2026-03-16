@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Clade declaration — part of the gv-clade-index registry
+# See: https://github.com/hyperpolymath/gv-clade-index
+
+[identity]
+uuid = "99d011d5-b0b4-5411-90b9-560b5a5c46a8"
+primary-forge = "github"
+primary-owner = "hyperpolymath"
+canonical-name = "zotero-tools"
+prefixed-name = "dx-zotero-tools"
+
+[clade]
+primary = "dx"
+secondary = []
+assigned = "2026-03-16"
+rationale = ""
+
+[forges]
+github = "hyperpolymath/zotero-tools"
+gitlab = "hyperpolymath/zotero-tools"
+bitbucket = "hyperpolymath/zotero-tools"
+
+[lineage]
+type = "standalone"
+parent = "Zotero reference management tools"
+born = "2026-03-16"
