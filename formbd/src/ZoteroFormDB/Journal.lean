@@ -112,11 +112,21 @@ theorem appendPreservesOrdering (j : Journal) (e : JournalEntry)
     (h : latestSequence j < e.sequence) :
     latestSequence (append j e) = e.sequence := by
   simp only [append, latestSequence]
-  sorry  -- Full proof requires List lemmas
+  -- After append, the list is j ++ [e], so getLast? returns some e
+  simp [List.getLast?_append_of_ne_nil _ (List.cons_ne_nil e [])]
 
 /-- Merged journals contain all entries from both -/
 theorem mergeContainsBoth (j1 j2 : Journal) (e : JournalEntry) :
     e ∈ j1 ∨ e ∈ j2 → ∃ e' ∈ merge j1 j2, e'.sequence = e.sequence := by
-  sorry  -- Full proof requires List membership lemmas
+  intro h
+  -- BLOCKED: The merge function uses Array.qsort and List.foldl with dedup,
+  -- making it difficult to reason about membership without auxiliary lemmas:
+  --   1. qsort preserves membership (Array.mem_qsort)
+  --   2. The dedup foldl preserves at least one entry per sequence number
+  --   3. List.append membership (e ∈ j1 ++ j2 from e ∈ j1 ∨ e ∈ j2)
+  -- The proof structure is: e ∈ j1 ∨ e ∈ j2 → e ∈ j1 ++ j2
+  -- → e ∈ (j1 ++ j2).toArray.qsort(...).toList → sequence preserved by dedup.
+  -- Lean's Array.qsort lacks standard membership lemmas in core library.
+  sorry  -- BLOCKED: requires Array.qsort membership lemma not in Lean core
 
 end ZoteroFormDB.Journal
