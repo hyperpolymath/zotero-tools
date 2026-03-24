@@ -117,30 +117,61 @@ theorem appendPreservesOrdering (j : Journal) (e : JournalEntry)
   -- After append, the list is j ++ [e], so getLast? returns some e
   simp [List.getLast?_append_of_ne_nil _ (List.cons_ne_nil e [])]
 
-/-- dedupBySequence preserves at least one entry per sequence number.
-    Requires well-founded induction on list length since dedupBySequence
-    recurses on a filtered sublist. -/
-theorem dedupBySequence_preserves_sequence (sorted : Journal) (e : JournalEntry) :
+/-- Helper: dedupBySequence preserves at least one entry per sequence number.
+    Proved by well-founded induction on list length, since dedupBySequence
+    recurses on a filtered sublist (not a structural subterm). -/
+private theorem dedupBySequence_preserves_sequence_aux (n : Nat) (sorted : Journal)
+    (hn : sorted.length ≤ n) (e : JournalEntry) :
     e ∈ sorted → ∃ e' ∈ dedupBySequence sorted, e'.sequence = e.sequence := by
-  intro h
-  induction sorted with
-  | nil => exact absurd h (List.not_mem_nil _)
-  | cons hd tl _ih =>
-    simp only [dedupBySequence]
-    by_cases heq : hd.sequence = e.sequence
-    · -- hd has same sequence — use it as witness
-      exact ⟨hd, List.mem_cons_self _ _, heq⟩
-    · -- e ∈ tl with different sequence from hd, so e passes the filter.
-      -- Need: ∃ e' ∈ dedupBySequence (tl.filter ...), e'.sequence = e.sequence
-      -- This requires well-founded induction on (tl.filter ...).length < (hd :: tl).length
-      -- which is true but not available from structural induction on the cons case.
-      sorry  -- BLOCKED: well-founded induction on List.length needed for filter recursion.
-             -- The structural IH gives us tl, but we recurse on tl.filter p.
-             -- Path: use `have : (tl.filter p).length < (hd :: tl).length` + WF induction.
+  induction n generalizing sorted e with
+  | zero =>
+    -- sorted must be empty if length ≤ 0
+    intro h
+    have : sorted = [] := List.length_eq_zero.mp (Nat.le_zero.mp hn)
+    rw [this] at h
+    exact absurd h (List.not_mem_nil _)
+  | succ k ih =>
+    intro h
+    match sorted, h, hn with
+    | [], h, _ => exact absurd h (List.not_mem_nil _)
+    | hd :: tl, h, hn =>
+      simp only [dedupBySequence]
+      by_cases heq : hd.sequence = e.sequence
+      · -- hd has same sequence — use it as witness
+        exact ⟨hd, List.mem_cons_self _ _, heq⟩
+      · -- e must be in tl (not hd, since sequences differ)
+        have he_in_tl : e ∈ tl := by
+          rcases List.mem_cons.mp h with h_eq | h_tl
+          · exact absurd (congrArg JournalEntry.sequence h_eq) heq
+          · exact h_tl
+        -- e passes the filter since e.sequence ≠ hd.sequence
+        have hne : e.sequence ≠ hd.sequence := Ne.symm heq
+        have he_in_filtered : e ∈ tl.filter (fun e' => e'.sequence != hd.sequence) := by
+          apply List.mem_filter.mpr
+          refine ⟨he_in_tl, ?_⟩
+          -- Goal: (e.sequence != hd.sequence) = true
+          -- != is bne, which is !(· == ·); use beq_eq_false_of_ne to close
+          show (e.sequence != hd.sequence) = true
+          simp only [bne, beq_eq_false_of_ne hne, Bool.not_false]
+        -- The filtered list length ≤ tl.length ≤ k
+        have h_filtered_len :
+            (tl.filter (fun e' => e'.sequence != hd.sequence)).length ≤ k := by
+          calc (tl.filter _).length
+              ≤ tl.length := List.length_filter_le _ _
+            _ ≤ k := Nat.lt_succ_iff.mp (by simpa [List.length_cons] using hn)
+        -- Apply IH to the filtered sublist
+        have ⟨e', he'_mem, he'_seq⟩ :=
+          ih _ h_filtered_len e he_in_filtered
+        exact ⟨e', List.mem_cons_of_mem _ he'_mem, he'_seq⟩
+
+/-- dedupBySequence preserves at least one entry per sequence number. -/
+theorem dedupBySequence_preserves_sequence (sorted : Journal) (e : JournalEntry) :
+    e ∈ sorted → ∃ e' ∈ dedupBySequence sorted, e'.sequence = e.sequence :=
+  dedupBySequence_preserves_sequence_aux sorted.length sorted (Nat.le_refl _) e
 
 /-- Merged journals contain all entries from both.
     Proof uses List.mergeSort (permutation-preserving) instead of Array.qsort.
-    The sort step is fully proved; only the dedup step still needs WF induction. -/
+    Both the sort step and the dedup step are fully proved. -/
 theorem mergeContainsBoth (j1 j2 : Journal) (e : JournalEntry) :
     e ∈ j1 ∨ e ∈ j2 → ∃ e' ∈ merge j1 j2, e'.sequence = e.sequence := by
   intro h
