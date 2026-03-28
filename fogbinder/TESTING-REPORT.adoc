@@ -214,7 +214,7 @@ The codebase uses deprecated ReScript APIs. These are non-blocking but should be
 Migration command available:
 [source,bash]
 ----
-rescript-tools migrate-all /var/home/hyper/repos/fogbinder
+rescript-tools migrate-all /var$HOME/repos/fogbinder
 ----
 
 == Recommendations
