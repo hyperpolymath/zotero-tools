@@ -1,39 +1,38 @@
-;; SPDX-License-Identifier: PMPL-1.0-or-later
-;; STATE.scm - Project state for zotpress
-;; Media-Type: application/vnd.state+scm
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Zotpress project state
+[metadata]
+project = "zotpress"
+version = "0.0.1"
+last-updated = "2026-01-03"
+status = "active"
+session = "converted from scheme — 2026-04-11"
 
-(state
-  (metadata
-    (version "0.0.1")
-    (schema-version "1.0")
-    (created "2026-01-03")
-    (updated "2026-01-03")
-    (project "zotpress")
-    (repo "github.com/hyperpolymath/zotpress"))
+[project-context]
+name = "Zotpress"
+purpose = """"""
+completion-percentage = 0
 
-  (project-context
-    (name "zotpress")
-    (tagline "")
-    (tech-stack ()))
+[position]
+phase = "initial"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
 
-  (current-position
-    (phase "initial")
-    (overall-completion 0)
-    (components ())
-    (working-features ()))
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
 
-  (route-to-mvp
-    (milestones ()))
+[blockers-and-issues]
+issues = [
+  # No blockers recorded
+]
 
-  (blockers-and-issues
-    (critical)
-    (high)
-    (medium)
-    (low))
+[critical-next-actions]
+actions = [
+  # No actions recorded
+]
 
-  (critical-next-actions
-    (immediate)
-    (this-week)
-    (this-month))
-
-  (session-history ()))
+[maintenance-status]
+last-run-utc = "2026-01-03T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail
