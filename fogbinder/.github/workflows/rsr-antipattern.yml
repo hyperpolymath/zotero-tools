@@ -23,7 +23,7 @@ jobs:
       - name: Check for TypeScript
         run: |
           if find . -name "*.ts" -o -name "*.tsx" | grep -v node_modules | grep -q .; then
-            echo "❌ TypeScript files detected - use ReScript instead"
+            echo "❌ TypeScript files detected - use AffineScript instead"
             find . -name "*.ts" -o -name "*.tsx" | grep -v node_modules
             exit 1
           fi
@@ -59,7 +59,7 @@ jobs:
       - name: Check for tsconfig
         run: |
           if [ -f "tsconfig.json" ]; then
-            echo "❌ tsconfig.json detected - use ReScript instead"
+            echo "❌ tsconfig.json detected - use AffineScript instead"
             exit 1
           fi
           echo "✅ No tsconfig.json"
