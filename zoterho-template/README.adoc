@@ -183,7 +183,7 @@ This template includes multiple `src-*` directories representing different Zoter
 
 This project enforces the Hyperpolymath Rhodium Standard:
 
-* **No TypeScript** - Use ReScript instead
+* **No TypeScript** - Use AffineScript instead
 * **No npm/yarn/pnpm/bun** - Use Deno only
 * **No Makefiles** - Use justfile
 * **HTTPS only** - No mixed content with insecure  URLs

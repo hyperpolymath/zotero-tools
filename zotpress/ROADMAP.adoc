@@ -309,7 +309,7 @@ Target: Next-generation features and integrations
 | ADR | Decision | Date
 
 | ADR-001
-| Use ReScript instead of TypeScript
+| Use AffineScript instead of TypeScript
 | 2025-01
 
 | ADR-002
