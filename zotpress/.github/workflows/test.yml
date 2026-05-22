@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Zotpress - Test & Quality Workflow
 # Runs PHP and TypeScript/JavaScript tests with full CI checks
 

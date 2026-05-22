@@ -1,5 +1,5 @@
 = zotero-tools
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 :author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 
 Zotero reference management extensions and integrations.
@@ -18,7 +18,7 @@ Zotero reference management extensions and integrations.
 
 == License
 
-PMPL-1.0-or-later
+MPL-2.0
 
 
 == Architecture

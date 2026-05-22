@@ -1,5 +1,5 @@
 // Fogbinder Graph Algorithms WASM Module
-// License: PMPL-1.0-or-later (with Palimpsest)
+// License: MPL-2.0 (with Palimpsest)
 // FogTrail network visualization algorithms
 
 #![forbid(unsafe_code)]

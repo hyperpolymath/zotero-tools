@@ -424,7 +424,7 @@ See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] for guidelines.
 
 == License
 
-PMPL-1.0-or-later — because your research tools should be free as in freedom.
+MPL-2.0 — because your research tools should be free as in freedom.
 
 == Acknowledgments
 

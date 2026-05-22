@@ -47,7 +47,7 @@ git clone {url-codeberg}
 
 == License
 
-Licensed under PMPL-1.0-or-later OR LicenseRef-Palimpsest-0.5.
+Licensed under MPL-2.0 OR LicenseRef-Palimpsest-0.5.
 
 See link:LICENSE[LICENSE] for details.
 

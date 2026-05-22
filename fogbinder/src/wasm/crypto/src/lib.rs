@@ -1,5 +1,5 @@
 // Fogbinder Cryptography WASM Module
-// License: PMPL-1.0-or-later (with Palimpsest)
+// License: MPL-2.0 (with Palimpsest)
 // Post-quantum cryptography implementation
 
 #![forbid(unsafe_code)]

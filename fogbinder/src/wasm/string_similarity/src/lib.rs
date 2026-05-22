@@ -1,5 +1,5 @@
 // Fogbinder String Similarity WASM Module
-// License: PMPL-1.0-or-later (with Palimpsest)
+// License: MPL-2.0 (with Palimpsest)
 // High-performance string similarity algorithms
 
 #![forbid(unsafe_code)]

@@ -1,4 +1,4 @@
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; 0-AI-MANIFEST.a2ml — AI Agent Entry Point
 ;; Repository: hyperpolymath/zotero-tools
 
@@ -13,7 +13,7 @@ AI manifest for zotero-tools. Read this file first before any other work.
 ;; Tests: verification/tests/ or tests/
 
 ;; === CRITICAL INVARIANTS ===
-;; - SPDX headers on ALL files (PMPL-1.0-or-later)
+;; - SPDX headers on ALL files (MPL-2.0)
 ;; - No believe_me, assert_total, sorry, Admitted, unsafeCoerce, Obj.magic
 ;; - SCM files ONLY in .machine_readable/ (never root)
 ;; - Author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>

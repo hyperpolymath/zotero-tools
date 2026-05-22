@@ -8,12 +8,12 @@
  * Requires PHP: 8.1
  * Author: Hyper Polymath
  * Author URI: https://github.com/hyperpolymath
- * License: PMPL-1.0-or-later
+ * License: MPL-2.0
  * License URI: https://www.gnu.org/licenses/agpl-3.0.html
  * Text Domain: zotpress
  * Domain Path: /languages
  *
- * SPDX-License-Identifier: PMPL-1.0-or-later
+ * SPDX-License-Identifier: MPL-2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
