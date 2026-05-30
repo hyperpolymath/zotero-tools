@@ -40,6 +40,14 @@ build/
 /vendor/
 /deps/
 
+# npm-avoidant (standards#67)
+package-lock.json
+**/package-lock.json
+bun.lockb
+yarn.lock
+pnpm-lock.yaml
+.npmrc
+
 # Secrets
 .env
 .env.*
