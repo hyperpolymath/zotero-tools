@@ -9,10 +9,28 @@ on:
     - cron: '0 6 * * 1'  # Weekly on Monday
   workflow_dispatch:
 
+# Estate guardrail: cancel superseded runs so re-pushes / rebased PR
+# updates do not pile up queued runs against the shared account-wide
+# Actions concurrency pool. Applied only to read-only check workflows
+# (no publish/mutation), so cancelling a superseded run is always safe.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
+  # The OSSF Scorecard publish endpoint enforces a hard contract: the job that
+  # runs `ossf/scorecard-action` with `publish_results: true` must contain
+  # ONLY steps with `uses:` (no `run:` steps in the same job). If a `run:`
+  # step is present, the publish step fails with:
+  #   "webapp: scorecard job must only have steps with uses"
+  # (49 estate repos hit this; see ROADMAP audit 2026-05-30.)
+  #
+  # Fix: split the threshold check into a downstream job that depends on
+  # `scorecard` and consumes the SARIF artifact. The `scorecard` job stays
+  # uses-only; `check-score` is the gating job that emits the error.
   scorecard:
     runs-on: ubuntu-latest
     permissions:
@@ -31,13 +49,30 @@ jobs:
           publish_results: true
 
       - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@0d579ffd059c29b07949a3cce3983f0780820c98 # v4
+        uses: github/codeql-action/upload-sarif@c6f931105cb2c34c8f901cc885ba1e2e259cf745 # v4
         with:
           sarif_file: results.sarif
 
+      - name: Persist SARIF for downstream score-gate job
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: scorecard-results
+          path: results.sarif
+          retention-days: 1
+
+  check-score:
+    needs: scorecard
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download SARIF from scorecard job
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v5.0.0
+        with:
+          name: scorecard-results
+
       - name: Check minimum score
         run: |
-          # Parse score from results
           SCORE=$(jq -r '.runs[0].tool.driver.properties.score // 0' results.sarif 2>/dev/null || echo "0")
 
           echo "OpenSSF Scorecard Score: $SCORE"
