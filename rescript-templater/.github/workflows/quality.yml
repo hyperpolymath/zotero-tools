@@ -8,6 +8,7 @@ permissions: read-all
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -40,6 +41,7 @@ jobs:
 
   docs:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:

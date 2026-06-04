@@ -11,6 +11,7 @@ jobs:
   # DEPENDABILITY - Stability and reliability
   dependability:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Check test coverage
@@ -30,6 +31,7 @@ jobs:
   # SECURITY - Multi-layer security scanning
   security:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Secret scanning
@@ -50,6 +52,7 @@ jobs:
   # INTEROPERABILITY - API and format compatibility
   interoperability:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Check API specs
@@ -67,6 +70,7 @@ jobs:
   # VALIDATION - Input/output validation
   validation:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Check for validation patterns
@@ -77,6 +81,7 @@ jobs:
   # ATTESTATION - Supply chain integrity (SLSA)
   attestation:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       id-token: write
       contents: read
@@ -97,6 +102,7 @@ jobs:
   # VERIFICATION - Formal methods where applicable
   verification:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Check SPARK proofs
@@ -113,6 +119,7 @@ jobs:
   # FUNCTIONALITY - Feature completeness
   functionality:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Check TODOs and FIXMEs
@@ -126,6 +133,7 @@ jobs:
   # PERFORMANCE - Benchmarks and profiling
   performance:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Check for benchmarks
@@ -142,6 +150,7 @@ jobs:
   # ACCESSIBILITY - A11y compliance
   accessibility:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: hashFiles('**/*.html') != ''
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -157,6 +166,7 @@ jobs:
   # LICENSE COMPLIANCE
   license:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Check license files
@@ -175,6 +185,7 @@ jobs:
   # DOCUMENTATION QUALITY
   documentation:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Check docs completeness

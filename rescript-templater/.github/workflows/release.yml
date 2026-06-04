@@ -15,6 +15,7 @@ jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write
 
@@ -104,6 +105,7 @@ jobs:
     name: Test Release Artifacts
     needs: create-release
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
@@ -133,6 +135,7 @@ jobs:
     name: Publish to Package Registries
     needs: create-release
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
@@ -168,6 +171,7 @@ jobs:
     name: Notify Release
     needs: [create-release, test-release-artifacts]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: always()
 
     steps:

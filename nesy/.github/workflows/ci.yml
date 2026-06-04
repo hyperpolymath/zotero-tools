@@ -12,6 +12,7 @@ jobs:
   test:
     name: Test (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     strategy:
       matrix:
@@ -44,6 +45,7 @@ jobs:
   typecheck:
     name: Type Checking
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -64,6 +66,7 @@ jobs:
   lint:
     name: Linting
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -84,6 +87,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -111,6 +115,7 @@ jobs:
   rsr-compliance:
     name: RSR Compliance Check
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -140,6 +145,7 @@ jobs:
   security:
     name: Security Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -160,6 +166,7 @@ jobs:
   all-checks:
     name: All Checks Passed
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [test, typecheck, lint, build, rsr-compliance, security]
 
     steps:

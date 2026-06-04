@@ -1,3 +1,7 @@
+<!--
+SPDX-License-Identifier: MPL-2.0
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-->
 # Security Policy
 
 We take security seriously and appreciate your efforts to responsibly disclose vulnerabilities. This policy outlines how to report security issues, what to expect, and how we recognize contributions.

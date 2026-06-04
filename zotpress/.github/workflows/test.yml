@@ -28,6 +28,7 @@ jobs:
   php-tests:
     name: PHP Tests (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -80,6 +81,7 @@ jobs:
   php-static-analysis:
     name: PHP Static Analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -115,6 +117,7 @@ jobs:
   deno-tests:
     name: Deno Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -154,6 +157,7 @@ jobs:
   build:
     name: Build Assets
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [deno-tests]
 
     steps:
@@ -187,6 +191,7 @@ jobs:
   wordpress-compat:
     name: WordPress Compatibility
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -216,6 +221,7 @@ jobs:
   all-checks:
     name: All Checks Passed
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [php-tests, php-static-analysis, deno-tests, build, wordpress-compat]
     if: always()
 

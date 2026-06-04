@@ -23,6 +23,7 @@ jobs:
   sanctify-analysis:
     name: Sanctify PHP Security Analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       security-events: write
@@ -84,6 +85,7 @@ jobs:
   php-aegis-check:
     name: PHP Aegis Integration Check
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository

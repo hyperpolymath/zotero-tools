@@ -1,3 +1,7 @@
+<!--
+SPDX-License-Identifier: MPL-2.0
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-->
 # Publishing Guide
 
 This document describes how to publish the Zotero ReScript Templater to various package repositories and distribution channels.

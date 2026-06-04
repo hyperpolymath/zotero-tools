@@ -1,5 +1,5 @@
-
-
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 import * as Js_string from "@rescript/runtime/lib/es6/Js_string.js";
 import * as SpeechAct$Fogbinder from "../core/SpeechAct.bs.js";
 

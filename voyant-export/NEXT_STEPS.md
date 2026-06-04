@@ -1,3 +1,7 @@
+<!--
+SPDX-License-Identifier: MPL-2.0
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-->
 # Next Steps: Your Accessibility Initiative Action Plan
 
 This document provides a clear roadmap for taking this initiative from concept to reality.

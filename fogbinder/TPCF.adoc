@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # Tri-Perimeter Contribution Framework (TPCF)
 
 Fogbinder uses the **Tri-Perimeter Contribution Framework (TPCF)** for graduated trust and access control.

@@ -37,6 +37,7 @@ jobs:
   syntax:
     name: PHP Syntax (${{ matrix.php }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -62,6 +63,7 @@ jobs:
   phpcs:
     name: WordPress Coding Standards
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: syntax
 
     steps:
@@ -123,6 +125,7 @@ jobs:
   phpstan:
     name: PHPStan (Level ${{ matrix.level }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: syntax
     strategy:
       fail-fast: false
@@ -164,6 +167,7 @@ jobs:
   psalm:
     name: Psalm Analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: syntax
 
     steps:
@@ -196,6 +200,7 @@ jobs:
   compatibility:
     name: PHP Compatibility (8.1+)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: syntax
 
     steps:
@@ -234,6 +239,7 @@ jobs:
   security:
     name: Security Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -254,6 +260,7 @@ jobs:
   summary:
     name: Standards Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [syntax, phpcs, phpstan, psalm, compatibility, security]
     if: always()
 

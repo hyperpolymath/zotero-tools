@@ -1,3 +1,7 @@
+<!--
+SPDX-License-Identifier: MPL-2.0
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-->
 # GPG Signing Guide
 
 This document explains how to sign releases, commits, and artifacts with GPG for cryptographic verification.

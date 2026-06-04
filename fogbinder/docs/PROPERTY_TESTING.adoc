@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # Property-Based Testing in Fogbinder
 
 This document explains Fogbinder's property-based testing approach using fast-check.

@@ -20,6 +20,7 @@ permissions: read-all
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:

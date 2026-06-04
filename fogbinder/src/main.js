@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 /**
  * main.js - Fogbinder Entry Point
  * Pure JavaScript wrapper for ReScript-compiled epistemic analysis engine

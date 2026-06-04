@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # Fogbinder Dual License
 
 **Copyright © 2024-2025 Jonathan (Hyperpolymath)**
@@ -182,8 +184,6 @@ https://github.com/Hyperpolymath/fogbinder
 ### For MIT-licensed derivatives
 
 ```rescript
-// SPDX-License-Identifier: MPL-2.0-or-later
-// Copyright (c) 2024-2025 Jonathan (Hyperpolymath)
 // Fogbinder - Epistemic ambiguity analysis
 // Licensed under MIT OR AGPL-3.0
 ```
@@ -191,8 +191,6 @@ https://github.com/Hyperpolymath/fogbinder
 ### For AGPL-licensed derivatives
 
 ```rescript
-// SPDX-License-Identifier: MPL-2.0-or-later
-// Copyright (c) 2024-2025 Jonathan (Hyperpolymath)
 // Fogbinder - Epistemic ambiguity analysis
 // Licensed under MIT OR AGPL-3.0
 //

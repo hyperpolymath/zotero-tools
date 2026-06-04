@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 // Fogbinder Contradiction Detector WASM Module
 // License: MPL-2.0 (with Palimpsest)
 // Language game conflict detection (NOT logical contradiction)

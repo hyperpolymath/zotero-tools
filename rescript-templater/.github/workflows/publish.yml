@@ -33,6 +33,7 @@ jobs:
   validate:
     name: Pre-Publish Validation
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -97,6 +98,7 @@ jobs:
     name: Publish to PowerShell Gallery
     needs: validate
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: |
       github.event_name == 'release' ||
       (github.event_name == 'workflow_dispatch' && inputs.publish_psgallery)
@@ -151,6 +153,7 @@ jobs:
     name: Publish Container Image
     needs: validate
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: |
       github.event_name == 'release' ||
       (github.event_name == 'workflow_dispatch' && inputs.publish_container)
@@ -212,6 +215,7 @@ jobs:
     name: Trigger Zenodo Archival
     needs: validate
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: |
       github.event_name == 'release' ||
       (github.event_name == 'workflow_dispatch' && inputs.publish_zenodo)
@@ -231,6 +235,7 @@ jobs:
     name: Archive to Software Heritage
     needs: validate
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: github.event_name == 'release'
     steps:
       - name: Request Software Heritage archival
@@ -255,6 +260,7 @@ jobs:
     name: Notify Release
     needs: [publish-psgallery, publish-container, trigger-zenodo, software-heritage]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: always() && github.event_name == 'release'
     steps:
       - name: Create release summary

@@ -1,3 +1,7 @@
+<!--
+SPDX-License-Identifier: MPL-2.0
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-->
 # Rhodium Standard Repository (RSR) Compliance Assessment
 
 **Project:** ZoteRho Templater (Zotero + Rhodium)

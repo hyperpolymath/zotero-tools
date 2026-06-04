@@ -1,6 +1,8 @@
+<!--
+SPDX-License-Identifier: MPL-2.0
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-->
 # ECHIDNA Architecture Update: 3-Language Stack
-
-<!-- SPDX-License-Identifier: MIT AND Palimpsest-0.6 -->
 
 **Date:** 2025-12-27
 **Change:** Dropped Mercury/Logtalk "logic reservoir" concept
