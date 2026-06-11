@@ -244,3 +244,6 @@ setup:
     @just install-hooks
     @just submodules-init
     @echo "✓ Setup complete"
+
+secret-scan-trufflehog:
+    @command -v trufflehog >/dev/null && trufflehog filesystem . --only-verified || true

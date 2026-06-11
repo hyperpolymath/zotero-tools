@@ -849,3 +849,6 @@ a11y:
     @grep -r "outline: none" assets/ && (echo "❌ Found outline:none" && exit 1) || echo "✅ No outline:none found"
     @grep -r "focus.*outline.*0" assets/ && (echo "❌ Found focus outline disabled" && exit 1) || echo "✅ No focus outline disabled"
     @echo "✅ Accessibility check passed"
+
+secret-scan-trufflehog:
+    @command -v trufflehog >/dev/null && trufflehog filesystem . --only-verified || true

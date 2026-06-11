@@ -1,39 +1,31 @@
 # SPDX-License-Identifier: MPL-2.0-or-later
 name: CI
-
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
-
 jobs:
   test:
     name: Test (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     strategy:
       matrix:
         node-version: [18.x, 20.x]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642195f2b846b8bbe245a93 # v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-
       - name: Install dependencies
         run: npm ci
-
       - name: Run tests
         run: npm test
-
       - name: Upload coverage
         if: matrix.node-version == '20.x'
         uses: codecov/codecov-action@v5
@@ -41,86 +33,67 @@ jobs:
           files: ./coverage/coverage-final.json
           flags: unittests
           name: codecov-nsai
-
   typecheck:
     name: Type Checking
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642195f2b846b8bbe245a93 # v4
         with:
           node-version: '20.x'
           cache: 'npm'
-
       - name: Install dependencies
         run: npm ci
-
       - name: Type check
         run: npm run typecheck
-
   lint:
     name: Linting
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642195f2b846b8bbe245a93 # v4
         with:
           node-version: '20.x'
           cache: 'npm'
-
       - name: Install dependencies
         run: npm ci
-
       - name: Run ESLint
         run: npm run lint
-
   build:
     name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642195f2b846b8bbe245a93 # v4
         with:
           node-version: '20.x'
           cache: 'npm'
-
       - name: Install dependencies
         run: npm ci
-
       - name: Build project
         run: npm run build
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
         with:
           name: build-output
           path: build/
           retention-days: 7
-
   rsr-compliance:
     name: RSR Compliance Check
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
       - name: Check required files
         run: |
           echo "Checking RSR compliance..."
@@ -134,41 +107,33 @@ jobs:
           test -f .well-known/ai.txt || (echo "❌ ai.txt missing" && exit 1)
           test -f .well-known/humans.txt || (echo "❌ humans.txt missing" && exit 1)
           echo "✅ All RSR compliance files present"
-
       - name: Validate security.txt
         run: |
           echo "Validating security.txt RFC 9116 compliance..."
           grep -q "Contact:" .well-known/security.txt || (echo "❌ Contact missing" && exit 1)
           grep -q "Expires:" .well-known/security.txt || (echo "❌ Expires missing" && exit 1)
           echo "✅ security.txt is valid"
-
   security:
     name: Security Audit
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642195f2b846b8bbe245a93 # v4
         with:
           node-version: '20.x'
           cache: 'npm'
-
       - name: Run npm audit
         run: npm audit --audit-level=moderate
-
       - name: Check for vulnerable dependencies
         run: npm audit --production --audit-level=high
-
   all-checks:
     name: All Checks Passed
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [test, typecheck, lint, build, rsr-compliance, security]
-
     steps:
       - name: All checks passed
         run: echo "✅ All CI checks passed!"

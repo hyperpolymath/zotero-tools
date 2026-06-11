@@ -355,3 +355,6 @@ install-zotero-manual:
     elif command -v open >/dev/null 2>&1; then \
         open build/ 2>/dev/null || true; \
     fi
+
+secret-scan-trufflehog:
+    @command -v trufflehog >/dev/null && trufflehog filesystem . --only-verified || true

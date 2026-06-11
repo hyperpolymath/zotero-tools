@@ -2,15 +2,12 @@
 # RSR Anti-Pattern Check - Uses reusable workflow from standards
 
 name: RSR Anti-Pattern Check
-
 on:
   push:
     branches: [main, master, develop]
   pull_request:
     branches: [main, master, develop]
-
 jobs:
   antipattern-check:
     uses: hyperpolymath/standards/.github/workflows/rsr-antipattern-reusable.yml@main
     timeout-minutes: 10
-

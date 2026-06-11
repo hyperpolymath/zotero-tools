@@ -73,3 +73,6 @@ install-hooks:
 	@echo "Installing git hooks..."
 	@echo "Note: Install lefthook separately: https://github.com/evilmartians/lefthook"
 	@echo "Then run: lefthook install"
+
+secret-scan-trufflehog:
+    @command -v trufflehog >/dev/null && trufflehog filesystem . --only-verified || true

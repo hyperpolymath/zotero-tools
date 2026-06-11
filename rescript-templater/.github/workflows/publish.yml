@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: MPL-2.0
 name: Publish Packages
-
 # Workflow for publishing to package repositories
 # Triggered manually or on release creation
-
 on:
   release:
     types: [published]
@@ -24,11 +22,9 @@ on:
         description: 'Trigger Zenodo archival'
         type: boolean
         default: false
-
 permissions:
   contents: read
-  packages: write  # For GitHub Container Registry
-
+  packages: write # For GitHub Container Registry
 jobs:
   validate:
     name: Pre-Publish Validation
@@ -37,22 +33,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
       - name: Setup PowerShell
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-
       - name: Install PowerShell
         run: |
           dotnet tool install --global PowerShell
-
       - name: Install Pester
         shell: pwsh
         run: |
           Install-Module -Name Pester -Force -Scope CurrentUser -AcceptLicense
           Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
-
       - name: Setup Racket
         uses: Bogdanp/setup-racket@v1.11
         with:
@@ -61,7 +53,6 @@ jobs:
           dest: '/opt/racket'
           local_catalogs: ''
           architecture: 'x64'
-
       - name: Run full validation
         shell: pwsh
         run: |
@@ -71,7 +62,6 @@ jobs:
 
           # Run linters
           Invoke-ScriptAnalyzer -Path ./init-zotero-rscript-plugin.ps1 -Settings PSGallery -Severity Warning,Error
-
       - name: Validate manifests
         shell: pwsh
         run: |
@@ -93,7 +83,6 @@ jobs:
               exit 1
             }
           }
-
   publish-psgallery:
     name: Publish to PowerShell Gallery
     needs: validate
@@ -105,16 +94,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
       - name: Setup PowerShell
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-
       - name: Install PowerShell
         run: |
           dotnet tool install --global PowerShell
-
       - name: Publish to PowerShell Gallery
         shell: pwsh
         env:
@@ -133,7 +119,6 @@ jobs:
           Publish-Module -Path . -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
 
           Write-Host "✅ Successfully published to PowerShell Gallery"
-
       - name: Verify publication
         shell: pwsh
         run: |
@@ -148,7 +133,6 @@ jobs:
           } else {
             Write-Warning "Package not yet indexed (may take a few minutes)"
           }
-
   publish-container:
     name: Publish Container Image
     needs: validate
@@ -160,20 +144,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -185,7 +165,6 @@ jobs:
             type=semver,pattern={{major}}
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix={{branch}}-
-
       - name: Build and push container image
         uses: docker/build-push-action@v5
         with:
@@ -197,20 +176,17 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
         with:
           image: ghcr.io/${{ github.repository }}:latest
           format: spdx-json
           output-file: sbom.spdx.json
-
       - name: Upload SBOM
         uses: actions/upload-artifact@ea165f8d65b6db9a8b71b5c2d1a090c0daf9c8bb # v4
         with:
           name: container-sbom
           path: sbom.spdx.json
-
   trigger-zenodo:
     name: Trigger Zenodo Archival
     needs: validate
@@ -230,7 +206,6 @@ jobs:
           echo ""
           echo "Once enabled, this release will be automatically archived with a DOI."
           echo "DOI will be available at: https://doi.org/10.5281/zenodo.XXXXXX"
-
   software-heritage:
     name: Archive to Software Heritage
     needs: validate
@@ -255,7 +230,6 @@ jobs:
           echo ""
           echo "View archive at:"
           echo "https://archive.softwareheritage.org/browse/origin/?origin_url=${{ github.server_url }}/${{ github.repository }}"
-
   notify:
     name: Notify Release
     needs: [publish-psgallery, publish-container, trigger-zenodo, software-heritage]
@@ -264,45 +238,7 @@ jobs:
     if: always() && github.event_name == 'release'
     steps:
       - name: Create release summary
-        run: |
-          echo "## 📦 Package Publication Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Release**: ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          echo "### Distribution Channels" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **GitHub Releases**: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Container Registry**: ghcr.io/${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 🔄 **PowerShell Gallery**: https://www.powershellgallery.com/packages/ZoteroReScriptTemplater" >> $GITHUB_STEP_SUMMARY
-          echo "- 🔄 **Racket Packages**: https://pkgs.racket-lang.org/package/zotero-rescript-templater" >> $GITHUB_STEP_SUMMARY
-          echo "- 🔄 **Software Heritage**: https://archive.softwareheritage.org/" >> $GITHUB_STEP_SUMMARY
-          echo "- 🔄 **Zenodo**: https://zenodo.org/ (if configured)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          echo "### Installation Methods" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**PowerShell**:" >> $GITHUB_STEP_SUMMARY
-          echo '```powershell' >> $GITHUB_STEP_SUMMARY
-          echo "Install-Module -Name ZoteroReScriptTemplater" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Racket**:" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "raco pkg install zotero-rescript-templater" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Container**:" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "podman pull ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Nix**:" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "nix run github:${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
+        run: "echo \"## \U0001F4E6 Package Publication Summary\" >> $GITHUB_STEP_SUMMARY\necho \"\" >> $GITHUB_STEP_SUMMARY\necho \"**Release**: ${{ github.event.release.tag_name }}\" >> $GITHUB_STEP_SUMMARY\necho \"**Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')\" >> $GITHUB_STEP_SUMMARY\necho \"\" >> $GITHUB_STEP_SUMMARY\n\necho \"### Distribution Channels\" >> $GITHUB_STEP_SUMMARY\necho \"\" >> $GITHUB_STEP_SUMMARY\necho \"- ✅ **GitHub Releases**: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}\" >> $GITHUB_STEP_SUMMARY\necho \"- ✅ **Container Registry**: ghcr.io/${{ github.repository }}\" >> $GITHUB_STEP_SUMMARY\necho \"- \U0001F504 **PowerShell Gallery**: https://www.powershellgallery.com/packages/ZoteroReScriptTemplater\" >> $GITHUB_STEP_SUMMARY\necho \"- \U0001F504 **Racket Packages**: https://pkgs.racket-lang.org/package/zotero-rescript-templater\" >> $GITHUB_STEP_SUMMARY\necho \"- \U0001F504 **Software Heritage**: https://archive.softwareheritage.org/\" >> $GITHUB_STEP_SUMMARY\necho \"- \U0001F504 **Zenodo**: https://zenodo.org/ (if configured)\" >> $GITHUB_STEP_SUMMARY\necho \"\" >> $GITHUB_STEP_SUMMARY\n\necho \"### Installation Methods\" >> $GITHUB_STEP_SUMMARY\necho \"\" >> $GITHUB_STEP_SUMMARY\necho \"**PowerShell**:\" >> $GITHUB_STEP_SUMMARY\necho '```powershell' >> $GITHUB_STEP_SUMMARY\necho \"Install-Module -Name ZoteroReScriptTemplater\" >> $GITHUB_STEP_SUMMARY\necho '```' >> $GITHUB_STEP_SUMMARY\necho \"\" >> $GITHUB_STEP_SUMMARY\necho \"**Racket**:\" >> $GITHUB_STEP_SUMMARY\necho '```bash' >> $GITHUB_STEP_SUMMARY\necho \"raco pkg install zotero-rescript-templater\" >> $GITHUB_STEP_SUMMARY\necho '```' >> $GITHUB_STEP_SUMMARY\necho \"\" >> $GITHUB_STEP_SUMMARY\necho \"**Container**:\" >> $GITHUB_STEP_SUMMARY\necho '```bash' >> $GITHUB_STEP_SUMMARY\necho \"podman pull ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}\" >> $GITHUB_STEP_SUMMARY\necho '```' >> $GITHUB_STEP_SUMMARY\necho \"\" >> $GITHUB_STEP_SUMMARY\necho \"**Nix**:\" >> $GITHUB_STEP_SUMMARY\necho '```bash' >> $GITHUB_STEP_SUMMARY\necho \"nix run github:${{ github.repository }}\" >> $GITHUB_STEP_SUMMARY\necho '```' >> $GITHUB_STEP_SUMMARY\n"
 # Documentation for secrets required:
 #
 # PSGALLERY_API_KEY:
