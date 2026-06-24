@@ -1,5 +1,5 @@
 = zotero-tools
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: CC-BY-SA-4.0
 :author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 
 Zotero reference management extensions and integrations.
