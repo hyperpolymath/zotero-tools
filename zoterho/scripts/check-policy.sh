@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: MPL-2.0
 # Hyperpolymath Language Policy Enforcement Script
 # Checks for banned files, patterns, and enforces compliance
 

@@ -2,7 +2,7 @@
  * @file ZoteRhoTemplate.res
  * @description Core Zotero plugin functionality.
  * Provides UI integration, menu items, and theme management.
- * SPDX-License-Identifier: MIT OR Apache-2.0
+ * SPDX-License-Identifier: MPL-2.0 OR Apache-2.0
  * SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
  */
 

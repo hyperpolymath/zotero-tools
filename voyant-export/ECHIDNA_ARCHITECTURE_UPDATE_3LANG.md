@@ -1,6 +1,6 @@
 # ECHIDNA Architecture Update: 3-Language Stack
 
-<!-- SPDX-License-Identifier: MIT AND Palimpsest-0.6 -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 AND Palimpsest-0.6 -->
 
 **Date:** 2025-12-27
 **Change:** Dropped Mercury/Logtalk "logic reservoir" concept
@@ -339,6 +339,6 @@ Files that need updating:
 
 ---
 
-**SPDX-License-Identifier: MPL-2.0-or-later
+**SPDX-License-Identifier: CC-BY-SA-4.0
 **Author:** Claude Code (Anthropic)
 **Date:** 2025-12-27

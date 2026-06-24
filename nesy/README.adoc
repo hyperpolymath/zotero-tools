@@ -6,7 +6,7 @@ image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,lin
 This project must declare **MPL-2.0-or-later** for platform/tooling compatibility.
 
 Philosophy: **Palimpsest**. The Palimpsest-MPL (PMPL) text is provided in `license/PMPL-1.0.txt`, and the canonical source is the palimpsest-license repository.
-// SPDX-License-Identifier: MPL-2.0-or-later
+// SPDX-License-Identifier: CC-BY-SA-4.0
 // SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
 
 *"What can be said at all can be said clearly."* — Wittgenstein, Tractatus Logico-Philosophicus
