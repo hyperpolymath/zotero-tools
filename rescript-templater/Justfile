@@ -322,3 +322,6 @@ help-extended:
     @echo "  README.md              # Project overview"
     @echo "  CONTRIBUTING.md        # Contribution guide"
     @echo "  RSR_COMPLIANCE.md      # RSR framework compliance"
+
+secret-scan-trufflehog:
+    @command -v trufflehog >/dev/null && trufflehog filesystem . --only-verified || true

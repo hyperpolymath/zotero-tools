@@ -25,3 +25,6 @@ lint:
 # Clean build artifacts
 clean:
     @echo "Clean not configured yet"
+
+secret-scan-trufflehog:
+    @command -v trufflehog >/dev/null && trufflehog filesystem . --only-verified || true

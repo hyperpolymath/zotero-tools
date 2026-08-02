@@ -1,3 +1,7 @@
+<!--
+SPDX-License-Identifier: MPL-2.0
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-->
 # ECHIDNA Architecture Update: 3-Language Stack
 
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 AND Palimpsest-0.6 -->

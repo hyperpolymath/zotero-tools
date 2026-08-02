@@ -1,3 +1,5 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 ||| ZOTERHO — FFI Bridge Declarations
 |||
 ||| This module defines the formal bridge to the Zoterho bibliographic

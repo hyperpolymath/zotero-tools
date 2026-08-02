@@ -18,7 +18,9 @@ Zotero reference management extensions and integrations.
 
 == License
 
-MPL-2.0
+This project is licensed under the Mozilla Public License, v. 2.0. See the `LICENSE` file for details.
+
+SPDX-License-Identifier: MPL-2.0
 
 
 == Architecture

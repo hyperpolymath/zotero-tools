@@ -1,3 +1,7 @@
+<!--
+SPDX-License-Identifier: MPL-2.0
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-->
 # Formal Verification Guide
 
 This document describes formal verification concepts, current implementations, and future directions for the Zotero ReScript Templater project.

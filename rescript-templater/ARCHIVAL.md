@@ -1,3 +1,7 @@
+<!--
+SPDX-License-Identifier: MPL-2.0
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-->
 # Long-Term Archival Guide
 
 This document describes the project's long-term preservation strategy using Software Heritage and Zenodo.

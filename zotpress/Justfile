@@ -212,3 +212,6 @@ check-tools:
     @which composer || echo "❌ Composer not found"
     @which just || echo "❌ Just not found"
     @echo "✓ Tool check complete"
+
+secret-scan-trufflehog:
+    @command -v trufflehog >/dev/null && trufflehog filesystem . --only-verified || true

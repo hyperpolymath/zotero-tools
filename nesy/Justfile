@@ -177,3 +177,6 @@ philosophy:
     @echo ""
     @echo "7   \"Whereof one cannot speak, thereof one must be silent.\""
     @echo "    → What NSAI cannot validate, Fogbinder explores"
+
+secret-scan-trufflehog:
+    @command -v trufflehog >/dev/null && trufflehog filesystem . --only-verified || true

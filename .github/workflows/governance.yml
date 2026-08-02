@@ -1,21 +1,11 @@
-# SPDX-License-Identifier: MPL-2.0
-# governance.yml — single wrapper calling the shared estate governance bundle
-# in hyperpolymath/standards instead of carrying per-repo copies.
-#
-# Replaces the per-repo governance scaffolding removed in the same commit:
-#   quality.yml, guix-nix-policy.yml, npm-bun-blocker.yml, ts-blocker.yml,
-#   security-policy.yml, rsr-antipattern.yml, wellknown-enforcement.yml,
-#   workflow-linter.yml
-#
-# Load-bearing build/security workflows stay standalone in the repo
-# (rust-ci, codeql, dependabot, release, scan/mirror/pages plumbing).
-
+# SPDX-License-Identifier: PMPL-1.0-or-later
 name: Governance
 
 on:
   push:
     branches: [main, master]
   pull_request:
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:

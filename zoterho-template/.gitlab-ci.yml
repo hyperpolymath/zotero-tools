@@ -2,14 +2,11 @@ stages:
   - build
   - test
   - deploy
-
 variables:
   CACHE_DIR: ".cache"
-
 cache:
   paths:
     - ${CACHE_DIR}
-
 build:
   stage: build
   script:
@@ -18,12 +15,10 @@ build:
   artifacts:
     paths:
       - ${CACHE_DIR}
-
 test:
   stage: test
   script:
     - echo "Running tests..."
-
 deploy:
   stage: deploy
   script:
@@ -31,3 +26,8 @@ deploy:
   only:
     - main
     - master
+trufflehog:
+  stage: security
+  image: trufflesecurity/trufflehog:latest
+  script:
+    - trufflehog git file://. --only-verified --fail

@@ -1,5 +1,5 @@
-
-
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 import * as Primitive_object from "@rescript/runtime/lib/es6/Primitive_object.js";
 import * as FamilyResemblance$Fogbinder from "./FamilyResemblance.bs.js";
 

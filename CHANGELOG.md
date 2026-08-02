@@ -2,7 +2,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0
 SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell (hyperpolymath)
 -->
-
 # Changelog
 
 All notable changes to `zotero-tools` will be documented in this file.
