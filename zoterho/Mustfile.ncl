@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: MPL-2.0
 # Zoterho Mustfile - Contract-driven enforcement
 # Hyperpolymath Language Policy
 

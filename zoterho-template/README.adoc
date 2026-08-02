@@ -194,7 +194,7 @@ This project enforces the Hyperpolymath Rhodium Standard:
 Policy is enforced by:
 
 1. `./mustfile validate` - Local validation
-2. `.github/workflows/ts-blocker.yml` - CI enforcement
+2. `.github/workflows.yml` - CI enforcement
 
 == ♿ WCAG 2.3 AAA Compliance (UI/Web)
 
