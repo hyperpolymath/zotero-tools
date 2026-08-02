@@ -1,7 +1,4 @@
-<!--
-SPDX-License-Identifier: MPL-2.0
-Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
--->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 <!-- TOPOLOGY.md — Project architecture map and completion dashboard -->
 <!-- Last updated: 2026-02-19 -->
 

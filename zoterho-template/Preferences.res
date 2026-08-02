@@ -2,7 +2,7 @@
  * @file Preferences.res
  * @description Zotero plugin preferences management module.
  * Handles reading/writing preferences and providing UI bindings.
- * SPDX-License-Identifier: MIT OR Apache-2.0
+ * SPDX-License-Identifier: MPL-2.0 OR Apache-2.0
  * SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
  */
 

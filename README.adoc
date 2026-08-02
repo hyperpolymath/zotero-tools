@@ -1,10 +1,5 @@
-// SPDX-License-Identifier: MPL-2.0
-// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = zotero-tools
-image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssourcesecurity[OpenSSF Best Practices,link="https://www.bestpractices.dev/en/projects/new?repo_url=https://github.com/hyperpolymath/zotero-tools"]
-
-image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[License: MPL-2.0,link="https://opensource.org/licenses/MPL-2.0"]
-
+// SPDX-License-Identifier: CC-BY-SA-4.0
 :author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 
 Zotero reference management extensions and integrations.

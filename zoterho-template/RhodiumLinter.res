@@ -2,7 +2,7 @@
  * @file RhodiumLinter.res
  * @description Rhodium Standard code linter integration.
  * Provides linting capabilities for ReScript code following the Rhodium Standard.
- * SPDX-License-Identifier: MIT OR Apache-2.0
+ * SPDX-License-Identifier: MPL-2.0 OR Apache-2.0
  * SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
  */
 
