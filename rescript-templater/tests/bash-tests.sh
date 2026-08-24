@@ -88,7 +88,7 @@ assert_command_succeeds() {
   local message="${2:-Command should succeed}"
 
   ((TESTS_RUN++))
-  if eval "$cmd" > /dev/null 2>&1; then
+  if bash -c "$cmd" > /dev/null 2>&1; then
     echo -e "${GREEN}✓${NC} $message"
     ((TESTS_PASSED++))
   else
@@ -102,7 +102,7 @@ assert_command_fails() {
   local message="${2:-Command should fail}"
 
   ((TESTS_RUN++))
-  if ! eval "$cmd" > /dev/null 2>&1; then
+  if ! bash -c "$cmd" > /dev/null 2>&1; then
     echo -e "${GREEN}✓${NC} $message"
     ((TESTS_PASSED++))
   else
