@@ -1,0 +1,78 @@
+== Changelog
+
+All notable changes to `+zotero-tools+` will be documented in this file.
+
+This file is generated from conventional commits by the
+https://github.com/hyperpolymath/standards/blob/main/.github/workflows/changelog-reusable.yml[`+changelog-reusable.yml+`]
+workflow (`+hyperpolymath/standards#206+`). Adopt the workflow in this
+repo’s CI to keep this file in sync automatically — see
+https://github.com/hyperpolymath/standards/blob/main/templates/cliff.toml[`+templates/cliff.toml+`]
+for the canonical config.
+
+The format follows https://keepachangelog.com/en/1.1.0/[Keep a
+Changelog]; this project aims to follow
+https://semver.org/spec/v2.0.0.html[Semantic Versioning].
+
+=== [Unreleased]
+
+==== Added
+
+* feat(crg): add crg-grade and crg-badge justfile recipes
+* feat: add stapeln.toml container definition
+* feat: add UX Justfile with doctor, tour, help-me, assail recipes
+* feat: deploy UX Manifesto infrastructure
+* feat: Zotero 8 compatibility, ReScript 12 migration, orphan adoption
+* feat: add CLADE.a2ml — clade taxonomy declaration
+* feat: add mirror.yml workflow for GitLab/Bitbucket mirroring
+* feat: consolidate 9 Zotero repos into zotero-tools monorepo
+
+==== Fixed
+
+* fix(ci): sync hypatia-scan.yml to canonical (413:
+env.HOME+Phase-2+SARIF) (#13)
+* fix(ci): build Hypatia escript from repo root (estate dogfood drift)
+* fix(ci): build Hypatia escript from repo root (estate dogfood drift)
+* fix(ci): rsr-antipattern.yml duplicate heredoc (#8)
+* fix(ci): repair YAML block-scalar in workflow-linter Check Permissions
+step (#9)
+* fix(ci): move secret-scanner Cargo.toml gate from job-level if: to
+step-level (#10)
+* fix(lithoglyph): replace sorry with fuel-based WF induction proof
+* fix(scorecard): enforce granular permissions and add fuzzing
+placeholder
+* fix(ci): Resolve workflow-linter self-matching and metadata issues
+* fix: correct email jonathan.jewell → j.d.a.jewell
+
+==== Changed
+
+* refactor: migrate 6SCM → 6A2 (.scm → .a2ml format)
+* refactor: convert vite/vitest configs from .ts to .js (language
+policy)
+
+==== Documentation
+
+* docs: record tech-debt audit findings (2026-05-26) (#17)
+* docs: add TEST-NEEDS.md (CRG C)
+* docs: add EXPLAINME.adoc — prove-it file backing README claims
+* docs: add 0-AI-MANIFEST.a2ml (RSR compliance)
+
+==== CI
+
+* ci: fix nonexistent actions/upload-artifact SHA pin (#12)
+* ci(secret-scanner): drop duplicate –fail from trufflehog extra_args
+(#7)
+* ci(antipattern): fix top-level dir matching + benchmarks/lsp/bench
+filename allowlists (#6)
+* ci(antipattern): TS check reads .claude/CLAUDE.md exemption table (#5)
+* ci(antipattern): broaden TS allowlist (cli/, mod.ts, lsp-server,
+_vscode_, deno-*) (#4)
+
+=== Pre-history
+
+Prior commits to this file’s introduction are recorded in git history
+but not formally classified into Keep-a-Changelog sections. To backfill,
+run `+git cliff -o CHANGELOG.md+` locally using the canonical
+https://github.com/hyperpolymath/standards/blob/main/templates/cliff.toml[`+cliff.toml+`]
+— this is one-shot mechanical work.
+
+'''''
