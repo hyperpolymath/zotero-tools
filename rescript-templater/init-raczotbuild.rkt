@@ -214,9 +214,9 @@
      (when (do-gitinit?)
        (printf "\nInitializing git repository...\n")
        (parameterize ([current-directory (proj-name)])
-         (system "git init .")
-         (system "git add .")
-         (system (format "git commit -m \"chore: init ~a\"" (proj-name)))))
+         (system* (find-executable-path "git") "init")
+         (system* (find-executable-path "git") "add" ".")
+         (system* (find-executable-path "git") "commit" "-m" (format "chore: init ~a" (proj-name)))))
 
      (printf "\n🎉 Done! Your Zotero plugin project is ready.\n")
      (printf "   cd ~a && start developing!\n" (proj-name))]))
