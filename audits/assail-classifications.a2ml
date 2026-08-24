@@ -1,0 +1,9 @@
+%A2ML
+- suppression:
+    file: 'voyant-export/accessibility-tools/dashboard/scanner.js'
+    rule: 'DynamicCodeExecution'
+    justification: 'DOM construction uses static HTML templates with explicit escapeHtml sanitization for user inputs.'
+- suppression:
+    file: 'voyant-export/accessibility-tools/browser-extension/popup.js'
+    rule: 'DynamicCodeExecution'
+    justification: 'Extension popup runs in isolated context with strict CSP. All injected values are trusted extension state.'
