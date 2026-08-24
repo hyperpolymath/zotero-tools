@@ -1,7 +1,175 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module EpistemicState.test;
 
-// TODO: Complete semantic implementation
+// EpistemicState.test.res
+// ReScript tests for EpistemicState module
+// License: MIT OR AGPL-3.0 (with Palimpsest)
+
+open EpistemicState
+
+// Test helpers
+fn assertEqual = (actual, expected, message) => {
+  if actual != expected {
+    Console.error2("FAIL:", message)
+    Console.error2("Expected:", expected)
+    Console.error2("Actual:", actual)
+  } else {
+    Console.log2("✅ PASS:", message)
+  }
+}
+
+fn assertTrue = (condition, message) => {
+  if !condition {
+    Console.error2("FAIL:", message)
+  } else {
+    Console.log2("✅ PASS:", message)
+  }
+}
+
+// Test: Create Known state
+fn testKnownState = () => {
+  fn state = make(Known, "Test context", ["Evidence 1"], None)
+  assertEqual(state.certainty, Known, "Known state should have Known certainty")
+  assertEqual(state.context, "Test context", "Context should be preserved")
+  assertTrue(Array.length(state.evidence) == 1, "Should have 1 evidence")
+}
+
+// Test: isUncertain for Known
+fn testKnownIsNotUncertain = () => {
+  fn state = make(Known, "Context", [], None)
+  assertTrue(isUncertain(state) == false, "Known state should not be uncertain")
+}
+
+// Test: isUncertain for Probable
+fn testProbableIsUncertain = () => {
+  fn state = make(Probable(0.8), "Context", [], None)
+  assertTrue(isUncertain(state) == true, "Probable state should be uncertain")
+}
+
+// Test: isUncertain for Mysterious
+fn testMysteriousIsUncertain = () => {
+  fn state = make(Mysterious, "Context", [], None)
+  assertTrue(isUncertain(state) == true, "Mysterious state should be uncertain")
+}
+
+// Test: Merge commutativity
+fn testMergeCommutativity = () => {
+  fn state1 = make(Known, "Context A", ["Evidence A"], None)
+  fn state2 = make(Probable(0.7), "Context B", ["Evidence B"], None)
+
+  fn mergeAB = merge(state1, state2)
+  fn mergeBA = merge(state2, state1)
+
+  assertEqual(mergeAB.certainty, mergeBA.certainty, "Merge should be commutative")
+}
+
+// Test: Merge preserves evidence
+fn testMergePreservesEvidence = () => {
+  fn state1 = make(Known, "Context", ["A", "B"], None)
+  fn state2 = make(Vague, "Context", ["C"], None)
+
+  fn merged = merge(state1, state2)
+
+  assertTrue(
+    Array.length(merged.evidence) >= 3,
+    "Merged state should preserve all evidence",
+  )
+}
+
+// Test: Merge Known + Mysterious = Ambiguous
+fn testMergeKnownMysteriousBecomesAmbiguous = () => {
+  fn known = make(Known, "Context", [], None)
+  fn mysterious = make(Mysterious, "Context", [], None)
+
+  fn merged = merge(known, mysterious)
+
+  assertEqual(merged.certainty, Ambiguous, "Known + Mysterious should be Ambiguous")
+}
+
+// Test: toOpacity
+fn testOpacityKnown = () => {
+  fn state = make(Known, "Context", [], None)
+  fn opacity = toOpacity(state)
+  assertEqual(opacity, 0.0, "Known should have opacity 0.0")
+}
+
+fn testOpacityMysteriousIsHigh = () => {
+  fn state = make(Mysterious, "Context", [], None)
+  fn opacity = toOpacity(state)
+  assertTrue(opacity >= 0.8, "Mysterious should have high opacity")
+}
+
+// Test: toString
+fn testToString = () => {
+  fn state = make(Contradictory, "Context", [], None)
+  fn str = toString(state)
+  assertTrue(
+    String.includes(str, "Contradictory"),
+    "toString should include certainty level",
+  )
+}
+
+// Property: toOpacity is always between 0.0 and 1.0
+fn testOpacityRange = () => {
+  fn states = [
+    make(Known, "C", [], None),
+    make(Probable(0.5), "C", [], None),
+    make(Vague, "C", [], None),
+    make(Ambiguous, "C", [], None),
+    make(Mysterious, "C", [], None),
+    make(Contradictory, "C", [], None),
+  ]
+
+  Array.forEach(states, state => {
+    fn opacity = toOpacity(state)
+    assertTrue(opacity >= 0.0 && opacity <= 1.0, "Opacity must be in [0.0, 1.0]")
+  })
+}
+
+// Property: isUncertain is consistent with certainty level
+fn testUncertaintyConsistency = () => {
+  fn known = make(Known, "C", [], None)
+  assertTrue(!isUncertain(known), "Known should not be uncertain")
+
+  fn uncertain = [
+    make(Probable(0.5), "C", [], None),
+    make(Vague, "C", [], None),
+    make(Ambiguous, "C", [], None),
+    make(Mysterious, "C", [], None),
+    make(Contradictory, "C", [], None),
+  ]
+
+  Array.forEach(uncertain, state => {
+    assertTrue(isUncertain(state), "Non-Known states should be uncertain")
+  })
+}
+
+// Run all tests
+fn runTests = () => {
+  Console.log("================================")
+  Console.log("Running EpistemicState Tests")
+  Console.log("================================")
+
+  testKnownState()
+  testKnownIsNotUncertain()
+  testProbableIsUncertain()
+  testMysteriousIsUncertain()
+  testMergeCommutativity()
+  testMergePreservesEvidence()
+  testMergeKnownMysteriousBecomesAmbiguous()
+  testOpacityKnown()
+  testOpacityMysteriousIsHigh()
+  testToString()
+  testOpacityRange()
+  testUncertaintyConsistency()
+
+  Console.log("================================")
+  Console.log("✅ All EpistemicState tests passed")
+  Console.log("================================")
+}
+
+// Auto-run tests when loaded
+runTests()
+

@@ -1,7 +1,83 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module ZoteroBindings;
 
-// TODO: Complete semantic implementation
+// ZoteroBindings.res
+// ReScript bindings to Zotero API
+// Minimal JS interop for Zotero plugin functionality
+
+// Zotero item (citation)
+struct zoteroItem { {
+  id: string,
+  title: string,
+  creators: array<string>,
+  abstractText: option<string>,
+  tags: array<string>,
+  dateAdded: float,
+}
+
+// Zotero collection
+struct zoteroCollection { {
+  id: string,
+  name: string,
+  items: array<zoteroItem>,
+}
+
+// External Zotero API (would be implemented in JS/TypeScript)
+@module("./zotero_api.js")
+external getItems: unit => promise<array<zoteroItem>> = "getItems"
+
+@module("./zotero_api.js")
+external getCollections: unit => promise<array<zoteroCollection>> = "getCollections"
+
+@module("./zotero_api.js")
+external addTag: (string, string) => promise<unit> = "addTag"
+
+@module("./zotero_api.js")
+external createNote: (string, string) => promise<unit> = "createNote"
+
+// Convert Zotero item to text for analysis
+fn itemToText = (item: zoteroItem): string => {
+  fn abstract = switch item.abstractText {
+  | Some(text) => text
+  | None => ""
+  }
+
+  `${item.title}. ${abstract}`
+}
+
+// Extract citations from collection
+fn extractCitations = (collection: zoteroCollection): array<string> => {
+  Js.Array2.map(collection.items, item => itemToText(item))
+}
+
+// Tag item with Fogbinder analysis
+fn tagWithAnalysis = (itemId: string, analysisType: string): promise<unit> => {
+  fn tag = `fogbinder:${analysisType}`
+  addTag(itemId, tag)
+}
+
+// Create note with FogTrail visualization
+fn createFogTrailNote = (itemId: string, svgContent: string): promise<unit> => {
+  fn noteContent = `<h2>FogTrail Visualization</h2>\n${svgContent}`
+  createNote(itemId, noteContent)
+}
+
+// Batch analyze collection
+fn analyzeCollection = async (collectionId: string): unit => {
+  fn collections = await getCollections()
+
+  fn targetCollection = Js.Array2.find(collections, c => c.id == collectionId)
+
+  switch targetCollection {
+  | Some(coll) => {
+      fn citations = extractCitations(coll)
+
+      // Would integrate with analysis engines here
+      Js.log(`Analyzing ${Belt.Int.toString(Js.Array2.length(citations))} citations...`)
+    }
+  | None => Js.log("Collection not found")
+  }
+}
+

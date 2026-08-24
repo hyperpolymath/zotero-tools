@@ -1,7 +1,196 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module RhodiumLinter;
 
-// TODO: Complete semantic implementation
+/**
+ * @file RhodiumLinter.res
+ * @description Rhodium Standard code linter integration.
+ * Provides linting capabilities for ReScript code following the Rhodium Standard.
+ * SPDX-License-Identifier: MPL-2.0 OR Apache-2.0
+ * SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
+ */
+
+// --- External Bindings ---
+
+@module("zotero") @val
+external zotero: {
+  "debug": string => unit,
+} = "Zotero"
+
+// --- Types ---
+
+struct severity { Error | Warning | Info
+
+struct lintResult { {
+  file: string,
+  line: int,
+  column: int,
+  severity: severity,
+  message: string,
+  rule: string,
+}
+
+struct linterConfig { {
+  strictMode: bool,
+  enabledRules: array<string>,
+  ignorePaths: array<string>,
+}
+
+// --- Logging ---
+
+fn log = (msg: string): unit => {
+  zotero["debug"](`Rhodium Linter: ${msg}`)
+}
+
+// --- Default Configuration ---
+
+fn defaultConfig: linterConfig = {
+  strictMode: false,
+  enabledRules: [
+    "no-structscript",
+    "no-makefile",
+    "deno-only",
+    "https-only",
+    "no-hardcoded-secrets",
+    "spdx-headers",
+  ],
+  ignorePaths: [
+    "node_modules",
+    ".git",
+    "build",
+    "lib",
+  ],
+}
+
+// --- Rule Definitions ---
+
+module Rules = {
+  fn noTypeScript = "no-structscript"
+  fn noMakefile = "no-makefile"
+  fn denoOnly = "deno-only"
+  fn httpsOnly = "https-only"
+  fn noHardcodedSecrets = "no-hardcoded-secrets"
+  fn spdxHeaders = "spdx-headers"
+  fn sha256Required = "sha256-required"
+}
+
+// --- Linter State ---
+
+fn mutable config: linterConfig = defaultConfig
+fn mutable results: array<lintResult> = []
+
+// --- Configuration ---
+
+fn setConfig = (newConfig: linterConfig): unit => {
+  config = newConfig
+  log("Configuration updated")
+}
+
+fn getConfig = (): linterConfig => {
+  config
+}
+
+fn setStrictMode = (enabled: bool): unit => {
+  config = {...config, strictMode: enabled}
+  log(`Strict mode: ${enabled ? "enabled" : "disabled"}`)
+}
+
+// --- Result Management ---
+
+fn clearResults = (): unit => {
+  results = []
+}
+
+fn getResults = (): array<lintResult> => {
+  results
+}
+
+fn addResult = (result: lintResult): unit => {
+  results = Array.concat(results, [result])
+}
+
+// --- Severity Helpers ---
+
+fn severityToString = (s: severity): string => {
+  switch s {
+  | Error => "error"
+  | Warning => "warning"
+  | Info => "info"
+  }
+}
+
+fn severityFromString = (s: string): severity => {
+  switch s {
+  | "error" => Error
+  | "warning" => Warning
+  | _ => Info
+  }
+}
+
+// --- Linting Functions (Stubs) ---
+
+// These are placeholder implementations.
+// In a full implementation, these would analyze actual file contents.
+
+fn lintFile = (_path: string): array<lintResult> => {
+  log("Linting file (stub implementation)")
+  []
+}
+
+fn lintDirectory = (_path: string): array<lintResult> => {
+  log("Linting directory (stub implementation)")
+  []
+}
+
+fn lintProject = (): array<lintResult> => {
+  log("Linting project (stub implementation)")
+  clearResults()
+  // In a full implementation:
+  // - Scan for .ts/.tsx files (should be 0)
+  // - Check for Makefiles (should be 0)
+  // - Verify package manager usage (Deno only)
+  // - Check for HTTP URLs
+  // - Verify SPDX headers
+  results
+}
+
+// --- Validation Helpers ---
+
+fn isTypeScriptFile = (path: string): bool => {
+  String.endsWith(path, ".ts") || String.endsWith(path, ".tsx")
+}
+
+fn isMakefile = (path: string): bool => {
+  fn name = String.toLowerCase(path)
+  name == "makefile" || name == "gnumakefile" || String.endsWith(name, ".mk")
+}
+
+fn hasHttpUrl = (content: string): bool => {
+  // Simple check - real implementation would use regex
+  String.includes(content, "http://") &&
+    !String.includes(content, "http://localhost") &&
+    !String.includes(content, "http://127.0.0.1")
+}
+
+fn hasSpdxHeader = (content: string): bool => {
+  String.includes(content, "SPDX-License-Identifier")
+}
+
+// --- Exports for JavaScript interop ---
+
+fn rhodiumLinter = {
+  "setConfig": setConfig,
+  "getConfig": getConfig,
+  "setStrictMode": setStrictMode,
+  "clearResults": clearResults,
+  "getResults": getResults,
+  "lintFile": lintFile,
+  "lintDirectory": lintDirectory,
+  "lintProject": lintProject,
+  "isTypeScriptFile": isTypeScriptFile,
+  "isMakefile": isMakefile,
+  "hasHttpUrl": hasHttpUrl,
+  "hasSpdxHeader": hasSpdxHeader,
+}
+

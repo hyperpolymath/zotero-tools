@@ -1,7 +1,213 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module Preferences;
 
-// TODO: Complete semantic implementation
+/**
+ * @file Preferences.res
+ * @description Zotero plugin preferences management module.
+ * Handles reading/writing preferences and providing UI bindings.
+ * SPDX-License-Identifier: MPL-2.0 OR Apache-2.0
+ * SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
+ */
+
+// --- External Bindings ---
+
+@module("zotero") @val
+external zotero: {
+  "Prefs": {
+    "get": (string, 'a) => 'a,
+    "set": (string, 'a) => unit,
+    "clear": string => unit,
+  },
+  "debug": string => unit,
+} = "Zotero"
+
+// --- Preference Keys ---
+
+fn prefBranch = "extensions.zoterho-template"
+
+module Keys = {
+  fn enabled = `${prefBranch}.enabled`
+  fn themeColor = `${prefBranch}.themeColor`
+  fn customColor = `${prefBranch}.customColor`
+  fn showNotifications = `${prefBranch}.showNotifications`
+  fn linterEnabled = `${prefBranch}.linter.enabled`
+  fn linterStrictMode = `${prefBranch}.linter.strictMode`
+}
+
+// --- Type Definitions ---
+
+struct themeColor { Rhodium | Green | Blue | Custom
+
+struct linterPrefs { {
+  enabled: bool,
+  strictMode: bool,
+}
+
+struct preferences { {
+  enabled: bool,
+  themeColor: themeColor,
+  customColor: string,
+  showNotifications: bool,
+  linter: linterPrefs,
+}
+
+// --- Helper Functions ---
+
+fn log = (msg: string): unit => {
+  zotero["debug"](`ZoteRho Preferences: ${msg}`)
+}
+
+fn themeColorFromString = (s: string): themeColor => {
+  switch s {
+  | "green" => Green
+  | "blue" => Blue
+  | "custom" => Custom
+  | _ => Rhodium
+  }
+}
+
+fn themeColorToString = (t: themeColor): string => {
+  switch t {
+  | Rhodium => "rhodium"
+  | Green => "green"
+  | Blue => "blue"
+  | Custom => "custom"
+  }
+}
+
+// --- Preference Accessors ---
+
+fn getEnabled = (): bool => {
+  zotero["Prefs"]["get"](Keys.enabled, true)
+}
+
+fn setEnabled = (value: bool): unit => {
+  zotero["Prefs"]["set"](Keys.enabled, value)
+  log(`Set enabled: ${value ? "true" : "false"}`)
+}
+
+fn getThemeColor = (): themeColor => {
+  fn value = zotero["Prefs"]["get"](Keys.themeColor, "rhodium")
+  themeColorFromString(value)
+}
+
+fn setThemeColor = (value: themeColor): unit => {
+  zotero["Prefs"]["set"](Keys.themeColor, themeColorToString(value))
+  log(`Set themeColor: ${themeColorToString(value)}`)
+}
+
+fn getCustomColor = (): string => {
+  zotero["Prefs"]["get"](Keys.customColor, "#e8e8e8")
+}
+
+fn setCustomColor = (value: string): unit => {
+  zotero["Prefs"]["set"](Keys.customColor, value)
+  log(`Set customColor: ${value}`)
+}
+
+fn getShowNotifications = (): bool => {
+  zotero["Prefs"]["get"](Keys.showNotifications, true)
+}
+
+fn setShowNotifications = (value: bool): unit => {
+  zotero["Prefs"]["set"](Keys.showNotifications, value)
+}
+
+fn getLinterEnabled = (): bool => {
+  zotero["Prefs"]["get"](Keys.linterEnabled, false)
+}
+
+fn setLinterEnabled = (value: bool): unit => {
+  zotero["Prefs"]["set"](Keys.linterEnabled, value)
+}
+
+fn getLinterStrictMode = (): bool => {
+  zotero["Prefs"]["get"](Keys.linterStrictMode, false)
+}
+
+fn setLinterStrictMode = (value: bool): unit => {
+  zotero["Prefs"]["set"](Keys.linterStrictMode, value)
+}
+
+// --- Bulk Operations ---
+
+fn getAll = (): preferences => {
+  {
+    enabled: getEnabled(),
+    themeColor: getThemeColor(),
+    customColor: getCustomColor(),
+    showNotifications: getShowNotifications(),
+    linter: {
+      enabled: getLinterEnabled(),
+      strictMode: getLinterStrictMode(),
+    },
+  }
+}
+
+fn resetToDefaults = (): unit => {
+  log("Resetting preferences to defaults")
+  setEnabled(true)
+  setThemeColor(Rhodium)
+  setCustomColor("#e8e8e8")
+  setShowNotifications(true)
+  setLinterEnabled(false)
+  setLinterStrictMode(false)
+}
+
+// --- UI Event Handlers (for preferences.xhtml bindings) ---
+
+fn onEnabledChange = (event: 'a): unit => {
+  fn target = event["target"]
+  fn checked = target["checked"]
+  setEnabled(checked)
+}
+
+fn onThemeColorChange = (event: 'a): unit => {
+  fn target = event["target"]
+  fn value = target["value"]
+  setThemeColor(themeColorFromString(value))
+}
+
+fn onCustomColorChange = (event: 'a): unit => {
+  fn target = event["target"]
+  fn value = target["value"]
+  setCustomColor(value)
+}
+
+fn onLinterEnabledChange = (event: 'a): unit => {
+  fn target = event["target"]
+  fn checked = target["checked"]
+  setLinterEnabled(checked)
+}
+
+fn onLinterStrictModeChange = (event: 'a): unit => {
+  fn target = event["target"]
+  fn checked = target["checked"]
+  setLinterStrictMode(checked)
+}
+
+fn onResetClick = (_event: 'a): unit => {
+  resetToDefaults()
+}
+
+// --- Exports for JavaScript interop ---
+
+fn preferences = {
+  "getAll": getAll,
+  "resetToDefaults": resetToDefaults,
+  "getEnabled": getEnabled,
+  "setEnabled": setEnabled,
+  "getThemeColor": getThemeColor,
+  "setThemeColor": setThemeColor,
+  "getCustomColor": getCustomColor,
+  "setCustomColor": setCustomColor,
+  "onEnabledChange": onEnabledChange,
+  "onThemeColorChange": onThemeColorChange,
+  "onCustomColorChange": onCustomColorChange,
+  "onLinterEnabledChange": onLinterEnabledChange,
+  "onLinterStrictModeChange": onLinterStrictModeChange,
+  "onResetClick": onResetClick,
+}
+

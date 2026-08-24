@@ -1,7 +1,184 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module Utils;
 
-// TODO: Complete semantic implementation
+/**
+ * Zotpress Utilities
+ *
+ * Common utility functions for the Zotpress ReScript modules.
+ *
+ * @package Zotpress
+ * @since 8.0.0
+ */
+
+// String utilities
+fn isEmpty = (str: string): bool => String.length(str) == 0
+
+fn isNotEmpty = (str: string): bool => String.length(str) > 0
+
+fn trim = (str: string): string => String.trim(str)
+
+fn capitalize = (str: string): string => {
+  if isEmpty(str) {
+    str
+  } else {
+    fn first = String.charAt(str, 0)->String.toUpperCase
+    fn rest = String.sliceToEnd(str, ~start=1)
+    first ++ rest
+  }
+}
+
+// Array utilities
+fn head = (arr: array<'a>): option<'a> => arr->Array.get(0)
+
+fn tail = (arr: array<'a>): array<'a> => {
+  if Array.length(arr) <= 1 {
+    []
+  } else {
+    arr->Array.sliceToEnd(~start=1)
+  }
+}
+
+fn last = (arr: array<'a>): option<'a> => arr->Array.get(Array.length(arr) - 1)
+
+fn isEmpty_arr = (arr: array<'a>): bool => Array.length(arr) == 0
+
+fn isNotEmpty_arr = (arr: array<'a>): bool => Array.length(arr) > 0
+
+// Option utilities
+fn getOrElse = (opt: option<'a>, default: 'a): 'a => {
+  switch opt {
+  | Some(v) => v
+  | None => default
+  }
+}
+
+fn map = (opt: option<'a>, fn: 'a => 'b): option<'b> => {
+  switch opt {
+  | Some(v) => Some(fn(v))
+  | None => None
+  }
+}
+
+fn flatMap = (opt: option<'a>, fn: 'a => option<'b>): option<'b> => {
+  switch opt {
+  | Some(v) => fn(v)
+  | None => None
+  }
+}
+
+// Result utilities
+fn mapOk = (result: result<'a, 'e>, fn: 'a => 'b): result<'b, 'e> => {
+  switch result {
+  | Ok(v) => Ok(fn(v))
+  | Error(e) => Error(e)
+  }
+}
+
+fn mapError = (result: result<'a, 'e>, fn: 'e => 'f): result<'a, 'f> => {
+  switch result {
+  | Ok(v) => Ok(v)
+  | Error(e) => Error(fn(e))
+  }
+}
+
+fn getOkOrElse = (result: result<'a, 'e>, default: 'a): 'a => {
+  switch result {
+  | Ok(v) => v
+  | Error(_) => default
+  }
+}
+
+// DOM utilities
+module DomUtils = {
+  @val @scope("document")
+  external querySelector: string => Nullable.t<{..}> = "querySelector"
+
+  @val @scope("document")
+  external querySelectorAll: string => array<{..}> = "querySelectorAll"
+
+  fn hasClass = (element: {..}, className: string): bool => {
+    fn classList: array<string> = %raw(`Array.from(element.classList)`)
+    classList->Array.includes(className)
+  }
+
+  fn addClass = (element: {..}, className: string): unit => {
+    %raw(`element.classList.add(className)`)
+  }
+
+  fn removeClass = (element: {..}, className: string): unit => {
+    %raw(`element.classList.remove(className)`)
+  }
+
+  fn toggleClass = (element: {..}, className: string): unit => {
+    %raw(`element.classList.toggle(className)`)
+  }
+}
+
+// Debounce utility
+fn debounce = (fn: unit => unit, delay: int): (unit => unit) => {
+  fn timeoutId = ref(None)
+
+  () => {
+    switch timeoutId.contents {
+    | Some(id) => %raw(`clearTimeout(id)`)
+    | None => ()
+    }
+
+    fn newId: int = %raw(`setTimeout(fn, delay)`)
+    timeoutId := Some(newId)
+  }
+}
+
+// Throttle utility
+fn throttle = (fn: unit => unit, limit: int): (unit => unit) => {
+  fn lastRun = ref(0.0)
+
+  () => {
+    fn now: float = %raw(`Date.now()`)
+    if now -. lastRun.contents >= Float.fromInt(limit) {
+      lastRun := now
+      fn()
+    }
+  }
+}
+
+// URL utilities
+fn parseQueryString = (query: string): Dict.t<string> => {
+  fn params = Dict.make()
+  fn cleanQuery = if String.startsWith(query, "?") {
+    String.sliceToEnd(query, ~start=1)
+  } else {
+    query
+  }
+
+  if isNotEmpty(cleanQuery) {
+    cleanQuery
+    ->String.split("&")
+    ->Array.forEach(pair => {
+      fn parts = String.split(pair, "=")
+      switch (parts->Array.get(0), parts->Array.get(1)) {
+      | (Some(key), Some(value)) =>
+        fn decodedKey: string = %raw(`decodeURIComponent(key)`)
+        fn decodedValue: string = %raw(`decodeURIComponent(value)`)
+        Dict.set(params, decodedKey, decodedValue)
+      | _ => ()
+      }
+    })
+  }
+
+  params
+}
+
+fn buildQueryString = (params: Dict.t<string>): string => {
+  params
+  ->Dict.toArray
+  ->Array.map(((key, value)) => {
+    fn encodedKey: string = %raw(`encodeURIComponent(key)`)
+    fn encodedValue: string = %raw(`encodeURIComponent(value)`)
+    `${encodedKey}=${encodedValue}`
+  })
+  ->Array.join("&")
+}
+

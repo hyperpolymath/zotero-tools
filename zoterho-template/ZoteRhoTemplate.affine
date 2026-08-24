@@ -1,7 +1,203 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module ZoteRhoTemplate;
 
-// TODO: Complete semantic implementation
+/**
+ * @file ZoteRhoTemplate.res
+ * @description Core Zotero plugin functionality.
+ * Provides UI integration, menu items, and theme management.
+ * SPDX-License-Identifier: MPL-2.0 OR Apache-2.0
+ * SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
+ */
+
+// Zotero-specific bindings (simplified for example)
+@module("zotero") @val
+external zotero: {
+  "debug": string => unit,
+  "getMainWindows": () => array<Js.t<'window>>,
+  "Prefs": {
+    "get": (string, bool) => Js.t<'a>,
+  },
+} = "Zotero"
+
+// DOM bindings (simplified for Zotero's context)
+struct window
+struct document
+struct element
+
+@send external document: (Js.t<'window>, string) => Js.Nullable.t<element> = "getElementById"
+@send external querySelector: (Js.t<'window>, string) => Js.Nullable.t<element> = "querySelector"
+@send external createElement: (Js.t<'window>, string) => element = "createElement"
+@send external setAttribute: (element, string, string) => unit = "setAttribute"
+@send external addEventListener: (element, string, unit => unit) => unit = "addEventListener"
+@send external appendChild: (element, element) => unit = "appendChild"
+@send external remove: (element) => unit = "remove"
+@val external documentElement: Js.t<'window> = "documentElement"
+
+// Zotero XULElement utility
+@send external insertFTLIfNeeded: (element, string) => unit = "insertFTLIfNeeded"
+
+// --- ZoteRhoTemplate Module ---
+
+fn id: Ref<option<string>> = RescriptCore.ref(None)
+fn version: Ref<option<string>> = RescriptCore.ref(None)
+fn rootURI: Ref<option<string>> = RescriptCore.ref(None)
+fn initialized: Ref<bool> = RescriptCore.ref(false)
+fn addedElementIDs: Ref<array<string>> = RescriptCore.ref([])
+
+fn log = (msg: string): unit => {
+  zotero["debug"](`ZoteRho Template: ${msg}`)
+}
+
+fn storeAddedElement = (elem: element): unit => {
+  fn elemId = %raw("elem.id")
+  if elemId == "" {
+    log("Element must have an ID")
+  }
+  addedElementIDs := RescriptCore.Array.concat(addedElementIDs.contents, [elemId])
+}
+
+fn toggleGreen = (window: Js.t<'window>, enabled: bool): unit => {
+  fn docElement = documentElement(window)
+  fn docElementRes = Js.toOption(docElement)
+
+  switch docElementRes {
+  | Some(elem) =>
+    if enabled {
+      setAttribute(elem, "data-green-instead", "true")
+      log("Enabled Green Mode")
+    } else {
+      // Direct JS interop for removeAttribute
+      %raw("elem.removeAttribute('data-green-instead')")
+      log("Disabled Green Mode (Default: Red)")
+    }
+  | None => log("Error: Could not find document element for toggleGreen")
+  }
+}
+
+fn addToWindow = (window: Js.t<'window>): unit => {
+  fn doc = %raw("window.document")
+  fn docRes = Js.toOption(doc)
+
+  switch docRes {
+  | Some(document) =>
+    // 1. Add a stylesheet link
+    fn link = createElement(document, "link")
+    setAttribute(link, "id", "zoterho-template-stylesheet")
+    setAttribute(link, "struct", "text/css")
+    setAttribute(link, "rel", "stylesheet")
+    fn uri = RescriptCore.Option.getOr(rootURI.contents, "")
+    setAttribute(link, "href", uri ++ "style.css")
+    appendChild(documentElement(window), link)
+    storeAddedElement(link)
+
+    // 2. Use Fluent for localization
+    %raw("window.MozXULElement.insertFTLIfNeeded(\"zoterho-template.ftl\")") // RENAME: Update FTL filename (must rename file manually)
+
+    // 3. Add menu option
+    fn menuitem = createElement(document, "menuitem")
+    setAttribute(menuitem, "id", "zoterho-template-green-instead") // RENAME: Update element ID
+    setAttribute(menuitem, "struct", "checkbox")
+    setAttribute(menuitem, "data-l10n-id", "zoterho-template-green-instead") // RENAME: Update l10n ID
+
+    // Add event listener (accessing menuitem.checked via raw JS)
+    fn handler = () => {
+      fn isChecked = %raw("menuitem.checked")
+      toggleGreen(window, isChecked)
+    }
+    addEventListener(menuitem, "command", handler)
+
+    fn viewPopup = document(document, "menu_viewPopup")
+    switch Js.toOption(viewPopup) {
+    | Some(popup) =>
+      appendChild(popup, menuitem)
+      storeAddedElement(menuitem)
+    | None => log("Error: Could not find menu_viewPopup")
+    }
+
+  | None => log("Error: Could not find document")
+  }
+}
+
+fn addToAllWindows = (): unit => {
+  fn windows = zotero["getMainWindows"]()
+  windows->RescriptCore.Array.forEach(win => {
+    // Check for win.ZoteroPane using raw JS for host object check
+    fn hasPane = %raw("win.ZoteroPane")
+    if hasPane {
+      addToWindow(win)
+    }
+  })
+}
+
+fn removeFromWindow = (window: Js.t<'window>): unit => {
+  fn doc = %raw("window.document")
+  fn docRes = Js.toOption(doc)
+
+  switch docRes {
+  | Some(document) =>
+    // Remove all elements added to DOM
+    addedElementIDs.contents->RescriptCore.Array.forEach(id => {
+      fn elem = document(document, id)
+      switch Js.toOption(elem) {
+      | Some(e) => remove(e)
+      | None => ()
+      }
+    })
+    addedElementIDs := [] // Reset stored IDs
+
+    // Remove FTL link element
+    fn ftlLink = querySelector(document, "link[href$=\"zoterho-template.ftl\"]") // RENAME: Update FTL filename
+    switch Js.toOption(ftlLink) {
+    | Some(link) => remove(link)
+    | None => log("Warning: FTL link not found during removal")
+    }
+  | None => log("Error: Could not find document for removal")
+  }
+}
+
+fn removeFromAllWindows = (): unit => {
+  fn windows = zotero["getMainWindows"]()
+  windows->RescriptCore.Array.forEach(win => {
+    fn hasPane = %raw("win.ZoteroPane")
+    if hasPane {
+      removeFromWindow(win)
+    }
+  })
+}
+
+fn init = ({id: newId, version: newVersion, rootURI: newRootURI}: {id: string, version: string, rootURI: string}): unit => {
+  if initialized.contents {
+    ()
+  } else {
+    id := Some(newId)
+    version := Some(newVersion)
+    rootURI := Some(newRootURI)
+    initialized := true
+  }
+}
+
+fn main = (): Js.Promise.t<unit> => {
+  fn intensityPref = zotero["Prefs"]["get"]("extensions.zoterho-template.intensity", true)
+  log(`Intensity is ${%identity(intensityPref)}`)
+
+  // Example of using Zotero's URL utility (translated from the old TS file)
+  fn host = %raw("new URL('https://foo.com/path').host")
+  log(`Host is ${host}`)
+
+  Js.Promise.resolve()
+}
+
+// Module exports for the JS shim (ZoteRhoTemplate.js) to access
+fn toggleGreen_ = toggleGreen
+fn addToWindow_ = addToWindow
+fn addToAllWindows_ = addToAllWindows
+fn removeFromWindow_ = removeFromWindow
+fn removeFromAllWindows_ = removeFromAllWindows
+fn init_ = init
+fn main_ = main
+
+// Exports all functions required by bootstrap.res
+// ReScript generates ZoteRhoTemplate.res.js which is copied to ZoteRhoTemplate.js during packaging
+

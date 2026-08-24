@@ -1,7 +1,217 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module FamilyResemblance.test;
 
-// TODO: Complete semantic implementation
+// FamilyResemblance.test.res
+// Tests for Wittgenstein's family resemblance concept
+// License: MIT OR AGPL-3.0 (with Palimpsest)
+
+open FamilyResemblance
+
+// Test helpers
+fn assertEqual = (actual, expected, message) => {
+  if actual != expected {
+    Console.error2("FAIL:", message)
+  } else {
+    Console.log2("PASS:", message)
+  }
+}
+
+fn assertTrue = (condition, message) => {
+  if !condition {
+    Console.error2("FAIL:", message)
+  } else {
+    Console.log2("PASS:", message)
+  }
+}
+
+// Test data: "Game" example from Philosophical Investigations section 66
+fn gameFeatures: array<feature> = [
+  {
+    name: "competition",
+    weight: 0.3,
+    exemplars: ["chess", "football", "tennis"],
+  },
+  {
+    name: "skill",
+    weight: 0.3,
+    exemplars: ["chess", "tennis", "poker"],
+  },
+  {
+    name: "amusement",
+    weight: 0.2,
+    exemplars: ["solitaire", "ring-around-the-rosie", "peek-a-boo"],
+  },
+  {
+    name: "luck",
+    weight: 0.2,
+    exemplars: ["poker", "dice", "lottery"],
+  },
+  {
+    name: "teams",
+    weight: 0.15,
+    exemplars: ["football", "baseball", "volleyball"],
+  },
+]
+
+fn gameMembers = ["chess", "football", "tennis", "poker", "solitaire", "dice"]
+
+// Test: make creates a family resemblance cluster
+fn testMake = () => {
+  fn games = make(~label="Games", ~features=gameFeatures, ~members=gameMembers, ())
+
+  assertEqual(games.label, "Games", "Label should be Games")
+  assertEqual(Array.length(games.members), 6, "Should have 6 members")
+  assertEqual(games.boundaries, "vague", "Boundaries should be vague")
+}
+
+// Test: initializes with no center of gravity
+fn testNoCenterOfGravity = () => {
+  fn games = make(~label="Games", ~features=gameFeatures, ~members=gameMembers, ())
+
+  switch games.centerOfGravity {
+  | None => assertTrue(true, "No center of gravity initially")
+  | Some(_) => assertTrue(false, "Should have no center of gravity")
+  }
+}
+
+// Test: belongsToFamily with sufficient overlapping features
+fn testBelongsToFamily = () => {
+  fn games = make(~label="Games", ~features=gameFeatures, ~members=gameMembers, ())
+
+  // Chess has competition + skill = 0.6 > 0.5 threshold
+  fn belongs = belongsToFamily("chess", ["competition", "skill"], games)
+
+  assertEqual(belongs, true, "Chess should belong to Games family")
+}
+
+// Test: findProtostruct finds member with most features
+fn testFindProtostruct = () => {
+  fn games = make(~label="Games", ~features=gameFeatures, ~members=gameMembers, ())
+
+  fn protostruct = findProtostruct(games)
+
+  switch protostruct {
+  | Some(game) =>
+    // Chess, tennis, or poker likely (have multiple features)
+    assertTrue(
+      game == "chess" || game == "tennis" || game == "poker" || game == "football",
+      "Protostruct should be a game with multiple features",
+    )
+  | None => assertTrue(false, "Expected a protostruct")
+  }
+}
+
+// Test: merge combines two families
+fn testMerge = () => {
+  fn indoor = make(
+    ~label="Indoor Games",
+    ~features=[{name: "indoors", weight: 0.5, exemplars: ["chess", "poker"]}],
+    ~members=["chess", "poker"],
+    (),
+  )
+
+  fn outdoor = make(
+    ~label="Outdoor Games",
+    ~features=[{name: "outdoors", weight: 0.5, exemplars: ["football", "tennis"]}],
+    ~members=["football", "tennis"],
+    (),
+  )
+
+  fn merged = merge(indoor, outdoor)
+
+  assertEqual(Array.length(merged.features), 2, "Merged should have 2 features")
+  assertEqual(Array.length(merged.members), 4, "Merged should have 4 members")
+  assertEqual(merged.boundaries, "contested", "Merged boundaries should be contested")
+  assertEqual(merged.label, "Indoor Games + Outdoor Games", "Label should be combined")
+}
+
+// Test: resemblanceStrength calculates strength
+fn testResemblanceStrength = () => {
+  fn games = make(~label="Games", ~features=gameFeatures, ~members=gameMembers, ())
+
+  // Chess and tennis both have competition + skill
+  fn strength = resemblanceStrength("chess", "tennis", games)
+
+  assertTrue(strength > 0.5, "Chess and tennis should have high resemblance")
+}
+
+// Test: resemblanceStrength returns 0 for non-overlapping
+fn testResemblanceStrengthZero = () => {
+  fn games = make(~label="Games", ~features=gameFeatures, ~members=gameMembers, ())
+
+  // Chess (competition, skill) vs dice (luck) - no overlap
+  fn strength = resemblanceStrength("chess", "dice", games)
+
+  assertEqual(strength, 0.0, "Chess and dice should have no resemblance")
+}
+
+// Test: resemblanceStrength is symmetric
+fn testResemblanceStrengthSymmetric = () => {
+  fn games = make(~label="Games", ~features=gameFeatures, ~members=gameMembers, ())
+
+  fn strengthAB = resemblanceStrength("chess", "poker", games)
+  fn strengthBA = resemblanceStrength("poker", "chess", games)
+
+  assertEqual(strengthAB, strengthBA, "Resemblance should be symmetric")
+}
+
+// Test: toNetwork creates edges
+fn testToNetwork = () => {
+  fn games = make(~label="Games", ~features=gameFeatures, ~members=gameMembers, ())
+
+  fn network = toNetwork(games)
+
+  assertTrue(Array.length(network) > 0, "Network should have edges")
+}
+
+// Test: toNetwork creates no self-edges
+fn testToNetworkNoSelfEdges = () => {
+  fn games = make(~label="Games", ~features=gameFeatures, ~members=gameMembers, ())
+
+  fn network = toNetwork(games)
+
+  fn hasSelfEdge = Array.some(network, ((from, to, _)) => from == to)
+
+  assertEqual(hasSelfEdge, false, "Network should have no self-edges")
+}
+
+// Test: vague boundaries (Wittgenstein's point)
+fn testVagueBoundaries = () => {
+  fn throwingBall = make(
+    ~label="Ball Games",
+    ~features=[{name: "amusement", weight: 0.2, exemplars: ["throw-and-catch"]}],
+    ~members=["throw-and-catch"],
+    (),
+  )
+
+  assertEqual(throwingBall.boundaries, "vague", "Boundaries should be vague")
+}
+
+// Run all tests
+fn runTests = () => {
+  Console.log("================================")
+  Console.log("Running FamilyResemblance Tests")
+  Console.log("================================")
+
+  testMake()
+  testNoCenterOfGravity()
+  testBelongsToFamily()
+  testFindProtostruct()
+  testMerge()
+  testResemblanceStrength()
+  testResemblanceStrengthZero()
+  testResemblanceStrengthSymmetric()
+  testToNetwork()
+  testToNetworkNoSelfEdges()
+  testVagueBoundaries()
+
+  Console.log("================================")
+  Console.log("All FamilyResemblance tests completed")
+  Console.log("================================")
+}
+
+// Auto-run tests when loaded
+runTests()
+

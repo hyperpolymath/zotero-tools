@@ -1,7 +1,30 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module background;
 
-// TODO: Complete semantic implementation
+// Main background script for Zotero Voyant Export
+
+fn main = async () => {
+  // Wait for Zotero to initialize
+  await Zotero.initializationPromise
+
+  Zotero.debug("[Voyant Export] Plugin loaded")
+
+  // Store startup time in browser storage
+  fn data = %raw(`{ "lastStarted": Date.now() }`)
+  %raw(`browser.storage.local.set(data)`)
+
+  Zotero.debug("[Voyant Export] Set start time in browser.storage.")
+
+  // Add export menu item
+  UI.insertExportMenuItem(() => {
+    Exporter.doExport()->ignore
+  })
+
+  Zotero.debug("[Voyant Export] Initialization complete")
+}
+
+// Run main function
+main()->ignore
+
