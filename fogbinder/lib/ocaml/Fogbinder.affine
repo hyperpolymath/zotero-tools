@@ -1,7 +1,225 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module Fogbinder;
 
-// TODO: Complete semantic implementation
+// Fogbinder.res
+// Main orchestrator - ties all philosophical engines together
+
+open EpistemicState
+open SpeechAct
+open ContradictionDetector
+open MoodScorer
+open MysteryClustering
+open FogTrailVisualizer
+open ZoteroBindings
+
+// Analysis metadata
+struct analysisMetadata { {
+  analyzed: float,
+  totalSources: int,
+  totalContradictions: int,
+  totalMysteries: int,
+  overallOpacity: float,
+}
+
+// Analysis result from Fogbinder
+struct analysisResult { {
+  contradictions: array<ContradictionDetector.contradiction>,
+  moods: array<MoodScorer.moodScore>,
+  mysteries: array<MysteryClustering.mysteryCluster>,
+  fogTrail: FogTrailVisualizer.t,
+  metadata: analysisMetadata,
+}
+
+// Main analysis pipeline
+fn analyze = (~sources: array<string>, ~context: EpistemicState.languageGame, ()): analysisResult => {
+  // 1. Create epistemic states for each source
+  fn epistemicStates = Js.Array2.map(sources, source => {
+    // Determine certainty (simplified heuristic)
+    fn certainty = if Js.String.includes("unclear", source) ||
+      Js.String.includes("ambiguous", source) {
+      EpistemicState.Vague
+    } else if Js.String.includes("mysterious", source) {
+      EpistemicState.Mysterious
+    } else if Js.String.includes("contradicts", source) {
+      EpistemicState.Contradictory(["self-contradiction"])
+    } else {
+      EpistemicState.Known
+    }
+
+    EpistemicState.make(~certainty, ~context, ~evidence=[source], ())
+  })
+
+  // 2. Analyze speech acts
+  fn speechActs = Js.Array2.map(sources, source => {
+    fn mood = MoodScorer.analyze(source, context)
+    SpeechAct.make(~utterance=source, ~force=mood.primary, ~context, ())
+  })
+
+  fn moods = Js.Array2.map(speechActs, act => MoodScorer.score(act))
+
+  // 3. Detect contradictions
+  fn contradictions = ContradictionDetector.detectMultiple(speechActs)
+
+  // 4. Cluster mysteries
+  fn mysteryStates = Js.Array2.filter(epistemicStates, state =>
+    MysteryClustering.isMystery(state)
+  )
+
+  fn mysteries = Js.Array2.map(mysteryStates, state => {
+    // Extract content from evidence
+    fn content = switch Js.Array2.unsafe_get(state.evidence, 0) {
+    | content => content
+    | exception _ => "Unknown"
+    }
+
+    MysteryClustering.make(~content, ~state, ())
+  })
+
+  fn mysteryClusters = MysteryClustering.cluster(mysteries)
+
+  // 5. Build FogTrail visualization
+  fn fogTrail = FogTrailVisualizer.buildFromAnalysis(
+    ~title="Epistemic Analysis",
+    ~sources,
+    ~contradictions,
+    ~mysteries,
+    (),
+  )
+
+  // 6. Compile results
+  {
+    contradictions,
+    moods,
+    mysteries: mysteryClusters,
+    fogTrail,
+    metadata: {
+      analyzed: Js.Date.now(),
+      totalSources: Js.Array2.length(sources),
+      totalContradictions: Js.Array2.length(contradictions),
+      totalMysteries: Js.Array2.length(mysteries),
+      overallOpacity: fogTrail.metadata.fogDensity,
+    },
+  }
+}
+
+// Analyze Zotero collection
+fn analyzeZoteroCollection = async (collectionId: string): analysisResult => {
+  fn collections = await ZoteroBindings.getCollections()
+
+  fn targetCollection = Js.Array2.find(collections, c => c.id == collectionId)
+
+  switch targetCollection {
+  | Some(coll) => {
+      fn sources = ZoteroBindings.extractCitations(coll)
+
+      fn context = {
+        EpistemicState.domain: coll.name,
+        conventions: [],
+        participants: [],
+        purpose: "Research analysis",
+      }
+
+      fn result = analyze(~sources, ~context, ())
+
+      // Tag items with results
+      fn _ = Js.Array2.forEach(coll.items, item => {
+        fn _ = ZoteroBindings.tagWithAnalysis(item.id, "analyzed")
+        ()
+      })
+
+      result
+    }
+  | None => {
+      Js.log("Collection not found")
+      // Return empty result
+      {
+        contradictions: [],
+        moods: [],
+        mysteries: [],
+        fogTrail: FogTrailVisualizer.make(~title="Empty", ()),
+        metadata: {
+          analyzed: Js.Date.now(),
+          totalSources: 0,
+          totalContradictions: 0,
+          totalMysteries: 0,
+          overallOpacity: 0.0,
+        },
+      }
+    }
+  }
+}
+
+// Export results to JSON
+fn toJson = (result: analysisResult): Js.Json.t => {
+  open Js.Dict
+
+  fn metadata = empty()
+  set(metadata, "totalSources", Js.Json.number(Belt.Int.toFloat(result.metadata.totalSources)))
+  set(
+    metadata,
+    "totalContradictions",
+    Js.Json.number(Belt.Int.toFloat(result.metadata.totalContradictions)),
+  )
+  set(
+    metadata,
+    "totalMysteries",
+    Js.Json.number(Belt.Int.toFloat(result.metadata.totalMysteries)),
+  )
+  set(metadata, "overallOpacity", Js.Json.number(result.metadata.overallOpacity))
+
+  fn resultDict = empty()
+  set(resultDict, "metadata", Js.Json.object_(metadata))
+  set(resultDict, "fogTrail", FogTrailVisualizer.toJson(result.fogTrail))
+
+  Js.Json.object_(resultDict)
+}
+
+// Generate human-readable report
+fn generateReport = (result: analysisResult): string => {
+  fn header = `# Fogbinder Analysis Report
+
+Analyzed: ${Js.Date.toISOString(Js.Date.fromFloat(result.metadata.analyzed))}
+Total Sources: ${Belt.Int.toString(result.metadata.totalSources)}
+Overall Epistemic Opacity: ${Belt.Float.toString(result.metadata.overallOpacity)}
+
+`
+
+  fn contradictionsSection = if Js.Array2.length(result.contradictions) > 0 {
+    fn items = Js.Array2.map(result.contradictions, c =>
+      `- ${c.utterance1.utterance} ⚔️ ${c.utterance2.utterance}\n  Resolution: ${ContradictionDetector.suggestResolution(
+          c,
+        )}\n`
+    )->Js.Array2.joinWith("")
+
+    `## Contradictions (${Belt.Int.toString(Js.Array2.length(result.contradictions))})
+
+${items}
+
+`
+  } else {
+    ""
+  }
+
+  fn mysteriesSection = if Js.Array2.length(result.mysteries) > 0 {
+    fn items = Js.Array2.map(result.mysteries, cluster =>
+      `- **${cluster.label}** (${Belt.Int.toString(
+          Js.Array2.length(cluster.mysteries),
+        )} mysteries)\n`
+    )->Js.Array2.joinWith("")
+
+    `## Mystery Clusters
+
+${items}
+
+`
+  } else {
+    ""
+  }
+
+  `${header}${contradictionsSection}${mysteriesSection}---
+
+*Generated by Fogbinder - Navigating Epistemic Ambiguity*`
+}
+

@@ -1,7 +1,331 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module FamilyResemblance.test;
 
-// TODO: Complete semantic implementation
+// FamilyResemblance.test.res
+// Tests for Wittgenstein's family resemblance concept
+
+open RescriptMocha
+
+describe("FamilyResemblance", () => {
+  // Test data: "Game" example from Philosophical Investigations §66
+  fn gameFeatures = [
+    {
+      name: "competition",
+      weight: 0.3,
+      exemplars: ["chess", "football", "tennis"],
+    },
+    {
+      name: "skill",
+      weight: 0.3,
+      exemplars: ["chess", "tennis", "poker"],
+    },
+    {
+      name: "amusement",
+      weight: 0.2,
+      exemplars: ["solitaire", "ring-around-the-rosie", "peek-a-boo"],
+    },
+    {
+      name: "luck",
+      weight: 0.2,
+      exemplars: ["poker", "dice", "lottery"],
+    },
+    {
+      name: "teams",
+      weight: 0.15,
+      exemplars: ["football", "baseball", "volleyball"],
+    },
+  ]
+
+  fn gameMembers = [
+    "chess",
+    "football",
+    "tennis",
+    "poker",
+    "solitaire",
+    "dice",
+  ]
+
+  describe("make", () => {
+    it("creates a family resemblance cluster", () => {
+      fn games = FamilyResemblance.make(
+        ~label="Games",
+        ~features=gameFeatures,
+        ~members=gameMembers,
+        (),
+      )
+
+      Assert.equal(games.label, "Games")
+      Assert.equal(Array.length(games.members), 6)
+      Assert.equal(games.boundaries, "vague")
+    })
+
+    it("initializes with no center of gravity", () => {
+      fn games = FamilyResemblance.make(
+        ~label="Games",
+        ~features=gameFeatures,
+        ~members=gameMembers,
+        (),
+      )
+
+      Assert.equal(games.centerOfGravity, None)
+    })
+
+    it("sets vague boundaries by default", () => {
+      fn cluster = FamilyResemblance.make(
+        ~label="Test",
+        ~features=[],
+        ~members=[],
+        (),
+      )
+
+      Assert.equal(cluster.boundaries, "vague")
+    })
+  })
+
+  describe("belongsToFamily", () => {
+    fn games = FamilyResemblance.make(
+      ~label="Games",
+      ~features=gameFeatures,
+      ~members=gameMembers,
+      (),
+    )
+
+    it("accepts item with sufficient overlapping features", () => {
+      // Chess has competition + skill = 0.6 > 0.5 threshold
+      fn belongs = FamilyResemblance.belongsToFamily(
+        "chess",
+        ["competition", "skill"],
+        games,
+      )
+
+      Assert.equal(belongs, true)
+    })
+
+    it("accepts item at boundary threshold", () => {
+      // Poker has skill + luck = 0.5 (exactly at threshold, but > 0.5)
+      fn belongs = FamilyResemblance.belongsToFamily(
+        "poker",
+        ["skill", "luck"],
+        games,
+      )
+
+      Assert.equal(belongs, true)
+    })
+  })
+
+  describe("findProtostruct", () => {
+    it("finds prototypical member with most features", () => {
+      fn games = FamilyResemblance.make(
+        ~label="Games",
+        ~features=gameFeatures,
+        ~members=gameMembers,
+        (),
+      )
+
+      fn protostruct = FamilyResemblance.findProtostruct(games)
+
+      switch protostruct {
+      | Some(game) =>
+        // Chess or tennis likely (both have competition + skill)
+        Assert.ok(game == "chess" || game == "tennis" || game == "poker")
+      | None => Assert.fail("Expected a protostruct")
+      }
+    })
+
+    it("returns None for empty family", () => {
+      fn emptyFamily = FamilyResemblance.make(
+        ~label="Empty",
+        ~features=[],
+        ~members=[],
+        (),
+      )
+
+      Assert.equal(FamilyResemblance.findProtostruct(emptyFamily), None)
+    })
+
+    it("returns Some for single-member family", () => {
+      fn singleMember = FamilyResemblance.make(
+        ~label="Singular",
+        ~features=[{name: "trait", weight: 1.0, exemplars: ["only"]}],
+        ~members=["only"],
+        (),
+      )
+
+      switch FamilyResemblance.findProtostruct(singleMember) {
+      | Some(member) => Assert.equal(member, "only")
+      | None => Assert.fail("Expected single member as protostruct")
+      }
+    })
+  })
+
+  describe("merge", () => {
+    fn indoor = FamilyResemblance.make(
+      ~label="Indoor Games",
+      ~features=[
+        {name: "indoors", weight: 0.5, exemplars: ["chess", "poker"]},
+      ],
+      ~members=["chess", "poker"],
+      (),
+    )
+
+    fn outdoor = FamilyResemblance.make(
+      ~label="Outdoor Games",
+      ~features=[
+        {name: "outdoors", weight: 0.5, exemplars: ["football", "tennis"]},
+      ],
+      ~members=["football", "tennis"],
+      (),
+    )
+
+    it("combines features from both families", () => {
+      fn merged = FamilyResemblance.merge(indoor, outdoor)
+
+      Assert.equal(Array.length(merged.features), 2)
+    })
+
+    it("combines members from both families", () => {
+      fn merged = FamilyResemblance.merge(indoor, outdoor)
+
+      Assert.equal(Array.length(merged.members), 4)
+      Assert.ok(Array.includes(merged.members, "chess"))
+      Assert.ok(Array.includes(merged.members, "football"))
+    })
+
+    it("creates contested boundaries", () => {
+      fn merged = FamilyResemblance.merge(indoor, outdoor)
+
+      Assert.equal(merged.boundaries, "contested")
+    })
+
+    it("creates combined label", () => {
+      fn merged = FamilyResemblance.merge(indoor, outdoor)
+
+      Assert.equal(merged.label, "Indoor Games + Outdoor Games")
+    })
+
+    it("resets center of gravity", () => {
+      fn merged = FamilyResemblance.merge(indoor, outdoor)
+
+      Assert.equal(merged.centerOfGravity, None)
+    })
+  })
+
+  describe("resemblanceStrength", () => {
+    fn games = FamilyResemblance.make(
+      ~label="Games",
+      ~features=gameFeatures,
+      ~members=gameMembers,
+      (),
+    )
+
+    it("calculates high resemblance for items sharing many features", () => {
+      // Chess and tennis both have competition + skill
+      fn strength = FamilyResemblance.resemblanceStrength("chess", "tennis", games)
+
+      Assert.ok(strength > 0.5) // At least competition (0.3) + skill (0.3)
+    })
+
+    it("calculates low resemblance for items sharing few features", () => {
+      // Chess (competition, skill) vs dice (luck) - no overlap
+      fn strength = FamilyResemblance.resemblanceStrength("chess", "dice", games)
+
+      Assert.equal(strength, 0.0)
+    })
+
+    it("calculates zero resemblance for non-overlapping items", () => {
+      // Solitaire (amusement) vs football (competition, teams) - no overlap
+      fn strength = FamilyResemblance.resemblanceStrength(
+        "solitaire",
+        "football",
+        games,
+      )
+
+      Assert.equal(strength, 0.0)
+    })
+
+    it("is symmetric (strength(A,B) == strength(B,A))", () => {
+      fn strengthAB = FamilyResemblance.resemblanceStrength("chess", "poker", games)
+      fn strengthBA = FamilyResemblance.resemblanceStrength("poker", "chess", games)
+
+      Assert.equal(strengthAB, strengthBA)
+    })
+  })
+
+  describe("toNetwork", () => {
+    fn games = FamilyResemblance.make(
+      ~label="Games",
+      ~features=gameFeatures,
+      ~members=gameMembers,
+      (),
+    )
+
+    it("creates network edges between members", () => {
+      fn network = FamilyResemblance.toNetwork(games)
+
+      Assert.ok(Array.length(network) > 0)
+    })
+
+    it("only includes edges with positive strength", () => {
+      fn network = FamilyResemblance.toNetwork(games)
+
+      Array.forEach(network, ((_, _, strength)) => {
+        Assert.ok(strength > 0.0)
+      })
+    })
+
+    it("does not create self-edges", () => {
+      fn network = FamilyResemblance.toNetwork(games)
+
+      Array.forEach(network, ((from, to, _)) => {
+        Assert.ok(from != to)
+      })
+    })
+
+    it("creates edges for items with shared features", () => {
+      fn network = FamilyResemblance.toNetwork(games)
+
+      // Chess and tennis should be connected (both have competition + skill)
+      fn chessToTennis = Array.some(network, ((from, to, _)) =>
+        (from == "chess" && to == "tennis") || (from == "tennis" && to == "chess")
+      )
+
+      Assert.equal(chessToTennis, true)
+    })
+
+    it("returns empty network for family with no overlapping features", () => {
+      fn isolated = FamilyResemblance.make(
+        ~label="Isolated",
+        ~features=[
+          {name: "a", weight: 1.0, exemplars: ["item1"]},
+          {name: "b", weight: 1.0, exemplars: ["item2"]},
+        ],
+        ~members=["item1", "item2"],
+        (),
+      )
+
+      fn network = FamilyResemblance.toNetwork(isolated)
+
+      Assert.equal(Array.length(network), 0)
+    })
+  })
+
+  describe("vague boundaries", () => {
+    it("demonstrates Wittgenstein's point about vague concepts", () => {
+      // "Is throwing a ball up and catching it a game?"
+      // No definitive answer - vague boundaries!
+      fn throwingBall = FamilyResemblance.make(
+        ~label="Ball Games",
+        ~features=[
+          {name: "amusement", weight: 0.2, exemplars: ["throw-and-catch"]},
+        ],
+        ~members=["throw-and-catch"],
+        (),
+      )
+
+      Assert.equal(throwingBall.boundaries, "vague")
+    })
+  })
+})
+

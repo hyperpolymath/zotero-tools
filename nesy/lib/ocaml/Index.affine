@@ -1,7 +1,19 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module Index;
 
-// TODO: Complete semantic implementation
+/**
+ * NSAI: Neurosymbolic validation and preparation for Zotero research data
+ *
+ * Main entry point
+ */
+
+// Re-export structs
+module Atomic = Atomic
+module Validator = Validator
+
+// Convenience exports
+fn validate = Validator.validate
+fn validateBatch = Validator.validateBatch
+

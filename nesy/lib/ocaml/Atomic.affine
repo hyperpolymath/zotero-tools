@@ -1,7 +1,173 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module Atomic;
 
-// TODO: Complete semantic implementation
+/**
+ * Tractarian Atomic Facts: Core data structures for NSAI
+ *
+ * Based on Wittgenstein's Tractatus Logico-Philosophicus:
+ * "The world is the totality of facts, not of things." (1.1)
+ */
+
+/** The kind of thing this citation is */
+struct itemType {
+  | Book
+  | BookSection
+  | JournalArticle
+  | ConferencePaper
+  | Thesis
+  | Webpage
+  | Manuscript
+  | Report
+  | Patent
+
+/** Creator structs */
+struct creatorType {
+  | Author
+  | Editor
+  | Contributor
+  | Translator
+
+/** Creator record */
+struct creator { {
+  creatorType: creatorType,
+  firstName: option<string>,
+  lastName: string,
+}
+
+/** Atomic Citation: The fundamental unit of bibliographic reality */
+struct atomicCitation { {
+  id: string,
+  itemType: itemType,
+  title: string,
+  creators: array<creator>,
+  date: option<string>,
+  publicationTitle: option<string>,
+  publisher: option<string>,
+  place: option<string>,
+  doi: option<string>,
+  isbn: option<string>,
+  issn: option<string>,
+  url: option<string>,
+  pages: option<string>,
+  volume: option<string>,
+  issue: option<string>,
+  edition: option<string>,
+  abstractNote: option<string>,
+  tags: array<string>,
+  extra: option<string>,
+}
+
+/** Validation State: Truth-functional analysis */
+struct validationState {
+  | Valid
+  | Incomplete
+  | Inconsistent
+  | Uncertain
+
+/** Certainty score factors */
+struct certaintyFactors { {
+  structural: float,
+  consistency: float,
+  referential: float,
+}
+
+/** How confident are we in validation? */
+struct certaintyScore { {
+  score: float,
+  factors: certaintyFactors,
+  reasoning: string,
+}
+
+/** Issue severity */
+struct severity {
+  | SeverityError
+  | SeverityWarning
+  | SeverityInfo
+
+/** Validation Issue: What's wrong with this citation? */
+struct validationIssue { {
+  severity: severity,
+  field: option<string>,
+  message: string,
+  suggestion: option<string>,
+  requiresUncertaintyNavigation: bool,
+}
+
+/** Validation Result: The output of formal verification */
+struct validationResult { {
+  citation: atomicCitation,
+  state: validationState,
+  certainty: certaintyScore,
+  issues: array<validationIssue>,
+  timestamp: Date.t,
+}
+
+/** Citation Relation structs */
+struct relationType {
+  | Cites
+  | CitedBy
+  | RelatedTo
+  | Contradicts
+  | Supports
+
+/** Citation Relation: Logical connections between citations */
+struct citationRelation { {
+  relationType: relationType,
+  source: string,
+  target: string,
+  confidence: float,
+  isContradiction: bool,
+}
+
+/** Bibliography metadata */
+struct bibliographyMetadata { {
+  created: Date.t,
+  updated: Date.t,
+  source: string,
+}
+
+/** Molecular Fact: Multiple citations related logically */
+struct bibliography { {
+  citations: array<atomicCitation>,
+  relationships: array<citationRelation>,
+  metadata: bibliographyMetadata,
+}
+
+// Helper functions for itemType string conversion
+fn itemTypeToString = itemType =>
+  switch itemType {
+  | Book => "book"
+  | BookSection => "bookSection"
+  | JournalArticle => "journalArticle"
+  | ConferencePaper => "conferencePaper"
+  | Thesis => "thesis"
+  | Webpage => "webpage"
+  | Manuscript => "manuscript"
+  | Report => "report"
+  | Patent => "patent"
+  }
+
+fn stringToItemType = str =>
+  switch str {
+  | "book" => Some(Book)
+  | "bookSection" => Some(BookSection)
+  | "journalArticle" => Some(JournalArticle)
+  | "conferencePaper" => Some(ConferencePaper)
+  | "thesis" => Some(Thesis)
+  | "webpage" => Some(Webpage)
+  | "manuscript" => Some(Manuscript)
+  | "report" => Some(Report)
+  | "patent" => Some(Patent)
+  | _ => None
+  }
+
+fn validationStateToString = state =>
+  switch state {
+  | Valid => "VALID"
+  | Incomplete => "INCOMPLETE"
+  | Inconsistent => "INCONSISTENT"
+  | Uncertain => "UNCERTAIN"
+  }
+
