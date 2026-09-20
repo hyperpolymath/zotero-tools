@@ -26,13 +26,6 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test
-      - name: Upload coverage
-        if: matrix.node-version == '20.x'
-        uses: codecov/codecov-action@v5
-        with:
-          files: ./coverage/coverage-final.json
-          flags: unittests
-          name: codecov-nsai
   typecheck:
     name: Type Checking
     runs-on: ubuntu-latest

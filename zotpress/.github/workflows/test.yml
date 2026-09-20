@@ -54,13 +54,6 @@ jobs:
         run: composer lint
       - name: Run PHPUnit tests
         run: composer test
-      - name: Upload coverage to Codecov
-        if: matrix.php == '8.2'
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
-        with:
-          files: ./coverage/clover.xml
-          flags: php
-          fail_ci_if_error: false
   # ─────────────────────────────────────────────────────────────────────────────
   # PHP Static Analysis
   # ─────────────────────────────────────────────────────────────────────────────
