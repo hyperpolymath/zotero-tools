@@ -22,7 +22,7 @@ info:
     @echo "Version: {{version}}"
     @echo "Policy:  Hyperpolymath Language Standard"
     @echo ""
-    @echo "Allowed: ReScript, Rust, Deno, Gleam, PHP 8.2+ (WordPress)"
+    @echo "Allowed: AffineScript, Rust, Deno, Gleam, PHP 8.2+ (WordPress)"
     @echo "Banned:  TypeScript, Node.js, npm, Go, Java, Swift"
 
 # ═══════════════════════════════════════════════════════════════════════════════
