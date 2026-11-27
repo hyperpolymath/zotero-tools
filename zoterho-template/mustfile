@@ -62,7 +62,7 @@ must_no_typescript() {
     if [[ -n "$ts_files" ]]; then
         log_error "TypeScript files detected (banned by policy):"
         echo "$ts_files"
-        die "MUST: Convert all TypeScript to ReScript"
+        die "MUST: Convert all TypeScript to AffineScript"
     fi
     log_success "No TypeScript files found"
 }
@@ -80,7 +80,7 @@ must_no_raw_javascript() {
         ! -name "*.gen.js" 2>/dev/null || true)
 
     if [[ -n "$js_files" ]]; then
-        log_warn "Raw JavaScript files detected (should use ReScript):"
+        log_warn "Raw JavaScript files detected (should use AffineScript):"
         echo "$js_files"
         # Warning only - some JS may be necessary for Zotero plugin shims
     fi
@@ -235,7 +235,7 @@ Commands:
     help        Show this help message
 
 Policy Enforcement:
-    - No TypeScript (use ReScript)
+    - No TypeScript (use AffineScript)
     - No raw JavaScript (except .res.js output)
     - No Makefiles (use justfile)
     - No npm/bun/pnpm/yarn (use Deno)

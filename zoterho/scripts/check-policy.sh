@@ -51,8 +51,8 @@ echo "Checking for banned file patterns..."
 echo ""
 
 # TypeScript files
-check_banned_pattern "*.ts" "TypeScript files found! TypeScript is banned." "ReScript (.res)"
-check_banned_pattern "*.tsx" "TypeScript JSX files found! TypeScript is banned." "ReScript (.res)"
+check_banned_pattern "*.ts" "TypeScript files found! TypeScript is banned." "AffineScript (.affine)"
+check_banned_pattern "*.tsx" "TypeScript JSX files found! TypeScript is banned." "AffineScript (.affine)"
 check_banned_pattern "tsconfig.json" "TypeScript configuration found!" "deno.json"
 
 # npm/Node.js files

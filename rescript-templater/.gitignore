@@ -6,7 +6,7 @@
 #   Tier 2: Nickel, Racket, Guile Scheme, Nix
 #   Infrastructure: Guix channels, derivations
 #
-# Prohibited: TypeScript, JavaScript (use ReScript), Python (except salt/), Go, CUE
+# Prohibited: TypeScript, JavaScript (use AffineScript), Python (except salt/), Go, CUE
 
 # === Build Artifacts ===
 /target/

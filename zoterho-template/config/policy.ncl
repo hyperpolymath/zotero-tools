@@ -16,11 +16,11 @@ let policy = {
   # Allowed languages and tools
   allowed = {
     languages = [
-      "ReScript",      # Primary application code
+      "AffineScript",  # Primary application code
       "Rust",          # Performance-critical, systems, WASM
       "Gleam",         # Backend services (BEAM or JS)
       "Bash",          # Scripts, automation (minimal)
-      "JavaScript",    # Only where ReScript cannot (MCP glue, Deno APIs)
+      "JavaScript",    # Only where AffineScript cannot (MCP glue, Deno APIs)
       "Python",        # SaltStack only
       "Nickel",        # Configuration language
       "Guile",         # State/meta files (STATE.scm, META.scm)
@@ -45,7 +45,7 @@ let policy = {
   # Banned languages and tools
   banned = {
     languages = [
-      "TypeScript",    # Use ReScript
+      "TypeScript",    # Use AffineScript
       "Go",            # Use Rust
       "Java",          # Use Rust/Tauri/Dioxus
       "Kotlin",        # Use Rust/Tauri/Dioxus
